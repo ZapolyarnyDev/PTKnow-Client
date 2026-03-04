@@ -1,12 +1,12 @@
-import axios from "axios";
+import axios from 'axios';
 
 export const api = axios.create({
-  baseURL: "https://localhost:PORT/api",
+  baseURL: 'http://localhost:8080/api',
   timeout: 1000,
   headers: {
     'Content-Type': 'application/json',
   },
-   withCredentials: true,
+  withCredentials: true,
 });
 
 export type { AxiosRequestConfig } from 'axios';
