@@ -1,0 +1,88 @@
+:root {
+  --font-family: 'Inter', sans-serif;
+  --font-family-monts: 'Montserrat', sans-serif;
+}
+
+.container {
+  width: 55.75rem;
+  height: 15.438rem;
+  border-radius: 16px;
+  background-color: white;
+  display: flex;
+  align-items: flex-start;
+}
+
+.previewInformation {
+  margin: 2.45rem 0 0 1.63rem;
+  font-family: var(--font-family);
+  flex: 1;
+  display: flex;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  width: 100%;
+}
+
+.imageContainer {
+  margin: 2.45rem 0 0 1.63rem;
+}
+
+.image {
+  width: auto;
+  height: 100%;
+  border-radius: 16px 0 0 16px;
+  object-fit: cover;
+}
+
+.title {
+  font-weight: 600;
+  font-size: 24px;
+}
+
+.description {
+  width: 28.44rem;
+  margin-top: 1rem;
+  color: #484848;
+  font-weight: 400;
+  font-size: 18px;
+  font-family: var(--font-family-monts);
+}
+
+.participants {
+  margin-top: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-family);
+  color: #0956c2;
+  font-weight: 600;
+  font-size: 14px;
+  width: 5.9rem;
+  height: 2.5rem;
+  background-color: #0956c21a;
+  border-radius: 32px;
+}
+
+.participants > img {
+  width: 17px;
+  height: 17px;
+  margin-left: 1rem;
+}
+
+.button {
+  width: 11rem;
+  height: 3rem;
+  font-family: var(--font-family);
+  font-weight: 600;
+  font-size: 14px;
+  color: white;
+  border-radius: 32px;
+  background-color: #0956c2;
+  align-self: flex-start;
+  margin-top: auto;
+  margin-right: 2rem;
+}
