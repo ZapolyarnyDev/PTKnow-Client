@@ -1,6 +1,6 @@
-import styles from '../../../styles/pages/CreateCoursePage.module.css';
-import { CourseButton } from '../forms/CourseButton';
-import { CourseFormInput } from '../forms/CourseForm';
+import styles from '../../../../styles/pages/CreateCoursePage.module.css';
+import { CourseButton } from '../../forms/CourseButton';
+import { CourseFormInput } from '../../forms/CourseForm';
 
 interface CourseVisitorsInfoProps {
   tagInput: string;

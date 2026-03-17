@@ -1,6 +1,6 @@
-import imageCourse from '../../../assets/image/image_course.svg';
-import styles from '../../../styles/pages/CreateCoursePage.module.css';
-import { CourseFormInput } from '../forms/CourseForm';
+import imageCourse from '../../../../assets/image/image_course.svg';
+import styles from '../../../../styles/pages/CreateCoursePage.module.css';
+import { CourseFormInput } from '../../forms/CourseForm';
 
 interface CourseMainInfoProps {
   name: string;
