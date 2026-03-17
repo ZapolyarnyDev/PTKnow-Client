@@ -1,83 +1,111 @@
 :root {
-    --font-family: "Inter", sans-serif;
+  --font-family: 'Inter', sans-serif;
 }
 
 .coursesFilter {
-    display: flex;
-    margin: 1.75rem 0 3.3rem 6.6rem;
-    gap: 1rem;
-    overflow-x: auto;
-    scrollbar-width: none;
-    padding-right: 1rem;
-    padding: 0.3rem;
+  display: flex;
+  gap: 0.75rem;
+
+  margin: 1.75rem 6.6rem 3.3rem;
+  padding: 0.3rem;
+
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+
+  scrollbar-width: none;
+}
+
+.coursesFilter::-webkit-scrollbar {
+  display: none;
 }
 
 .filterButton {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px 12px;
-    width: auto;
-    height: 43px;
-    background-color: #00000012;
-    font-family: var(--font-family);
-    font-weight: 500;
-    font-size: 16px;
-    border-radius: 32px;
-    cursor: pointer;
-    transition: all 0.3s ease;
+  flex: 0 0 auto;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 0 16px;
+  height: 44px;
+
+  background: #00000012;
+  border-radius: 32px;
+
+  font-family: var(--font-family);
+  font-weight: 500;
+  font-size: 16px;
+
+  white-space: nowrap;
+  cursor: pointer;
+
+  transition: all 0.25s ease;
+  scroll-snap-align: start;
 }
 
 .filterButton:hover {
-    background: #0956C2;
-    color: white;
-    transform: translateY(-2px);
+  background: #0956c2;
+  color: white;
+  transform: translateY(-2px);
 }
 
 .filterButton:active {
-    transform: translateY(0);
+  transform: scale(0.98);
 }
 
 .filterButtonActive {
-    background: #0956C2;
-    color: white;
-    transform: translateY(-2px);
+  background: #0956c2;
+  color: white;
+}
+
+@media (max-width: 1280px) {
+  .coursesFilter {
+    margin: 1.5rem 3rem 2.5rem;
+  }
 }
 
 @media (max-width: 1024px) {
-    .coursesFilter {
-        margin: 1.75rem 2rem 3.3rem 2rem;
-    }
+  .coursesFilter {
+    margin: 1.5rem 2rem 2.5rem;
+  }
+
+  .filterButton {
+    height: 42px;
+    font-size: 15px;
+  }
 }
 
 @media (max-width: 768px) {
-    .coursesFilter {
-        margin: 1.75rem 1.5rem 3.3rem 1.5rem;
-    }
-}
+  .coursesFilter {
+    margin: 1.2rem 1.5rem 2rem;
+    gap: 0.6rem;
+  }
 
-@media (max-width: 640px) {
-    .coursesFilter {
-        margin: 1.75rem 1rem 3.3rem 1rem;
-        gap: 0.75rem;
-    }
-    
-    .filterButton {
-        padding: 18px 10px;
-        height: 40px;
-        font-size: 15px;
-    }
+  .filterButton {
+    height: 40px;
+    padding: 0 14px;
+    font-size: 14px;
+  }
 }
 
 @media (max-width: 480px) {
-    .coursesFilter {
-        margin: 1.75rem 0.75rem 3.3rem 0.75rem;
-        gap: 0.5rem;
-    }
-    
-    .filterButton {
-        padding: 16px 8px;
-        height: 38px;
-        font-size: 14px;
-    }
+  .coursesFilter {
+    margin: 1rem;
+    gap: 0.5rem;
+  }
+
+  .filterButton {
+    height: 38px;
+    padding: 0 12px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 360px) {
+  .filterButton {
+    height: 36px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
 }
