@@ -80,9 +80,10 @@ const AuthPage: React.FC = () => {
                 <AuthInput
                   type="password"
                   placeholder="Пароль"
-                  value="password"
+                  value={password}
                   className={style.emailAuth}
                   onChange={handleInputChange}
+                  required
                 />
 
                 <button

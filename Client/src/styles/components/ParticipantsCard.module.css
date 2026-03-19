@@ -1,0 +1,46 @@
+.card {
+  background: #f3f3f3;
+  padding: 20px;
+  border-radius: 20px;
+}
+
+.avatars {
+  display: flex;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #1d5bbf;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.more {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress {
+  height: 6px;
+  background: #ddd;
+  border-radius: 10px;
+}
+
+.bar {
+  width: 80%;
+  height: 100%;
+  background: #1d5bbf;
+  border-radius: 10px;
+}

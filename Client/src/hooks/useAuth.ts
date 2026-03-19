@@ -1,26 +1,21 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect } from "react";
-import { authAPI } from "../api";
-import type { User, LoginData, RegisterData } from "../types/user";
-
+import { useState, useEffect, useCallback } from 'react';
+import { authAPI } from '../api';
+import type { User, LoginData, RegisterData } from '../types/user';
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  useEffect(() => {
-    const initializeAuth = async () => {
-      await checkAuth();
-      setIsInitialized(true);
-    };
-    initializeAuth();
-  }, []);
-
-  const buildFullName = (firstName: string, lastName: string, middleName?: string): string => {
-    return `${lastName} ${firstName}${middleName ? ` ${middleName}` : ''}`.trim();
+  const buildFullName = (
+    firstName: string,
+    lastName: string,
+    middleName?: string
+  ): string => {
+    return `${lastName} ${firstName}${
+      middleName ? ` ${middleName}` : ''
+    }`.trim();
   };
 
   const parseFullName = (fullName: string) => {
@@ -28,57 +23,68 @@ export const useAuth = () => {
     return {
       lastName: parts[0] || '',
       firstName: parts[1] || '',
-      middleName: parts[2] || ''
+      middleName: parts[2] || '',
     };
   };
 
-  const login = async (data: LoginData): Promise<boolean> => {
+  const getErrorMessage = (err: unknown, fallback: string) => {
+    if (typeof err === 'object' && err !== null && 'response' in err) {
+      const response = err as { response?: { data?: { message?: string } } };
+      return response.response?.data?.message || fallback;
+    }
+    if (err instanceof Error) {
+      return err.message || fallback;
+    }
+    return fallback;
+  };
+
+  const login = useCallback(async (data: LoginData): Promise<boolean> => {
     setIsLoading(true);
-    setError('');
+    setError(null);
     try {
       const response = await authAPI.login(data);
       setUser(response.user);
       return true;
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Ошибка входа');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Ошибка входа'));
       return false;
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const register = async (data: RegisterData): Promise<boolean> => {
+  const register = useCallback(async (data: RegisterData): Promise<boolean> => {
     setIsLoading(true);
-    setError('');
+    setError(null);
     try {
-      
       const registerData = {
         ...data,
-        fullName: buildFullName(data.firstName, data.lastName, data.middleName)
+        fullName: buildFullName(data.firstName, data.lastName, data.middleName),
       };
 
       const response = await authAPI.register(registerData);
       setUser(response.user);
       return true;
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Ошибка регистрации');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Ошибка регистрации'));
       return false;
     } finally {
       setIsLoading(false);
     }
-  };
-  const logout = async (): Promise<void> => {
+  }, []);
+
+  const logout = useCallback(async (): Promise<void> => {
     try {
       await authAPI.logout();
-    } catch (error) {
-      console.error('Ошибка при выходе:', error);
+    } catch (logoutError) {
+      console.error('Ошибка при выходе:', logoutError);
     } finally {
       localStorage.removeItem('accessToken');
       setUser(null);
     }
-  };
+  }, []);
 
-  const checkAuth = async (): Promise<boolean> => {
+  const checkAuth = useCallback(async (): Promise<boolean> => {
     const token = localStorage.getItem('accessToken');
     if (!token) {
       setUser(null);
@@ -90,25 +96,30 @@ export const useAuth = () => {
       const userData = await authAPI.getProfile();
       setUser(userData);
       return true;
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        try {
-          await authAPI.refreshToken();
-          const userData = await authAPI.getProfile();
-          setUser(userData);
-          return true;
-        } catch (refreshError) {
-          localStorage.removeItem('accessToken');
-          setUser(null);
-          return false;
-        }
+    } catch (authError: unknown) {
+      if (
+        typeof authError === 'object' &&
+        authError !== null &&
+        'response' in authError &&
+        (authError as { response?: { status?: number } }).response?.status ===
+          401
+      ) {
+        localStorage.removeItem('accessToken');
       }
       setUser(null);
       return false;
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const initializeAuth = async () => {
+      await checkAuth();
+      setIsInitialized(true);
+    };
+    initializeAuth();
+  }, [checkAuth]);
 
   return {
     user,
@@ -119,6 +130,6 @@ export const useAuth = () => {
     register,
     logout,
     checkAuth,
-    parseFullName
+    parseFullName,
   };
 };
