@@ -1,15 +1,17 @@
+import { memo } from 'react';
+
 interface AuthInputProps {
   type: string;
   name?: string;
   placeholder: string;
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; 
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   required?: boolean;
   minLength?: number;
   className?: string;
 }
 
-export const AuthInput = ({
+const AuthInputComponent = ({
   type,
   name,
   placeholder,
@@ -17,7 +19,7 @@ export const AuthInput = ({
   onChange,
   required = false,
   minLength,
-  className=''
+  className = '',
 }: AuthInputProps) => {
   return (
     <input
@@ -32,3 +34,5 @@ export const AuthInput = ({
     />
   );
 };
+
+export const AuthInput = memo(AuthInputComponent);

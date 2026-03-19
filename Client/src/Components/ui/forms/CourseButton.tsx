@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 interface CourseButtonProps {
   type?: 'submit' | 'button' | 'reset';
   className?: string;
@@ -7,7 +9,7 @@ interface CourseButtonProps {
   onClick?: () => void;
 }
 
-export const CourseButton = ({
+const CourseButtonComponent = ({
   type,
   className,
   disabled = false,
@@ -26,3 +28,5 @@ export const CourseButton = ({
     </button>
   );
 };
+
+export const CourseButton = memo(CourseButtonComponent);

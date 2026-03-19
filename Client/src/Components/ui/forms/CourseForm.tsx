@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 interface CourseFormProps {
   type?: string;
   id: string;
@@ -18,7 +20,7 @@ interface CourseFormProps {
   as?: 'input' | 'textarea';
 }
 
-export const CourseFormInput = ({
+const CourseFormInputComponent = ({
   type = 'text',
   id,
   value,
@@ -69,3 +71,5 @@ export const CourseFormInput = ({
     />
   );
 };
+
+export const CourseFormInput = memo(CourseFormInputComponent);

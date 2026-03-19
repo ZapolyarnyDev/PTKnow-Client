@@ -1,15 +1,26 @@
+import { memo, useCallback, useMemo } from 'react';
 import { useLessonStore } from '../../../stores/scheduleStore';
 import styles from '../../../styles/components/Calendar.module.css';
 import { formatDate, formatDay, formatMonth } from '../../../utils/dateUtils';
 
-export const Calendar = () => {
+const CalendarComponent = () => {
   const { lessons, selectedDate, setSelectedDate } = useLessonStore();
 
-  const uniqueDates = [
-    ...new Set(
-      lessons.map(l => new Date(l.beginAt).toISOString().split('T')[0])
-    ),
-  ];
+  const uniqueDates = useMemo(
+    () => [
+      ...new Set(
+        lessons.map(l => new Date(l.beginAt).toISOString().split('T')[0])
+      ),
+    ],
+    [lessons]
+  );
+
+  const handleSelectDate = useCallback(
+    (dateStr: string) => {
+      setSelectedDate(dateStr);
+    },
+    [setSelectedDate]
+  );
 
   return (
     <div className={styles.calendar}>
@@ -21,7 +32,7 @@ export const Calendar = () => {
           <div
             key={dateStr}
             className={`${styles.dayCard} ${active ? styles.active : ''}`}
-            onClick={() => setSelectedDate(dateStr)}
+            onClick={() => handleSelectDate(dateStr)}
           >
             <div className={styles.weekday}>{formatDay(date)}</div>
             <div className={styles.day}>{formatDate(date)}</div>
@@ -32,3 +43,5 @@ export const Calendar = () => {
     </div>
   );
 };
+
+export const Calendar = memo(CalendarComponent);

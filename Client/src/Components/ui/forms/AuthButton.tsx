@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 interface AuthButtonProps {
   type?: 'submit' | 'button' | 'reset';
   onClick?: () => void;
@@ -7,7 +9,7 @@ interface AuthButtonProps {
   className?: string;
 }
 
-export const AuthButton = ({
+const AuthButtonComponent = ({
   type,
   onClick,
   disabled = false,
@@ -26,3 +28,5 @@ export const AuthButton = ({
     </button>
   );
 };
+
+export const AuthButton = memo(AuthButtonComponent);

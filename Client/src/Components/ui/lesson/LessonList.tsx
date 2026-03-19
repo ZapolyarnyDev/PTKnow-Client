@@ -1,12 +1,17 @@
+import { memo, useMemo } from 'react';
 import { useLessonStore } from '../../../stores/scheduleStore';
 import { LessonCard } from './LessonCard';
 
-export const LessonList = () => {
+const LessonListComponent = () => {
   const { lessons, selectedDate } = useLessonStore();
 
-  const filtered = lessons.filter(
-    lesson =>
-      new Date(lesson.beginAt).toISOString().split('T')[0] === selectedDate
+  const filtered = useMemo(
+    () =>
+      lessons.filter(
+        lesson =>
+          new Date(lesson.beginAt).toISOString().split('T')[0] === selectedDate
+      ),
+    [lessons, selectedDate]
   );
 
   return (
@@ -17,3 +22,5 @@ export const LessonList = () => {
     </div>
   );
 };
+
+export const LessonList = memo(LessonListComponent);

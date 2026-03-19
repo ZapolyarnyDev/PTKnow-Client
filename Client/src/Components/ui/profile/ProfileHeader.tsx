@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import StatusSt from '../../../assets/icons/status_student.svg';
 import Logotype from '../../../assets/logo/Logotype.svg';
 import styles from '../../../styles/pages/ProfilePage.module.css';
@@ -9,7 +10,7 @@ interface ProfileHeaderProps {
   onEdit?: () => void;
 }
 
-export const ProfileHeader = ({
+const ProfileHeaderComponent = ({
   profile,
   isMyProfile,
   onEdit,
@@ -43,3 +44,5 @@ export const ProfileHeader = ({
     </div>
   );
 };
+
+export const ProfileHeader = memo(ProfileHeaderComponent);

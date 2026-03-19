@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 interface LessonFormProps {
   type?: string;
   id?: string;
@@ -7,7 +9,7 @@ interface LessonFormProps {
   placeholder?: string;
 }
 
-export const LessonForm = ({
+const LessonFormComponent = ({
   type,
   id,
   value,
@@ -26,3 +28,5 @@ export const LessonForm = ({
     />
   );
 };
+
+export const LessonForm = memo(LessonFormComponent);

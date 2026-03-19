@@ -1,3 +1,4 @@
+import { memo, useCallback } from 'react';
 import imageCourse from '../../../../assets/image/image_course.svg';
 import styles from '../../../../styles/pages/CreateCoursePage.module.css';
 import { CourseFormInput } from '../../forms/CourseForm';
@@ -12,7 +13,7 @@ interface CourseMainInfoProps {
   onPreviewChange: (file: File | null, url: string) => void;
 }
 
-export const CourseMainInfo = ({
+const CourseMainInfoComponent = ({
   name,
   description,
   previewUrl,
@@ -21,13 +22,30 @@ export const CourseMainInfo = ({
   onDescriptionChange,
   onPreviewChange,
 }: CourseMainInfoProps) => {
-  const handleLoadPreview = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      onPreviewChange(file, url);
-    }
-  };
+  const handleLoadPreview = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (file) {
+        const url = URL.createObjectURL(file);
+        onPreviewChange(file, url);
+      }
+    },
+    [onPreviewChange]
+  );
+
+  const handleNameChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onNameChange(event.target.value);
+    },
+    [onNameChange]
+  );
+
+  const handleDescriptionChange = useCallback(
+    (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+      onDescriptionChange(event.target.value);
+    },
+    [onDescriptionChange]
+  );
 
   return (
     <div className={styles.mainInfo}>
@@ -58,7 +76,7 @@ export const CourseMainInfo = ({
           type="text"
           id="nameCourse"
           value={name}
-          onInputChange={e => onNameChange(e.target.value)}
+          onInputChange={handleNameChange}
           placeholder="Введите название курса"
           className={styles.titleInput}
           disabled={isLoading}
@@ -68,7 +86,7 @@ export const CourseMainInfo = ({
         <CourseFormInput
           id="descriptionCourse"
           value={description}
-          onTextareaChange={e => onDescriptionChange(e.target.value)}
+          onTextareaChange={handleDescriptionChange}
           placeholder="Введите описание курса"
           className={styles.descriptionInput}
           disabled={isLoading}
@@ -79,3 +97,5 @@ export const CourseMainInfo = ({
     </div>
   );
 };
+
+export const CourseMainInfo = memo(CourseMainInfoComponent);

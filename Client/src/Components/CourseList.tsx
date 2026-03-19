@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useCourse } from '../hooks/useCourse';
 import styles from '../styles/components/CourseList.module.css';
 import type { CourseDTO } from '../types/CourseCard';
@@ -98,10 +98,26 @@ export const CourseList: React.FC<CourseListProps> = ({
     }
   }, [course, loading]);
 
-  const displayCourses = useMockData ? mockCourses : course;
-  const visibleCourses = displayCourses.slice(0, visibleCount);
-  const displayLoading = useMockData ? false : loading;
-  const displayError = useMockData ? null : error;
+  const displayCourses = useMemo(
+    () => (useMockData ? mockCourses : course),
+    [useMockData, course]
+  );
+  const visibleCourses = useMemo(
+    () => displayCourses.slice(0, visibleCount),
+    [displayCourses, visibleCount]
+  );
+  const displayLoading = useMemo(
+    () => (useMockData ? false : loading),
+    [useMockData, loading]
+  );
+  const displayError = useMemo(
+    () => (useMockData ? null : error),
+    [useMockData, error]
+  );
+
+  const handleShowMore = useCallback(() => {
+    setVisibleCount(prev => prev + (limit || 6));
+  }, [limit]);
 
   if (displayLoading) {
     return <div className={styles.loading}>Загрузка курсов...</div>;
@@ -128,10 +144,7 @@ export const CourseList: React.FC<CourseListProps> = ({
       ))}
 
       {showLoadMore && displayCourses.length > visibleCount && (
-        <button
-          className={styles.showMoreButton}
-          onClick={() => setVisibleCount(prev => prev + (limit || 6))}
-        >
+        <button className={styles.showMoreButton} onClick={handleShowMore}>
           Показать еще ({displayCourses.length - visibleCount})
         </button>
       )}

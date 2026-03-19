@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import count_people from '../../../../assets/icons/ui-icons/count_people.svg';
 import styles from './PreviewEvent.module.css';
 
@@ -46,4 +47,4 @@ const PreviewEvent: React.FC<PreviewEventProps> = ({
   );
 };
 
-export default PreviewEvent;
+export default memo(PreviewEvent);

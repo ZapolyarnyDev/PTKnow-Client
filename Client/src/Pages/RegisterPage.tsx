@@ -45,7 +45,7 @@ const RegisterPage: React.FC = () => {
         return;
       }
 
-      if (formData.password.length < 8) {
+      if (formData.password.length < 12) {
         alert('Пароль должен содержать минимум 6 символов');
         return;
       }

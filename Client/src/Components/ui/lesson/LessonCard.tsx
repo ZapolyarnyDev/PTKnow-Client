@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react';
 import { useLessonStore } from '../../../stores/scheduleStore';
 import styles from '../../../styles/components/LessonCard.module.css';
 import type { LessonDTO } from '../../../types/lesson';
@@ -7,12 +8,12 @@ interface Props {
   lesson: LessonDTO;
 }
 
-export const LessonCard = ({ lesson }: Props) => {
+const LessonCardComponent = ({ lesson }: Props) => {
   const { selectedDate } = useLessonStore();
 
-  const begin = new Date(lesson.beginAt);
-  const end = new Date(lesson.endsAt);
-  const date = new Date(selectedDate);
+  const begin = useMemo(() => new Date(lesson.beginAt), [lesson.beginAt]);
+  const end = useMemo(() => new Date(lesson.endsAt), [lesson.endsAt]);
+  const date = useMemo(() => new Date(selectedDate), [selectedDate]);
 
   return (
     <div className={styles.container}>
@@ -31,3 +32,5 @@ export const LessonCard = ({ lesson }: Props) => {
     </div>
   );
 };
+
+export const LessonCard = memo(LessonCardComponent);

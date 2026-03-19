@@ -1,3 +1,4 @@
+import { memo, useCallback } from 'react';
 import styles from '../../../../styles/pages/CreateCoursePage.module.css';
 import { CourseButton } from '../../forms/CourseButton';
 import { CourseFormInput } from '../../forms/CourseForm';
@@ -15,7 +16,7 @@ interface CourseVisitorsInfoProps {
   onCourseTypeChange: (type: 'private' | 'public') => void;
 }
 
-export const CourseVisitorsInfo = ({
+const CourseVisitorsInfoComponent = ({
   tagInput,
   tags,
   participantsCount,
@@ -27,19 +28,45 @@ export const CourseVisitorsInfo = ({
   onParticipantsChange,
   onCourseTypeChange,
 }: CourseVisitorsInfoProps) => {
-  const handleTagInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && tagInput.trim()) {
-      e.preventDefault();
-      onTagAdd(tagInput.trim());
-      onTagInputChange('');
-    }
-  };
+  const handleTagInputKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter' && tagInput.trim()) {
+        e.preventDefault();
+        onTagAdd(tagInput.trim());
+        onTagInputChange('');
+      }
+    },
+    [tagInput, onTagAdd, onTagInputChange]
+  );
 
-  const handleParticipantsSliderChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    onParticipantsChange(parseInt(e.target.value));
-  };
+  const handleParticipantsSliderChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      onParticipantsChange(parseInt(e.target.value, 10));
+    },
+    [onParticipantsChange]
+  );
+
+  const handleTagInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      onTagInputChange(e.target.value);
+    },
+    [onTagInputChange]
+  );
+
+  const handleRemoveTag = useCallback(
+    (tag: string) => {
+      onTagRemove(tag);
+    },
+    [onTagRemove]
+  );
+
+  const handleSetPrivate = useCallback(() => {
+    onCourseTypeChange('private');
+  }, [onCourseTypeChange]);
+
+  const handleSetPublic = useCallback(() => {
+    onCourseTypeChange('public');
+  }, [onCourseTypeChange]);
 
   return (
     <div className={styles.visitorsInfo}>
@@ -54,7 +81,7 @@ export const CourseVisitorsInfo = ({
                 {tag}
                 <CourseButton
                   type="button"
-                  onClick={() => onTagRemove(tag)}
+                  onClick={() => handleRemoveTag(tag)}
                   className={styles.tagRemove}
                   disabled={isLoading}
                 >
@@ -68,7 +95,7 @@ export const CourseVisitorsInfo = ({
             type="text"
             id="tagsCourse"
             value={tagInput}
-            onInputChange={e => onTagInputChange(e.target.value)}
+            onInputChange={handleTagInputChange}
             onInputKeyDown={handleTagInputKeyDown}
             placeholder="Введите тег и нажмите Enter"
             className={styles.titleInput}
@@ -100,7 +127,7 @@ export const CourseVisitorsInfo = ({
         <div className={styles.changeType}>
           <CourseButton
             type="button"
-            onClick={() => onCourseTypeChange('private')}
+            onClick={handleSetPrivate}
             className={`${styles.typeButton} ${
               courseType === 'private' ? styles.typeButtonActive : ''
             }`}
@@ -111,7 +138,7 @@ export const CourseVisitorsInfo = ({
 
           <CourseButton
             type="button"
-            onClick={() => onCourseTypeChange('public')}
+            onClick={handleSetPublic}
             className={`${styles.typeButton} ${
               courseType === 'public' ? styles.typeButtonActive : ''
             }`}
@@ -124,3 +151,5 @@ export const CourseVisitorsInfo = ({
     </div>
   );
 };
+
+export const CourseVisitorsInfo = memo(CourseVisitorsInfoComponent);

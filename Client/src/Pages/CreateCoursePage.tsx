@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Footer from '../Components/Footer';
@@ -22,63 +22,79 @@ const CreateCoursePage: React.FC = () => {
 
   const { createCourse, isLoading } = useCreateCourse();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
 
-    if (!name.trim()) {
-      toast.error('Введите название курса');
-      return;
-    }
+      if (!name.trim()) {
+        toast.error('Введите название курса');
+        return;
+      }
 
-    if (!description.trim()) {
-      toast.error('Введите описание курса');
-      return;
-    }
+      if (!description.trim()) {
+        toast.error('Введите описание курса');
+        return;
+      }
 
-    if (description.trim().length < 10) {
-      toast.error('Описание должно содержать минимум 10 символов');
-      return;
-    }
+      if (description.trim().length < 10) {
+        toast.error('Описание должно содержать минимум 10 символов');
+        return;
+      }
 
-    try {
-      const courseData = {
-        name: name.trim(),
-        description: description.trim(),
-        tags: tags,
-        ageAudience: ageAudience,
-        participantsCount: participantsCount,
-        courseType: courseType,
-      };
+      try {
+        const courseData = {
+          name: name.trim(),
+          description: description.trim(),
+          tags: tags,
+          ageAudience: ageAudience,
+          participantsCount: participantsCount,
+          courseType: courseType,
+        };
 
-      await createCourse(courseData, previewFile || undefined);
+        await createCourse(courseData, previewFile || undefined);
 
-      setName('');
-      setDescription('');
-      setPreviewFile(null);
-      setPreviewUrl('');
-      setTagInput('');
-      setTags([]);
-      setAgeAudience('');
-      setParticipantsCount(0);
-      setCourseType('private');
+        setName('');
+        setDescription('');
+        setPreviewFile(null);
+        setPreviewUrl('');
+        setTagInput('');
+        setTags([]);
+        setAgeAudience('');
+        setParticipantsCount(0);
+        setCourseType('private');
 
-      toast.success('Курс успешно создан!');
-    } catch (err) {
-      console.error('Ошибка создания курса:', err);
-      toast.error('Произошла ошибка при создании курса');
-    }
-  };
+        toast.success('Курс успешно создан!');
+      } catch (err) {
+        console.error('Ошибка создания курса:', err);
+        toast.error('Произошла ошибка при создании курса');
+      }
+    },
+    [
+      name,
+      description,
+      tags,
+      ageAudience,
+      participantsCount,
+      courseType,
+      createCourse,
+      previewFile,
+    ]
+  );
 
-  const handleTagAdd = (tag: string) => {
-    if (!tags.includes(tag)) {
-      setTags([...tags, tag]);
-    }
-  };
+  const handleTagAdd = useCallback((tag: string) => {
+    setTags(prevTags =>
+      prevTags.includes(tag) ? prevTags : [...prevTags, tag]
+    );
+  }, []);
 
-  const handlePreviewChange = (file: File | null, url: string) => {
+  const handleTagRemove = useCallback((tag: string) => {
+    setTags(prevTags => prevTags.filter(existingTag => existingTag !== tag));
+  }, []);
+
+  const handlePreviewChange = useCallback((file: File | null, url: string) => {
     setPreviewFile(file);
     setPreviewUrl(url);
-  };
+  }, []);
 
   return (
     <>
@@ -103,7 +119,7 @@ const CreateCoursePage: React.FC = () => {
             isLoading={isLoading}
             onTagInputChange={setTagInput}
             onTagAdd={handleTagAdd}
-            onTagRemove={tag => setTags(tags.filter(t => t !== tag))}
+            onTagRemove={handleTagRemove}
             onParticipantsChange={setParticipantsCount}
             onCourseTypeChange={setCourseType}
           />

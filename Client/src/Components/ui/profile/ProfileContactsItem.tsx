@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import StatusSt from '../../../assets/icons/status_student.svg';
 import styles from '../../../styles/pages/ProfilePage.module.css';
 import type { ProfileResponseDTO } from '../../../types/profile';
@@ -6,7 +7,7 @@ interface ProfileContacts {
   profile: ProfileResponseDTO;
 }
 
-export const ProfileContactsItem = ({ profile }: ProfileContacts) => {
+const ProfileContactsItemComponent = ({ profile }: ProfileContacts) => {
   return (
     <div className={styles.profileInfo}>
       <p className={styles.profileInfoTitle}>Контактная информация</p>
@@ -36,3 +37,5 @@ export const ProfileContactsItem = ({ profile }: ProfileContacts) => {
     </div>
   );
 };
+
+export const ProfileContactsItem = memo(ProfileContactsItemComponent);

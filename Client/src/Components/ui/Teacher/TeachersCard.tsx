@@ -1,6 +1,7 @@
+import { memo } from 'react';
 import styles from '../../../styles/components/TeachersCard.module.css';
 
-export const TeachersCard = () => {
+const TeachersCardComponent = () => {
   return (
     <div className={styles.card}>
       <h2>Преподаватели</h2>
@@ -12,3 +13,5 @@ export const TeachersCard = () => {
     </div>
   );
 };
+
+export const TeachersCard = memo(TeachersCardComponent);
