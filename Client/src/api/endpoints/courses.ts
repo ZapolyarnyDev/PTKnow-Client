@@ -1,5 +1,13 @@
-import type { CourseDTO, CreateCourseDTO } from "../../types/CourseCard";
-import { api } from "../axiosConfig";
+import type {
+  CourseDTO,
+  CourseTeacherDTO,
+  CreateCourseDTO,
+  EnrollmentDTO,
+  UpdateCourseDTO,
+  UpdateCourseTeacherDTO,
+} from '../../types/CourseCard';
+import type { UserSummaryDTO } from '../../types/user';
+import { api } from '../axiosConfig';
 
 export const courseCardApi = {
   getAllCourses: async (): Promise<CourseDTO[]> => {
@@ -7,48 +15,133 @@ export const courseCardApi = {
     return response.data;
   },
 
-  createCourse: async (courseDate: CreateCourseDTO, preview?: File): Promise<CourseDTO> => {
+  createCourse: async (
+    courseData: CreateCourseDTO,
+    preview?: File
+  ): Promise<CourseDTO> => {
     const formData = new FormData();
 
-    formData.append('course', new Blob([JSON.stringify(courseDate)], {
-      type: 'application/json'
-    }));
-    
-    if(preview){
-      formData.append('preview', preview)
+    formData.append(
+      'course',
+      new Blob([JSON.stringify(courseData)], {
+        type: 'application/json',
+      })
+    );
+
+    if (preview) {
+      formData.append('preview', preview);
     }
     const response = await api.post('/v0/course', formData, {
       headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+        'Content-Type': 'multipart/form-data',
+      },
     });
     return response.data;
   },
 
-  getCourseById: async (id: string): Promise<CourseDTO> => {
-    const response = await api.get(`/v0/course/id/${id}`);
+  getCourseById: async (id: number): Promise<CourseDTO> => {
+    const response = await api.get(`/v0/course/id/${String(id)}`);
     return response.data;
   },
-
 
   getCourseByHandle: async (handle: string): Promise<CourseDTO> => {
     const response = await api.get(`/v0/course/handle/${handle}`);
     return response.data;
   },
-  
-  updateCoursePreview: async (id: string, file:File): Promise<CourseDTO> => {
-    const formData = new FormData();
-    formData.append('file', file);
 
-    const response = await api.post(`/v0/course/${id}/preview`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
+  updateCourse: async (
+    id: number,
+    data: UpdateCourseDTO
+  ): Promise<CourseDTO> => {
+    const response = await api.patch(`/v0/course/${String(id)}`, data);
     return response.data;
   },
 
-  delete: async (id: string): Promise<void> => {
-    await api.delete(`/v0/course/${id}`);
-  }
+  replaceCourse: async (
+    id: number,
+    data: UpdateCourseDTO
+  ): Promise<CourseDTO> => {
+    const response = await api.put(`/v0/course/${String(id)}`, data);
+    return response.data;
+  },
+
+  updateCoursePreview: async (id: number, file: File): Promise<CourseDTO> => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await api.post(
+      `/v0/course/${String(id)}/preview`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return response.data;
+  },
+
+  publishCourse: async (id: number): Promise<CourseDTO> => {
+    const response = await api.post(`/v0/course/${String(id)}/publish`);
+    return response.data;
+  },
+
+  archiveCourse: async (id: number): Promise<CourseDTO> => {
+    const response = await api.post(`/v0/course/${String(id)}/archive`);
+    return response.data;
+  },
+
+  enrollInCourse: async (id: number): Promise<EnrollmentDTO> => {
+    const response = await api.post(`/v0/course/${String(id)}/enroll`);
+    return response.data;
+  },
+
+  cancelEnrollment: async (id: number): Promise<void> => {
+    await api.delete(`/v0/course/${String(id)}/enroll`);
+  },
+
+  addCourseTeacher: async (
+    id: number,
+    data: UpdateCourseTeacherDTO
+  ): Promise<CourseTeacherDTO> => {
+    const response = await api.post(`/v0/course/${String(id)}/teachers`, data);
+    return response.data;
+  },
+
+  removeCourseTeacher: async (id: number, teacherId: string): Promise<void> => {
+    await api.delete(`/v0/course/${String(id)}/teachers/${teacherId}`);
+  },
+
+  addCourseEditor: async (
+    id: number,
+    userId: string
+  ): Promise<CourseTeacherDTO> => {
+    const response = await api.post(
+      `/v0/course/${String(id)}/editors/${userId}`
+    );
+    return response.data;
+  },
+
+  removeCourseEditor: async (id: number, userId: string): Promise<void> => {
+    await api.delete(`/v0/course/${String(id)}/editors/${userId}`);
+  },
+
+  getCourseTeachers: async (id: number): Promise<CourseTeacherDTO[]> => {
+    const response = await api.get(`/v0/course/${String(id)}/teachers`);
+    return response.data;
+  },
+
+  getCourseStudents: async (id: number): Promise<UserSummaryDTO[]> => {
+    const response = await api.get(`/v0/course/${String(id)}/students`);
+    return response.data;
+  },
+
+  getCourseMembers: async (id: number): Promise<UserSummaryDTO[]> => {
+    const response = await api.get(`/v0/course/${String(id)}/members`);
+    return response.data;
+  },
+
+  delete: async (id: number): Promise<void> => {
+    await api.delete(`/v0/course/${String(id)}`);
+  },
 };

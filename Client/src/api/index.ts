@@ -1,3 +1,11 @@
 export { api } from './axiosConfig';
 export { setupAuthInterceptor } from './interceptors';
-export { authAPI, courseCardApi, getAuthHeader } from './endpoints';
+export {
+  authAPI,
+  courseCardApi,
+  filesAPI,
+  getAuthHeader,
+  lessonApi,
+  profileApi,
+  usersApi,
+} from './endpoints';
