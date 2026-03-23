@@ -6,27 +6,23 @@ import { CourseFormInput } from '../../forms/CourseForm';
 interface CourseVisitorsInfoProps {
   tagInput: string;
   tags: string[];
-  participantsCount: number;
-  courseType: 'private' | 'public';
+  maxUsersAmount: number;
   isLoading: boolean;
   onTagInputChange: (value: string) => void;
   onTagAdd: (tag: string) => void;
   onTagRemove: (tag: string) => void;
-  onParticipantsChange: (count: number) => void;
-  onCourseTypeChange: (type: 'private' | 'public') => void;
+  onMaxUsersAmountChange: (count: number) => void;
 }
 
 const CourseVisitorsInfoComponent = ({
   tagInput,
   tags,
-  participantsCount,
-  courseType,
+  maxUsersAmount,
   isLoading,
   onTagInputChange,
   onTagAdd,
   onTagRemove,
-  onParticipantsChange,
-  onCourseTypeChange,
+  onMaxUsersAmountChange,
 }: CourseVisitorsInfoProps) => {
   const handleTagInputKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -41,9 +37,9 @@ const CourseVisitorsInfoComponent = ({
 
   const handleParticipantsSliderChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      onParticipantsChange(parseInt(e.target.value, 10));
+      onMaxUsersAmountChange(parseInt(e.target.value, 10));
     },
-    [onParticipantsChange]
+    [onMaxUsersAmountChange]
   );
 
   const handleTagInputChange = useCallback(
@@ -59,14 +55,6 @@ const CourseVisitorsInfoComponent = ({
     },
     [onTagRemove]
   );
-
-  const handleSetPrivate = useCallback(() => {
-    onCourseTypeChange('private');
-  }, [onCourseTypeChange]);
-
-  const handleSetPublic = useCallback(() => {
-    onCourseTypeChange('public');
-  }, [onCourseTypeChange]);
 
   return (
     <div className={styles.visitorsInfo}>
@@ -106,8 +94,8 @@ const CourseVisitorsInfoComponent = ({
 
       <div className={styles.participantsSection}>
         <div className={styles.participantsControl}>
-          <label htmlFor="countUsers">Количество участников</label>
-          <span className={styles.participantsValue}>{participantsCount}</span>
+          <label htmlFor="countUsers">Максимум участников</label>
+          <span className={styles.participantsValue}>{maxUsersAmount}</span>
         </div>
 
         <CourseFormInput
@@ -115,38 +103,11 @@ const CourseVisitorsInfoComponent = ({
           id="countUsersSlider"
           min={0}
           max={20}
-          value={participantsCount}
+          value={maxUsersAmount}
           onInputChange={handleParticipantsSliderChange}
           className={styles.participantsSlider}
           disabled={isLoading}
         />
-      </div>
-
-      <div className={styles.typeCourse}>
-        <p>Тип курса</p>
-        <div className={styles.changeType}>
-          <CourseButton
-            type="button"
-            onClick={handleSetPrivate}
-            className={`${styles.typeButton} ${
-              courseType === 'private' ? styles.typeButtonActive : ''
-            }`}
-            disabled={isLoading}
-          >
-            Приватный
-          </CourseButton>
-
-          <CourseButton
-            type="button"
-            onClick={handleSetPublic}
-            className={`${styles.typeButton} ${
-              courseType === 'public' ? styles.typeButtonActive : ''
-            }`}
-            disabled={isLoading}
-          >
-            Публичный
-          </CourseButton>
-        </div>
       </div>
     </div>
   );

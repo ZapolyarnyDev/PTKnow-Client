@@ -8,50 +8,55 @@ import { LessonList } from '../Components/ui/lesson/LessonList';
 
 import { NextLessonCard } from '../Components/ui/lesson/NextLessonCard';
 import { TeachersCard } from '../Components/ui/Teacher/TeachersCard';
-import { mockLessons } from '../data/mockLesson';
 import { useLessonStore } from '../stores/scheduleStore';
-
-const mockCourse = {
-  id: '1',
-  name: 'Роботехника для начинающих',
-  description: 'Практические занятия по созданию и программированию роботов.',
-  previewUrl: courseDetails,
-  participantsCount: 247,
-};
+import { useCourseStore } from '../stores/courseStore';
 
 const CourseDetailsPage: React.FC = () => {
-  const { setLesson, setSelectedDate } = useLessonStore();
+  const { lessons, setSelectedDate } = useLessonStore();
+  const { course, fetchCourse } = useCourseStore();
   const navigate = useNavigate();
 
   useEffect(() => {
-    setLesson(mockLessons);
-    setSelectedDate('2025-10-01');
-  }, [setLesson, setSelectedDate]);
+    fetchCourse(1);
+  }, [fetchCourse]);
+
+  useEffect(() => {
+    if (lessons.length > 0) {
+      const firstLessonDate = new Date(lessons[0].beginAt)
+        .toISOString()
+        .split('T')[0];
+      setSelectedDate(firstLessonDate);
+    }
+  }, [lessons, setSelectedDate]);
 
   const handleJoin = useCallback(() => {
-    navigate(`/course/${mockCourse.id}/register`);
-  }, [navigate]);
+    if (course) {
+      navigate(`/course/${course.id}/register`);
+    }
+  }, [navigate, course]);
 
   const handleCreateLesson = useCallback(() => {
-    navigate(`/courses/${mockCourse.id}/lessons/new`);
-  }, [navigate]);
+    if (course) {
+      navigate(`/courses/${course.id}/lessons/new`);
+    }
+  }, [navigate, course]);
 
   return (
     <>
       <PreviewEvent
-        imageUrl={mockCourse.previewUrl}
-        title={mockCourse.name}
-        description={mockCourse.description}
-        participantsCount={mockCourse.participantsCount}
+        imageUrl={course?.previewUrl || courseDetails}
+        title={course?.name || 'Курс'}
+        description={course?.description || ''}
         buttonText="Вступить"
         onButtonClick={handleJoin}
-        imageAlt={mockCourse.name}
+        imageAlt={course?.name || 'Курс'}
       />
 
       <div style={{ padding: '0 20px 20px', display: 'flex', gap: '12px' }}>
         <button
           type="button"
           onClick={handleCreateLesson}
+          disabled={!course}
           style={{
             border: 'none',
             borderRadius: '999px',
