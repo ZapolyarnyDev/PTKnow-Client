@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { api } from "../axiosConfig";
-import type { AxiosRequestConfig } from "axios";
+import { api } from '../axiosConfig';
+import type { AxiosRequestConfig } from 'axios';
 
 interface AxiosRequestConfigWithRetry extends AxiosRequestConfig {
   _retry?: boolean;
@@ -24,28 +24,49 @@ const processQueue = (error: any = null, token: string | null = null) => {
 };
 
 export const setupAuthInterceptor = () => {
-  api.interceptors.request.use((config) => {
+  api.interceptors.request.use(config => {
     const token = localStorage.getItem('accessToken');
-    if (token && config.headers) {
+    const requestUrl = config.url || '';
+    const isAuthRequest =
+      requestUrl.includes('/v0/auth/login') ||
+      requestUrl.includes('/v0/auth/register') ||
+      requestUrl.includes('/v0/token/refresh');
+    if (token && !isAuthRequest) {
+      config.headers = config.headers ?? {};
       config.headers['Authorization'] = `Bearer ${token}`;
     }
     return config;
   });
 
   api.interceptors.response.use(
-    (response) => response,
-    async (error) => {
+    response => response,
+    async error => {
       const originalRequest = error.config as AxiosRequestConfigWithRetry;
 
-      if (error.response?.status === 401 && !originalRequest._retry) {
+      const requestUrl = originalRequest.url || '';
+      const isAuthRequest =
+        requestUrl.includes('/v0/auth/login') ||
+        requestUrl.includes('/v0/auth/register') ||
+        requestUrl.includes('/v0/token/refresh');
+
+      if (
+        error.response?.status === 401 &&
+        !originalRequest._retry &&
+        !isAuthRequest
+      ) {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+          return Promise.reject(error);
+        }
+
         if (isRefreshing) {
           return new Promise((resolve, reject) => {
-            failedQueue.push({ 
+            failedQueue.push({
               resolve: (token: string) => {
                 originalRequest.headers!['Authorization'] = `Bearer ${token}`;
                 resolve(api(originalRequest));
-              }, 
-              reject 
+              },
+              reject,
             });
           });
         }
@@ -54,20 +75,24 @@ export const setupAuthInterceptor = () => {
         isRefreshing = true;
 
         try {
-          const response = await api.post('/auth/token/refresh');
-          const newAccessToken = response.data.accessToken;
-          
+          const response = await api.post('/v0/token/refresh');
+          const newAccessToken =
+            (typeof response.data === 'string' && response.data.trim()) ||
+            response.data.accessToken;
+
           localStorage.setItem('accessToken', newAccessToken);
-          api.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
+          api.defaults.headers.common[
+            'Authorization'
+          ] = `Bearer ${newAccessToken}`;
           processQueue(null, newAccessToken);
 
-          originalRequest.headers!['Authorization'] = `Bearer ${newAccessToken}`;
+          originalRequest.headers![
+            'Authorization'
+          ] = `Bearer ${newAccessToken}`;
           return api(originalRequest);
-          
         } catch (refreshError) {
           processQueue(refreshError, null);
           localStorage.removeItem('accessToken');
-          window.location.href = '/login';
           return Promise.reject(refreshError);
         } finally {
           isRefreshing = false;

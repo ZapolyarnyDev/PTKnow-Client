@@ -7,28 +7,77 @@ import type {
 import type { TokenRefreshResponse } from '../../types/auth';
 import { api } from '../axiosConfig';
 
+const extractAccessTokenFromResponse = (response: {
+  data?: unknown;
+  headers?: Record<string, unknown> | null;
+}): string | null => {
+  const payload = response.data;
+  if (typeof payload === 'string' && payload.trim()) {
+    return payload.trim();
+  }
+  if (payload && typeof payload === 'object') {
+    const data = payload as {
+      accessToken?: string;
+      access_token?: string;
+      tokens?: { accessToken?: string };
+    };
+    const tokenFromBody =
+      data.accessToken || data.access_token || data.tokens?.accessToken;
+    if (tokenFromBody) {
+      return tokenFromBody;
+    }
+  }
+
+  const headers = response.headers || {};
+  const authHeader =
+    (headers as Record<string, unknown>).authorization ||
+    (headers as Record<string, unknown>).Authorization;
+  if (typeof authHeader === 'string') {
+    const match = authHeader.match(/Bearer\s+(.*)/i);
+    return match ? match[1] : authHeader;
+  }
+
+  return null;
+};
+
+const persistAccessToken = (token: string | null) => {
+  if (token) {
+    localStorage.setItem('accessToken', token);
+  } else {
+    localStorage.removeItem('accessToken');
+  }
+};
+
 export const authAPI = {
   login: async (data: LoginDTO): Promise<AuthResponse> => {
     const response = await api.post('/v0/auth/login', data);
-    localStorage.setItem('accessToken', response.data.accessToken);
+    const accessToken = extractAccessTokenFromResponse(response);
+    persistAccessToken(accessToken);
+    if (!accessToken) {
+      try {
+        await authAPI.refreshToken();
+      } catch (error) {
+        console.error('Failed to refresh token after login:', error);
+      }
+    }
     return response.data;
   },
 
   register: async (data: RegistrationDTO): Promise<AuthResponse> => {
     const response = await api.post('/v0/auth/register', data);
-    localStorage.setItem('accessToken', response.data.accessToken);
+    const accessToken = extractAccessTokenFromResponse(response);
+    persistAccessToken(accessToken);
     return response.data;
   },
   logout: async (): Promise<void> => {
     await api.post('/v0/auth/logout');
-    localStorage.removeItem('accessToken');
+    persistAccessToken(null);
   },
 
   refreshToken: async (): Promise<TokenRefreshResponse> => {
     const response = await api.post('/v0/token/refresh');
-    if (response.data?.accessToken) {
-      localStorage.setItem('accessToken', response.data.accessToken);
-    }
+    const accessToken = extractAccessTokenFromResponse(response);
+    persistAccessToken(accessToken);
     return response.data;
   },
 
