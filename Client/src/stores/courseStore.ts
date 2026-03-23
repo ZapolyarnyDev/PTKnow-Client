@@ -23,9 +23,10 @@ export const useCourseStore = create<CourseState>((set, get) => ({
     try {
       const data = await courseCardApi.getCourseById(id);
       set({ course: data, loading: false });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      set({ error: err.message, loading: false });
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Ошибка загрузки курса';
+      set({ error: message, loading: false });
     }
   },
 

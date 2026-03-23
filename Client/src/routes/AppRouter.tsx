@@ -69,7 +69,7 @@ const AppRouter: React.FC = () => {
           }
         />
 
-        <Route path="/course" element={<CourseDetailsPage />} />
+        <Route path="/course/:courseId" element={<CourseDetailsPage />} />
 
         <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
