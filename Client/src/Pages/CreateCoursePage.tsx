@@ -16,9 +16,7 @@ const CreateCoursePage: React.FC = () => {
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState<string[]>([]);
-  const [ageAudience, setAgeAudience] = useState('');
-  const [participantsCount, setParticipantsCount] = useState(0);
-  const [courseType, setCourseType] = useState<'private' | 'public'>('private');
+  const [maxUsersAmount, setMaxUsersAmount] = useState(0);
 
   const { createCourse, isLoading } = useCreateCourse();
 
@@ -46,9 +44,7 @@ const CreateCoursePage: React.FC = () => {
           name: name.trim(),
           description: description.trim(),
           tags: tags,
-          ageAudience: ageAudience,
-          participantsCount: participantsCount,
-          courseType: courseType,
+          maxUsersAmount: maxUsersAmount,
         };
 
         await createCourse(courseData, previewFile || undefined);
@@ -59,9 +55,7 @@ const CreateCoursePage: React.FC = () => {
         setPreviewUrl('');
         setTagInput('');
         setTags([]);
-        setAgeAudience('');
-        setParticipantsCount(0);
-        setCourseType('private');
+        setMaxUsersAmount(0);
 
         toast.success('Курс успешно создан!');
       } catch (err) {
@@ -69,16 +63,7 @@ const CreateCoursePage: React.FC = () => {
         toast.error('Произошла ошибка при создании курса');
       }
     },
-    [
-      name,
-      description,
-      tags,
-      ageAudience,
-      participantsCount,
-      courseType,
-      createCourse,
-      previewFile,
-    ]
+    [name, description, tags, maxUsersAmount, createCourse, previewFile]
   );
 
   const handleTagAdd = useCallback((tag: string) => {
@@ -114,14 +99,12 @@ const CreateCoursePage: React.FC = () => {
           <CourseVisitorsInfo
             tagInput={tagInput}
             tags={tags}
-            participantsCount={participantsCount}
-            courseType={courseType}
+            maxUsersAmount={maxUsersAmount}
             isLoading={isLoading}
             onTagInputChange={setTagInput}
             onTagAdd={handleTagAdd}
             onTagRemove={handleTagRemove}
-            onParticipantsChange={setParticipantsCount}
-            onCourseTypeChange={setCourseType}
+            onMaxUsersAmountChange={setMaxUsersAmount}
           />
 
           <CourseButton

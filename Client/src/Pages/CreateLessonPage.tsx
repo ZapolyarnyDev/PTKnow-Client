@@ -6,12 +6,16 @@ import { useLesson } from '../hooks/useLessons';
 import styles from '../styles/pages/CreateLessonPage.module.css';
 
 const CreateLessonPage: React.FC = () => {
-  const { courseId } = useParams<{ courseId: string }>();
+  const { courseId: courseIdParam } = useParams<{ courseId: string }>();
+  const parsedCourseId = courseIdParam ? Number(courseIdParam) : null;
+  const courseId = Number.isFinite(parsedCourseId) ? parsedCourseId : null;
   const { createLesson, loading, error, clearError } = useLesson();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [contentMd, setContentMd] = useState('');
   const [beginAt, setBeginAt] = useState('');
   const [endsAt, setEndsAt] = useState('');
+  const [type, setType] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
 
   const isFormDisabled = loading || !courseId;
@@ -36,7 +40,13 @@ const CreateLessonPage: React.FC = () => {
       return;
     }
 
-    if (!name.trim() || !description.trim() || !beginAt || !endsAt) {
+    if (
+      !name.trim() ||
+      !description.trim() ||
+      !beginAt ||
+      !endsAt ||
+      !type.trim()
+    ) {
       setLocalError('Заполните все поля.');
       return;
     }
@@ -53,14 +63,18 @@ const CreateLessonPage: React.FC = () => {
       await createLesson(courseId, {
         name: name.trim(),
         description: description.trim(),
+        contentMd: contentMd.trim(),
         beginAt: beginIso,
         endsAt: endIso,
+        type: type.trim(),
       });
 
       setName('');
       setDescription('');
+      setContentMd('');
       setBeginAt('');
       setEndsAt('');
+      setType('');
     } catch (submitError) {
       console.error('Ошибка создания урока:', submitError);
     }
@@ -109,6 +123,19 @@ const CreateLessonPage: React.FC = () => {
             />
           </label>
 
+          <label className={styles.field}>
+            <span>Содержание (Markdown)</span>
+            <textarea
+              value={contentMd}
+              onChange={event => {
+                resetErrors();
+                setContentMd(event.target.value);
+              }}
+              placeholder="Добавьте материал урока"
+              disabled={isFormDisabled}
+            />
+          </label>
+
           <div className={styles.row}>
             <label className={styles.field}>
               <span>Начало</span>
@@ -138,6 +165,21 @@ const CreateLessonPage: React.FC = () => {
               />
             </label>
           </div>
+
+          <label className={styles.field}>
+            <span>Тип занятия</span>
+            <input
+              type="text"
+              value={type}
+              onChange={event => {
+                resetErrors();
+                setType(event.target.value);
+              }}
+              placeholder="Например: LECTURE"
+              disabled={isFormDisabled}
+              required
+            />
+          </label>
 
           {(localError || error) && (
             <div className={styles.error}>{localError || error}</div>
