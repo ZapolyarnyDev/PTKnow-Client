@@ -12,7 +12,23 @@ import { api } from '../axiosConfig';
 export const courseCardApi = {
   getAllCourses: async (): Promise<CourseDTO[]> => {
     const response = await api.get('/v0/course');
-    return response.data;
+    const payload = response.data as unknown;
+    if (Array.isArray(payload)) {
+      return payload as CourseDTO[];
+    }
+    if (payload && typeof payload === 'object') {
+      const data = payload as {
+        items?: CourseDTO[];
+        courses?: CourseDTO[];
+        data?: CourseDTO[];
+        content?: CourseDTO[];
+      };
+      if (Array.isArray(data.items)) return data.items;
+      if (Array.isArray(data.courses)) return data.courses;
+      if (Array.isArray(data.data)) return data.data;
+      if (Array.isArray(data.content)) return data.content;
+    }
+    return [];
   },
 
   createCourse: async (

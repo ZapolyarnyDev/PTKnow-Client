@@ -7,6 +7,7 @@ export interface ProfileResponseDTO {
   avatarUrl: string;
   id?: string;
   status?: UserStatus;
+  role?: string;
   course?: number;
   numberGroup?: string;
   email?: string;
@@ -17,4 +18,5 @@ export interface ProfileUpdateDTO {
   fullName: string;
   summary: string;
   handle: string;
+  numberPhone?: string;
 }
