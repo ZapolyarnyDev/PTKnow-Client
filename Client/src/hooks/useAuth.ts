@@ -1,6 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { authAPI } from '../api';
-import type { User, LoginData, RegisterData } from '../types/user';
+import type {
+  User,
+  LoginData,
+  RegisterData,
+  RegistrationDTO,
+} from '../types/user';
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -57,9 +62,10 @@ export const useAuth = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const registerData = {
-        ...data,
+      const registerData: RegistrationDTO = {
         fullName: buildFullName(data.firstName, data.lastName, data.middleName),
+        email: data.email,
+        password: data.password,
       };
 
       const response = await authAPI.register(registerData);
