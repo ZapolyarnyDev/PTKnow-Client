@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Header from '../Components/Header';
 import { useProfile } from '../hooks/useProfile';
+import { useAuth } from '../hooks/useAuth';
 
 import IconBook from '../assets/icons/book.svg';
 import { CourseList } from '../Components/CourseList';
@@ -14,7 +15,9 @@ export const ProfilePage = () => {
   const { handle } = useParams<{ handle: string }>();
   const { profile, loading, error, getProfileByHandle, getMyProfile } =
     useProfile();
+  const { logout } = useAuth();
   const [isMyProfile, setIsMyProfile] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (handle) {
@@ -47,7 +50,12 @@ export const ProfilePage = () => {
       <Header />
       <div className={styles.container}>
         <div className={styles.profileCard}>
-          <ProfileHeader profile={profile} isMyProfile={isMyProfile} />
+          <ProfileHeader
+            profile={profile}
+            isMyProfile={isMyProfile}
+            onEdit={() => navigate('/profile/edit')}
+            onLogout={logout}
+          />
 
           <ProfileContactsItem profile={profile} />
         </div>

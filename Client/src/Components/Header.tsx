@@ -93,38 +93,38 @@ const Header: React.FC = () => {
           </nav>
 
           <div className={styles.authSection}>
-            <div className={styles.profileSection}>
-              <Link to={ROUTES.PROFILE} className={styles.profileLink}>
-                <div className={styles.userInfo}>
-                  <img
-                    src={user?.avatarUrl || Logotype}
-                    className={styles.userAvatar}
-                  />
-                </div>
-                <div>
-                  <p className={styles.userName}>
-                    {displayName || 'Иванов И.И'}
-                  </p>
-                  <p className={styles.handleName}>{user?.handle || 'test'}</p>
-                </div>
-                <img src={Profile} alt="" />
-              </Link>
-            </div>
-
-            {/* {isAuthenticated ? (
-                            <div className={styles.profileSection}>
-                                <Link to={ROUTES.PROFILE}>
-                                    Профиль
-                                </Link>
-                                <button onClick={handleLogout}>
-                                    Выйти
-                                </button>
-                            </div>
-                        ) : (
-                            !isAuthPage && (
-                                <Link to='/auth' className={styles.loginButton}>Войти</Link>
-                            )
-                        )} */}
+            {isAuthenticated ? (
+              <div className={styles.profileSection}>
+                <Link to={ROUTES.PROFILE} className={styles.profileLink}>
+                  <div className={styles.userInfo}>
+                    <img
+                      src={user?.avatarUrl || Logotype}
+                      className={styles.userAvatar}
+                      alt={
+                        displayName
+                          ? `Аватар ${displayName}`
+                          : 'Аватар пользователя'
+                      }
+                    />
+                  </div>
+                  <div>
+                    {displayName && (
+                      <p className={styles.userName}>{displayName}</p>
+                    )}
+                    {user?.handle && (
+                      <p className={styles.handleName}>{user.handle}</p>
+                    )}
+                  </div>
+                  <img src={Profile} alt="" />
+                </Link>
+              </div>
+            ) : (
+              !isAuthPage && (
+                <Link to={ROUTES.AUTH} className={styles.loginButton}>
+                  Войти
+                </Link>
+              )
+            )}
           </div>
 
           <button

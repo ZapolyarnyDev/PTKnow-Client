@@ -8,12 +8,14 @@ interface ProfileHeaderProps {
   profile: ProfileResponseDTO;
   isMyProfile: boolean;
   onEdit?: () => void;
+  onLogout?: () => void;
 }
 
 const ProfileHeaderComponent = ({
   profile,
   isMyProfile,
   onEdit,
+  onLogout,
 }: ProfileHeaderProps) => {
   return (
     <div className={styles.profileHeader}>
@@ -30,6 +32,10 @@ const ProfileHeaderComponent = ({
           {profile.status}
         </div>
 
+        {profile.role && (
+          <div className={styles.profileRole}>{profile.role}</div>
+        )}
+
         <div className={styles.profileCourseGroup}>
           <div className={styles.profileCourse}>{profile.course} курс</div>
           <div className={styles.profileNumberGroup}>{profile.numberGroup}</div>
@@ -39,6 +45,9 @@ const ProfileHeaderComponent = ({
       {isMyProfile && (
         <div className={styles.profileEdit}>
           <button onClick={onEdit}>Редактировать</button>
+          <button onClick={onLogout} className={styles.profileLogout}>
+            Выйти
+          </button>
         </div>
       )}
     </div>

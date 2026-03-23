@@ -14,6 +14,7 @@ import { ProfilePage } from '../Pages/ProfilePage';
 import RegisterPage from '../Pages/RegisterPage';
 import GuestRoute from './GuestRoute';
 import CourseDetailsPage from '../Pages/CourseDetailsPage';
+import ProfileEditPage from '../Pages/ProfileEditPage';
 
 const AppRouter: React.FC = () => {
   return (
@@ -50,6 +51,8 @@ const AppRouter: React.FC = () => {
         />
 
         <Route path="/profile/:handle" element={<ProfilePage />} />
+
+        <Route path="/profile/edit" element={<ProfileEditPage />} />
 
         <Route
           path="/create-course"

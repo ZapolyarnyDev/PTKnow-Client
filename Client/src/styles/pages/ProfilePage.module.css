@@ -85,6 +85,23 @@
   flex-shrink: 0;
 }
 
+.profileRole {
+  display: inline-flex;
+  align-items: center;
+  min-width: 6.5rem;
+  height: 2rem;
+  padding: 0 0.75rem;
+  border-radius: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  font-family: var(--font-family-monts);
+  font-weight: 600;
+  font-size: 0.813rem;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
 .profileStatus > img {
   width: 1rem;
   height: 0.9rem;
@@ -116,6 +133,9 @@
 .profileEdit {
   margin-left: auto;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .profileEdit > button {
@@ -132,7 +152,25 @@
   transition: all 0.2s ease;
 }
 
-.profileEdit > button:hover {
+.profileLogout {
+  width: 8.5rem;
+  height: 3rem;
+  border-radius: 1000px;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  font-family: var(--font-family-monts);
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.profileLogout:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.profileEdit > button:not(.profileLogout):hover {
   background-color: #f0f0f0;
 }
 

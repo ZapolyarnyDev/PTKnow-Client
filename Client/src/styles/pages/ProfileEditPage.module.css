@@ -1,0 +1,253 @@
+:root {
+  --font-family-monts: 'Montserrat', sans-serif;
+  --font-family-inter: 'Inter', sans-serif;
+  --primary-color: #0956c2;
+  --border-radius: 20px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.5rem 1rem 3.5rem;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(9, 86, 194, 0.1);
+  padding: 2.5rem 2.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+}
+
+.title {
+  font-family: var(--font-family-monts);
+  font-weight: 600;
+  font-size: 1.5rem;
+  margin: 0 0 0.4rem 0;
+}
+
+.subtitle {
+  font-family: var(--font-family-inter);
+  font-size: 0.95rem;
+  color: #5f6b7c;
+  margin: 0;
+}
+
+.backButton {
+  border: 1px solid #d7dce4;
+  background: #f6f8fb;
+  border-radius: 999px;
+  padding: 0.6rem 1.2rem;
+  font-family: var(--font-family-monts);
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: #39485d;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.backButton:hover {
+  background: #eef2f8;
+}
+
+.form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem 2rem;
+}
+
+.avatarBlock {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem 1.25rem;
+  background: #f7f9fc;
+  border-radius: 18px;
+  border: 1px solid #e3e8f0;
+}
+
+.avatarPreviewWrapper {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #ffffff;
+  box-shadow: 0 12px 30px rgba(9, 86, 194, 0.15);
+  background: #ffffff;
+  flex-shrink: 0;
+}
+
+.avatarPreview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatarUpload {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 1.4rem;
+  border-radius: 999px;
+  border: 1px solid #d7dce4;
+  background: #ffffff;
+  font-family: var(--font-family-monts);
+  font-size: 0.9rem;
+  color: #2a3850;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.avatarUpload input {
+  display: none;
+}
+
+.avatarUpload:hover {
+  background: #eef2f8;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  font-family: var(--font-family-monts);
+  font-size: 0.9rem;
+  color: #1e2a3b;
+}
+
+.field input,
+.field textarea {
+  border: 1px solid #d7dce4;
+  border-radius: 14px;
+  padding: 0.8rem 1rem;
+  font-family: var(--font-family-inter);
+  font-size: 0.95rem;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.field input:disabled {
+  background: #f3f5f9;
+  color: #8a93a3;
+  cursor: not-allowed;
+}
+
+.fieldHint {
+  font-family: var(--font-family-inter);
+  font-size: 0.8rem;
+  color: #7a8699;
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 140px;
+}
+
+.field input:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: rgba(9, 86, 194, 0.6);
+  box-shadow: 0 0 0 3px rgba(9, 86, 194, 0.12);
+}
+
+.summaryField {
+  grid-column: 1 / -1;
+}
+
+.actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.primaryButton,
+.secondaryButton {
+  border-radius: 999px;
+  padding: 0.8rem 1.6rem;
+  font-family: var(--font-family-monts);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.primaryButton {
+  background: var(--primary-color);
+  color: #ffffff;
+  box-shadow: 0 12px 30px rgba(9, 86, 194, 0.25);
+}
+
+.primaryButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.secondaryButton {
+  background: #edf1f6;
+  color: #2a3850;
+}
+
+.secondaryButton:hover {
+  background: #e2e7f0;
+}
+
+.stateMessage {
+  font-family: var(--font-family-inter);
+  color: #5f6b7c;
+}
+
+.errorMessage {
+  background: #fff0f0;
+  color: #b42318;
+  border: 1px solid #ffd5d5;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  font-family: var(--font-family-inter);
+}
+
+@media (max-width: 900px) {
+  .card {
+    padding: 2rem 1.75rem;
+  }
+
+  .form {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 1.5rem 1rem 2.5rem;
+  }
+
+  .cardHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .backButton {
+    width: 100%;
+    text-align: center;
+  }
+
+  .actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    width: 100%;
+  }
+}
