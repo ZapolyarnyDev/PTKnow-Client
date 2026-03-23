@@ -7,6 +7,36 @@ export const useProfile = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>();
 
+  const getErrorMessage = (err: unknown, fallback: string) => {
+    if (typeof err === 'object' && err !== null && 'response' in err) {
+      const response = err as {
+        response?: { data?: { message?: string } | string; status?: number };
+      };
+      const status = response.response?.status;
+      if (status === 409) {
+        console.error('Profile fetch conflict (409):', response.response);
+        return 'Ошибка сервера. Попробуйте позже.';
+      }
+      const data = response.response?.data;
+      if (typeof data === 'string') {
+        return status ? `${data} (${status})` : data;
+      }
+      if (
+        data &&
+        typeof data === 'object' &&
+        'message' in data &&
+        data.message
+      ) {
+        return status ? `${data.message} (${status})` : data.message;
+      }
+      return status ? `${fallback} (${status})` : fallback;
+    }
+    if (err instanceof Error) {
+      return err.message || fallback;
+    }
+    return fallback;
+  };
+
   const getMyProfile = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -15,10 +45,9 @@ export const useProfile = () => {
       const data = await profileApi.getMyProfile();
       setProfile(data);
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Ошибка загрузки профиля';
+      const message = getErrorMessage(err, 'Ошибка загрузки профиля');
       setError(message);
-      throw err;
+      setProfile(null);
     } finally {
       setLoading(false);
     }
@@ -32,10 +61,9 @@ export const useProfile = () => {
       const data = await profileApi.getProfileByHandle(handle);
       setProfile(data);
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Ошибка загрузки профиля';
+      const message = getErrorMessage(err, 'Ошибка загрузки профиля');
       setError(message);
-      throw err;
+      setProfile(null);
     } finally {
       setLoading(false);
     }
@@ -49,10 +77,9 @@ export const useProfile = () => {
       const data = await profileApi.updateAvatar(file);
       setProfile(data);
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Ошибка обновления аватарки';
+      const message = getErrorMessage(err, 'Ошибка обновления аватарки');
       setError(message);
-      throw err;
+      setProfile(null);
     } finally {
       setLoading(false);
     }

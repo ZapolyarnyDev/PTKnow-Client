@@ -7,8 +7,32 @@ import type {
   RegistrationDTO,
 } from '../types/user';
 
+const getStoredUser = (): User | null => {
+  const storedUser = localStorage.getItem('userData');
+  if (!storedUser) {
+    return null;
+  }
+  if (storedUser === 'undefined') {
+    localStorage.removeItem('userData');
+    return null;
+  }
+  try {
+    return JSON.parse(storedUser) as User;
+  } catch {
+    return null;
+  }
+};
+
+const persistUser = (nextUser: User | null) => {
+  if (nextUser) {
+    localStorage.setItem('userData', JSON.stringify(nextUser));
+  } else {
+    localStorage.removeItem('userData');
+  }
+};
+
 export const useAuth = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => getStoredUser());
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -32,10 +56,32 @@ export const useAuth = () => {
     };
   };
 
-  const getErrorMessage = (err: unknown, fallback: string) => {
+  const getErrorMessage = (
+    err: unknown,
+    fallback: string,
+    conflictMessage?: string
+  ) => {
     if (typeof err === 'object' && err !== null && 'response' in err) {
-      const response = err as { response?: { data?: { message?: string } } };
-      return response.response?.data?.message || fallback;
+      const response = err as {
+        response?: { data?: { message?: string } | string; status?: number };
+      };
+      const status = response.response?.status;
+      if (status === 409 && conflictMessage) {
+        return conflictMessage;
+      }
+      const data = response.response?.data;
+      if (typeof data === 'string') {
+        return status ? `${data} (${status})` : data;
+      }
+      if (
+        data &&
+        typeof data === 'object' &&
+        'message' in data &&
+        data.message
+      ) {
+        return status ? `${data.message} (${status})` : data.message;
+      }
+      return status ? `${fallback} (${status})` : fallback;
     }
     if (err instanceof Error) {
       return err.message || fallback;
@@ -48,7 +94,9 @@ export const useAuth = () => {
     setError(null);
     try {
       const response = await authAPI.login(data);
-      setUser(response.user);
+      const nextUser = response?.user ?? null;
+      setUser(nextUser);
+      persistUser(nextUser);
       return true;
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Ошибка входа'));
@@ -68,11 +116,26 @@ export const useAuth = () => {
         password: data.password,
       };
 
-      const response = await authAPI.register(registerData);
-      setUser(response.user);
+      let response = await authAPI.register(registerData);
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        response = await authAPI.login({
+          email: data.email,
+          password: data.password,
+        });
+      }
+      const nextUser = response?.user ?? null;
+      setUser(nextUser);
+      persistUser(nextUser);
       return true;
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Ошибка регистрации'));
+      setError(
+        getErrorMessage(
+          err,
+          'Ошибка регистрации',
+          'Пользователь уже зарегистрирован.'
+        )
+      );
       return false;
     } finally {
       setIsLoading(false);
@@ -86,21 +149,18 @@ export const useAuth = () => {
       console.error('Ошибка при выходе:', logoutError);
     } finally {
       localStorage.removeItem('accessToken');
+      persistUser(null);
       setUser(null);
     }
   }, []);
 
   const checkAuth = useCallback(async (): Promise<boolean> => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
-      setUser(null);
-      return false;
-    }
-
     setIsLoading(true);
     try {
       const userData = await authAPI.getProfile();
-      setUser(userData);
+      const nextUser = userData ?? null;
+      setUser(nextUser);
+      persistUser(nextUser);
       return true;
     } catch (authError: unknown) {
       if (
@@ -112,6 +172,7 @@ export const useAuth = () => {
       ) {
         localStorage.removeItem('accessToken');
       }
+      persistUser(null);
       setUser(null);
       return false;
     } finally {
