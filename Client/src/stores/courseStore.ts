@@ -6,7 +6,7 @@ interface CourseState {
   course: CourseDTO | null;
   loading: boolean;
   error: string | null;
-  fetchCourse: (id: string) => Promise<void>;
+  fetchCourse: (id: number) => Promise<void>;
   clearCourse: () => void;
 }
 
@@ -15,7 +15,7 @@ export const useCourseStore = create<CourseState>((set, get) => ({
   loading: false,
   error: null,
 
-  fetchCourse: async (id: string) => {
+  fetchCourse: async (id: number) => {
     const { course } = get();
     if (course?.id === id) return;
 

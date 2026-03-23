@@ -1,19 +1,41 @@
-export type UserStatus = 'guest' | 'banned' | 'Студент' | 'admin' | 'moderator';
+export type UserStatus = string;
 
-export interface User {
-  id: number,
-  fullName: string;
-  avatarUrl?: string;
+export interface UserSummaryDTO {
+  id: string;
   email: string;
-  status: UserStatus;
+  role: string;
+  status: string;
   handle: string;
-  registrationDate: string;
-  course?: number;
-  numberGroup?: string;
-  numberPhone?: string;
+  fullName: string;
+  avatarUrl: string;
 }
 
-export interface LoginData {
+export interface AdminUserDTO {
+  id: string;
+  email: string;
+  role: string;
+  status: string;
+  authProvider: string;
+  registeredAt: string;
+  profileHandle: string;
+  fullName: string;
+}
+
+export interface UpdateUserStatusDTO {
+  status: string;
+}
+
+export interface UpdateUserRoleDTO {
+  role: string;
+}
+
+export interface RegistrationDTO {
+  fullName: string;
+  email: string;
+  password: string;
+}
+
+export interface LoginDTO {
   email: string;
   password: string;
 }
@@ -25,6 +47,10 @@ export interface RegisterData {
   email: string;
   password: string;
 }
+
+export type LoginData = LoginDTO;
+
+export interface User extends UserSummaryDTO {}
 
 export interface AuthResponse {
   user: User;
