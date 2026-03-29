@@ -14,7 +14,6 @@ const ProfileContactsItemComponent = ({ profile }: ProfileContacts) => {
     ? (JSON.parse(storedUser) as User | null)?.email
     : null;
   const email = profile.email || storedEmail || '—';
-  const phone = profile.numberPhone || '—';
   return (
     <div className={styles.profileInfo}>
       <p className={styles.profileInfoTitle}>Контактная информация</p>
@@ -31,15 +30,6 @@ const ProfileContactsItemComponent = ({ profile }: ProfileContacts) => {
           </div>
         </div>
 
-        <div className={styles.profilePhone}>
-          <div className={styles.profileContactsIcon}>
-            <img src={StatusSt} alt="" />
-          </div>
-          <div className={styles.phoneTextWrapper}>
-            <p>Телефон</p>
-            <p>{phone}</p>
-          </div>
-        </div>
       </div>
     </div>
   );

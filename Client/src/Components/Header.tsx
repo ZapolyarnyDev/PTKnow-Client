@@ -7,6 +7,8 @@ import styles from '../styles/components/Header.module.css';
 import Logotype from '../assets/logo/Logotype.svg';
 import Profile from '../assets/icons/profile.svg';
 import { useAuth } from '../hooks/useAuth';
+import { getFileUrl } from '../utils/fileUtils';
+import { normalizeRole } from '../utils/roleUtils';
 
 const ROUTES = {
   HOME: '/',
@@ -16,6 +18,7 @@ const ROUTES = {
   EVENTS: '/events',
   PROJECTS: '/projects',
   PROFILE: '/profile',
+  ADMIN: '/admin',
 } as const;
 
 interface NavItem {
@@ -42,6 +45,14 @@ const Header: React.FC = () => {
   const isAuthenticated = useMemo(() => !!user, [user]);
   const displayName = useMemo(
     () => (user ? formatShortName(user.fullName) : ''),
+    [user]
+  );
+  const avatarUrl = useMemo(
+    () => (user?.avatarUrl ? getFileUrl(user.avatarUrl) : null),
+    [user]
+  );
+  const isAdmin = useMemo(
+    () => normalizeRole(user?.role) === 'ADMIN',
     [user]
   );
 
@@ -89,6 +100,20 @@ const Header: React.FC = () => {
                   </NavLink>
                 </li>
               ))}
+              {isAdmin && (
+                <li>
+                  <NavLink
+                    to={ROUTES.ADMIN}
+                    className={({ isActive }) =>
+                      isActive
+                        ? `${styles.navLink} ${styles.active}`
+                        : styles.navLink
+                    }
+                  >
+                    Админ
+                  </NavLink>
+                </li>
+              )}
             </ul>
           </nav>
 
@@ -98,7 +123,7 @@ const Header: React.FC = () => {
                 <Link to={ROUTES.PROFILE} className={styles.profileLink}>
                   <div className={styles.userInfo}>
                     <img
-                      src={user?.avatarUrl || Logotype}
+                      src={avatarUrl || Logotype}
                       className={styles.userAvatar}
                       alt={
                         displayName
@@ -161,6 +186,21 @@ const Header: React.FC = () => {
                 </NavLink>
               </li>
             ))}
+            {isAdmin && (
+              <li className={styles.mobileNavItem}>
+                <NavLink
+                  to={ROUTES.ADMIN}
+                  className={({ isActive }) =>
+                    isActive
+                      ? `${styles.mobileNavLink} ${styles.active}`
+                      : styles.mobileNavLink
+                  }
+                  onClick={handleNavLinkClick}
+                >
+                  Админ
+                </NavLink>
+              </li>
+            )}
           </ul>
 
           <div className={styles.mobileAuthSection}>

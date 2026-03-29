@@ -3,6 +3,7 @@ import StatusSt from '../../../assets/icons/status_student.svg';
 import Logotype from '../../../assets/logo/Logotype.svg';
 import styles from '../../../styles/pages/ProfilePage.module.css';
 import type { ProfileResponseDTO } from '../../../types/profile';
+import { getAvatarUrl } from '../../../utils/fileUtils';
 
 interface ProfileHeaderProps {
   profile: ProfileResponseDTO;
@@ -17,10 +18,11 @@ const ProfileHeaderComponent = ({
   onEdit,
   onLogout,
 }: ProfileHeaderProps) => {
+  const avatarUrl = getAvatarUrl(profile) || Logotype;
   return (
     <div className={styles.profileHeader}>
       <img
-        src={profile.avatarUrl || Logotype}
+        src={avatarUrl}
         alt={`Аватар ${profile.fullName}`}
         className={styles.profileAvatar}
       />
