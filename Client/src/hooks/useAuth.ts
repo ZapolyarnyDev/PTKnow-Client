@@ -1,11 +1,62 @@
 import { useState, useEffect, useCallback } from 'react';
 import { authAPI } from '../api';
+import type { ProfileResponseDTO } from '../types/profile';
 import type {
   User,
   LoginData,
   RegisterData,
   RegistrationDTO,
 } from '../types/user';
+
+const normalizeRole = (role?: string | null) => {
+  if (!role) {
+    return '';
+  }
+  const upper = role.toUpperCase();
+  return upper.startsWith('ROLE_') ? upper.slice(5) : upper;
+};
+
+const decodeJwtPayload = (
+  token: string | null
+): { role?: string; sub?: string } | null => {
+  if (!token) return null;
+  const payload = token.split('.')[1];
+  if (!payload) return null;
+  try {
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(
+      normalized.length + ((4 - (normalized.length % 4)) % 4),
+      '='
+    );
+    const decoded = atob(padded);
+    const data = JSON.parse(decoded) as { role?: string; sub?: string };
+    return data;
+  } catch {
+    return null;
+  }
+};
+
+const buildUser = (
+  profile: ProfileResponseDTO | null,
+  token: string | null,
+  existingUser?: User | null
+): User | null => {
+  if (!profile && !token && !existingUser) {
+    return null;
+  }
+  const payload = decodeJwtPayload(token);
+  const role = normalizeRole(profile?.role ?? payload?.role ?? existingUser?.role);
+
+  return {
+    id: existingUser?.id ?? profile?.id ?? '',
+    email: existingUser?.email ?? profile?.email ?? payload?.sub ?? '',
+    role: role || '',
+    status: existingUser?.status ?? profile?.status ?? '',
+    handle: profile?.handle ?? existingUser?.handle ?? '',
+    fullName: profile?.fullName ?? existingUser?.fullName ?? '',
+    avatarUrl: profile?.avatarUrl ?? existingUser?.avatarUrl ?? '',
+  };
+};
 
 const getStoredUser = (): User | null => {
   const storedUser = localStorage.getItem('userData');
@@ -17,7 +68,11 @@ const getStoredUser = (): User | null => {
     return null;
   }
   try {
-    return JSON.parse(storedUser) as User;
+    const parsed = JSON.parse(storedUser) as User;
+    const normalizedRole = normalizeRole(parsed.role);
+    return normalizedRole && normalizedRole !== parsed.role
+      ? { ...parsed, role: normalizedRole }
+      : parsed;
   } catch {
     return null;
   }
@@ -25,7 +80,12 @@ const getStoredUser = (): User | null => {
 
 const persistUser = (nextUser: User | null) => {
   if (nextUser) {
-    localStorage.setItem('userData', JSON.stringify(nextUser));
+    const normalizedRole = normalizeRole(nextUser.role);
+    const payload =
+      normalizedRole && normalizedRole !== nextUser.role
+        ? { ...nextUser, role: normalizedRole }
+        : nextUser;
+    localStorage.setItem('userData', JSON.stringify(payload));
   } else {
     localStorage.removeItem('userData');
   }
@@ -93,8 +153,15 @@ export const useAuth = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await authAPI.login(data);
-      const nextUser = response?.user ?? null;
+      const tokenResponse = await authAPI.login(data);
+      const token = tokenResponse || localStorage.getItem('accessToken');
+      let profile: ProfileResponseDTO | null = null;
+      try {
+        profile = await authAPI.getProfile();
+      } catch (profileError) {
+        console.warn('Failed to load profile after login:', profileError);
+      }
+      const nextUser = buildUser(profile, token, getStoredUser());
       setUser(nextUser);
       persistUser(nextUser);
       return true;
@@ -116,15 +183,22 @@ export const useAuth = () => {
         password: data.password,
       };
 
-      let response = await authAPI.register(registerData);
-      const token = localStorage.getItem('accessToken');
+      const tokenResponse = await authAPI.register(registerData);
+      let token = tokenResponse || localStorage.getItem('accessToken');
       if (!token) {
-        response = await authAPI.login({
+        const loginToken = await authAPI.login({
           email: data.email,
           password: data.password,
         });
+        token = loginToken || localStorage.getItem('accessToken');
       }
-      const nextUser = response?.user ?? null;
+      let profile: ProfileResponseDTO | null = null;
+      try {
+        profile = await authAPI.getProfile();
+      } catch (profileError) {
+        console.warn('Failed to load profile after registration:', profileError);
+      }
+      const nextUser = buildUser(profile, token, getStoredUser());
       setUser(nextUser);
       persistUser(nextUser);
       return true;
@@ -157,11 +231,17 @@ export const useAuth = () => {
   const checkAuth = useCallback(async (): Promise<boolean> => {
     setIsLoading(true);
     try {
-      const userData = await authAPI.getProfile();
-      const nextUser = userData ?? null;
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        persistUser(null);
+        setUser(null);
+        return false;
+      }
+      const profile = await authAPI.getProfile();
+      const nextUser = buildUser(profile, token, getStoredUser());
       setUser(nextUser);
       persistUser(nextUser);
-      return true;
+      return !!nextUser;
     } catch (authError: unknown) {
       if (
         typeof authError === 'object' &&

@@ -79,7 +79,6 @@ export const useProfile = () => {
     } catch (err) {
       const message = getErrorMessage(err, 'Ошибка обновления аватарки');
       setError(message);
-      setProfile(null);
     } finally {
       setLoading(false);
     }
