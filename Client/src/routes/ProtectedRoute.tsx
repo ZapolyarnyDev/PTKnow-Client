@@ -1,18 +1,29 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
+import { normalizeRole } from '../utils/roleUtils';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requiredRole?: string | string[];
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
-  children, 
-  requiredRole 
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  children,
+  requiredRole,
 }) => {
+  const { user, isLoading, isInitialized } = useAuth();
   const token = localStorage.getItem('accessToken');
-  
+
   if (!token) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  if (!isInitialized || isLoading) {
+    return null;
+  }
+
+  if (!user) {
     return <Navigate to="/auth" replace />;
   }
 
@@ -20,28 +31,16 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <>{children}</>;
   }
 
-  const userData = localStorage.getItem('userData');
-  if (!userData) {
-    return <Navigate to="/auth" replace />;
+  const userRole = normalizeRole(user.role);
+  const hasAccess = Array.isArray(requiredRole)
+    ? requiredRole.map(normalizeRole).includes(userRole)
+    : userRole === normalizeRole(requiredRole);
+
+  if (!hasAccess) {
+    return <Navigate to="/unauthorized" replace />;
   }
 
-  try {
-    const user = JSON.parse(userData);
-    const userRole = user.role;
-    
-    const hasAccess = Array.isArray(requiredRole) 
-      ? requiredRole.includes(userRole)
-      : userRole === requiredRole;
-
-    if (!hasAccess) {
-      return <Navigate to="/unauthorized" replace />;
-    }
-
-    return <>{children}</>;
-  } catch (error) {
-    console.error('Error parsing user data:', error);
-    return <Navigate to="/auth" replace />;
-  }
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;

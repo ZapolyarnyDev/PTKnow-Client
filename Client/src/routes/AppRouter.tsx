@@ -15,6 +15,9 @@ import RegisterPage from '../Pages/RegisterPage';
 import GuestRoute from './GuestRoute';
 import CourseDetailsPage from '../Pages/CourseDetailsPage';
 import ProfileEditPage from '../Pages/ProfileEditPage';
+import ProtectedRoute from './ProtectedRoute';
+import AdminUsersPage from '../Pages/AdminUsersPage';
+import AdminPanelPage from '../Pages/AdminPanelPage';
 
 const AppRouter: React.FC = () => {
   return (
@@ -60,6 +63,24 @@ const AppRouter: React.FC = () => {
             // <ProtectedRoute requiredRole={["Teacher", "admin"]}>
             <CreateCoursePage />
             // {/* </ProtectedRoute> */}
+          }
+        />
+
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute requiredRole="ADMIN">
+              <AdminPanelPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/users"
+          element={
+            <ProtectedRoute requiredRole="ADMIN">
+              <AdminUsersPage />
+            </ProtectedRoute>
           }
         />
 

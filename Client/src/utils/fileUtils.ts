@@ -2,6 +2,15 @@ import { api } from '../api';
 import type { CourseDTO } from '../types/CourseCard';
 import type { ProfileResponseDTO } from '../types/profile';
 
+const getBaseUrl = (): string => {
+  const baseUrl = api.defaults.baseURL ?? '';
+  return baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+};
+
+const stripApiSuffix = (baseUrl: string): string => {
+  return baseUrl.endsWith('/api') ? baseUrl.slice(0, -4) : baseUrl;
+};
+
 export const getFileUrl = (fileUrl?: string): string | null => {
   if (!fileUrl) {
     return null;
@@ -12,8 +21,11 @@ export const getFileUrl = (fileUrl?: string): string | null => {
   }
 
   if (fileUrl.startsWith('/')) {
-    const baseUrl = api || '';
-    return `${baseUrl}${fileUrl}`;
+    const baseUrl = getBaseUrl();
+    if (baseUrl && fileUrl.startsWith('/api/')) {
+      return `${stripApiSuffix(baseUrl)}${fileUrl}`;
+    }
+    return baseUrl ? `${baseUrl}${fileUrl}` : fileUrl;
   }
   return fileUrl;
 };

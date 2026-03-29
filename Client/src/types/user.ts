@@ -52,7 +52,4 @@ export type LoginData = LoginDTO;
 
 export interface User extends UserSummaryDTO {}
 
-export interface AuthResponse {
-  user: User;
-  accessToken: string;
-}
+export type AuthResponse = string;

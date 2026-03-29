@@ -11,12 +11,11 @@ export interface ProfileResponseDTO {
   course?: number;
   numberGroup?: string;
   email?: string;
-  numberPhone?: string;
 }
 
 export interface ProfileUpdateDTO {
   fullName: string;
   summary: string;
   handle: string;
-  numberPhone?: string;
+  avatarUrl: string;
 }
