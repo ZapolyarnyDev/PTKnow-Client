@@ -28,9 +28,15 @@ export const setupAuthInterceptor = () => {
     const token = localStorage.getItem('accessToken');
     const requestUrl = config.url || '';
     const isAuthRequest =
-      requestUrl.includes('/v0/auth/login') ||
-      requestUrl.includes('/v0/auth/register') ||
-      requestUrl.includes('/v0/token/refresh');
+      requestUrl.includes('/v1/auth/login') ||
+      requestUrl.includes('/v1/auth/register') ||
+      requestUrl.includes('/v1/token/refresh');
+    if (config.data instanceof FormData) {
+      if (config.headers) {
+        delete config.headers['Content-Type'];
+        delete config.headers['content-type'];
+      }
+    }
     if (token && !isAuthRequest) {
       config.headers = config.headers ?? {};
       config.headers['Authorization'] = `Bearer ${token}`;
@@ -45,9 +51,9 @@ export const setupAuthInterceptor = () => {
 
       const requestUrl = originalRequest.url || '';
       const isAuthRequest =
-        requestUrl.includes('/v0/auth/login') ||
-        requestUrl.includes('/v0/auth/register') ||
-        requestUrl.includes('/v0/token/refresh');
+        requestUrl.includes('/v1/auth/login') ||
+        requestUrl.includes('/v1/auth/register') ||
+        requestUrl.includes('/v1/token/refresh');
 
       if (
         error.response?.status === 401 &&
@@ -75,7 +81,7 @@ export const setupAuthInterceptor = () => {
         isRefreshing = true;
 
         try {
-          const response = await api.post('/v0/token/refresh');
+          const response = await api.post('/v1/token/refresh');
           const newAccessToken =
             (typeof response.data === 'string' && response.data.trim()) ||
             response.data.accessToken;

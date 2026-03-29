@@ -12,29 +12,29 @@ export const lessonApi = {
     courseId: number,
     data: CreateLessonDTO
   ): Promise<LessonDTO> => {
-    const response = await api.post(`/v0/lessons/${String(courseId)}`, data);
+    const response = await api.post(`/v1/lessons/${String(courseId)}`, data);
     return response.data;
   },
   getLessonById: async (lessonId: number): Promise<LessonDTO> => {
-    const response = await api.get(`/v0/lessons/${String(lessonId)}`);
+    const response = await api.get(`/v1/lessons/${String(lessonId)}`);
     return response.data;
   },
   getCourseLessons: async (courseId: number): Promise<LessonDTO[]> => {
-    const response = await api.get(`/v0/lessons/course/${String(courseId)}`);
+    const response = await api.get(`/v1/lessons/course/${String(courseId)}`);
     return response.data;
   },
   updateLesson: async (
     lessonId: number,
     data: UpdateLessonDTO
   ): Promise<LessonDTO> => {
-    const response = await api.patch(`/v0/lessons/${String(lessonId)}`, data);
+    const response = await api.patch(`/v1/lessons/${String(lessonId)}`, data);
     return response.data;
   },
   replaceLesson: async (
     lessonId: number,
     data: UpdateLessonDTO
   ): Promise<LessonDTO> => {
-    const response = await api.put(`/v0/lessons/${String(lessonId)}`, data);
+    const response = await api.put(`/v1/lessons/${String(lessonId)}`, data);
     return response.data;
   },
   updateLessonState: async (
@@ -42,7 +42,7 @@ export const lessonApi = {
     data: UpdateLessonStateDTO
   ): Promise<LessonDTO> => {
     const response = await api.patch(
-      `/v0/lessons/${String(lessonId)}/state`,
+      `/v1/lessons/${String(lessonId)}/state`,
       data
     );
     return response.data;
@@ -54,7 +54,7 @@ export const lessonApi = {
     const formData = new FormData();
     formData.append('file', file);
     const response = await api.post(
-      `/v0/lessons/${String(lessonId)}/materials`,
+      `/v1/lessons/${String(lessonId)}/materials`,
       formData,
       {
         headers: {
@@ -69,10 +69,10 @@ export const lessonApi = {
     fileId: number
   ): Promise<void> => {
     await api.delete(
-      `/v0/lessons/${String(lessonId)}/materials/${String(fileId)}`
+      `/v1/lessons/${String(lessonId)}/materials/${String(fileId)}`
     );
   },
   deleteLesson: async (lessonId: number): Promise<void> => {
-    await api.delete(`/v0/lessons/${String(lessonId)}`);
+    await api.delete(`/v1/lessons/${String(lessonId)}`);
   },
 };

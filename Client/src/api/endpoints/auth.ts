@@ -1,9 +1,5 @@
-import type {
-  AuthResponse,
-  LoginDTO,
-  RegistrationDTO,
-  User,
-} from '../../types/user';
+import type { AuthResponse, LoginDTO, RegistrationDTO } from '../../types/user';
+import type { ProfileResponseDTO } from '../../types/profile';
 import type { TokenRefreshResponse } from '../../types/auth';
 import { api } from '../axiosConfig';
 
@@ -50,7 +46,7 @@ const persistAccessToken = (token: string | null) => {
 
 export const authAPI = {
   login: async (data: LoginDTO): Promise<AuthResponse> => {
-    const response = await api.post('/v0/auth/login', data);
+    const response = await api.post('/v1/auth/login', data);
     const accessToken = extractAccessTokenFromResponse(response);
     persistAccessToken(accessToken);
     if (!accessToken) {
@@ -64,25 +60,25 @@ export const authAPI = {
   },
 
   register: async (data: RegistrationDTO): Promise<AuthResponse> => {
-    const response = await api.post('/v0/auth/register', data);
+    const response = await api.post('/v1/auth/register', data);
     const accessToken = extractAccessTokenFromResponse(response);
     persistAccessToken(accessToken);
     return response.data;
   },
   logout: async (): Promise<void> => {
-    await api.post('/v0/auth/logout');
+    await api.post('/v1/auth/logout');
     persistAccessToken(null);
   },
 
   refreshToken: async (): Promise<TokenRefreshResponse> => {
-    const response = await api.post('/v0/token/refresh');
+    const response = await api.post('/v1/token/refresh');
     const accessToken = extractAccessTokenFromResponse(response);
     persistAccessToken(accessToken);
     return response.data;
   },
 
-  getProfile: async (): Promise<User> => {
-    const response = await api.get('/v0/profile/me');
+  getProfile: async (): Promise<ProfileResponseDTO> => {
+    const response = await api.get('/v1/profile/me');
     return response.data;
   },
 };

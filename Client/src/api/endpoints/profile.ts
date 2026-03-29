@@ -1,43 +1,39 @@
-import { api } from '../axiosConfig';
 import type { ProfileResponseDTO, ProfileUpdateDTO } from '../../types/profile';
+import { api } from '../axiosConfig';
 
 export const profileApi = {
   getProfile: async (): Promise<ProfileResponseDTO> => {
-    const response = await api.get('/v0/profile');
+    const response = await api.get('/v1/profile');
     return response.data;
   },
   getMyProfile: async (): Promise<ProfileResponseDTO> => {
-    const response = await api.get('/v0/profile/me');
+    const response = await api.get('/v1/profile/me');
     return response.data;
   },
   getProfileByHandle: async (handle: string): Promise<ProfileResponseDTO> => {
-    const response = await api.get(`/v0/profile/${handle}`);
+    const response = await api.get(`/v1/profile/${handle}`);
     return response.data;
   },
   getProfileById: async (userId: string): Promise<ProfileResponseDTO> => {
-    const response = await api.get(`/v0/profile/id/${userId}`);
+    const response = await api.get(`/v1/profile/id/${userId}`);
     return response.data;
   },
   updateAvatar: async (file: File): Promise<ProfileResponseDTO> => {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', file, file.name || 'avatar');
 
-    const response = await api.post('/v0/profile/avatar', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await api.post('/v1/profile/avatar', formData);
     return response.data;
   },
   deleteAvatar: async (): Promise<void> => {
-    await api.delete('/v0/profile/avatar');
+    await api.delete('/v1/profile/avatar');
   },
   updateProfile: async (data: ProfileUpdateDTO): Promise<ProfileUpdateDTO> => {
-    const response = await api.patch('/v0/profile', data);
+    const response = await api.patch('/v1/profile', data);
     return response.data;
   },
   replaceProfile: async (data: ProfileUpdateDTO): Promise<ProfileUpdateDTO> => {
-    const response = await api.put('/v0/profile', data);
+    const response = await api.put('/v1/profile', data);
     return response.data;
   },
 };
