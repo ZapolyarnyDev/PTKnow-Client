@@ -7,6 +7,8 @@ import { CourseMainInfo } from '../Components/ui/Events/course/CourseMainInfo';
 import { CourseVisitorsInfo } from '../Components/ui/Events/course/CourseVisitorsInfo';
 import { CourseButton } from '../Components/ui/forms/CourseButton';
 import { useCreateCourse } from '../hooks/useCreateCourse';
+import { useAuth } from '../hooks/useAuth';
+import { normalizeRole } from '../utils/roleUtils';
 import styles from '../styles/pages/CreateCoursePage.module.css';
 
 const CreateCoursePage: React.FC = () => {
@@ -18,7 +20,13 @@ const CreateCoursePage: React.FC = () => {
   const [tags, setTags] = useState<string[]>([]);
   const [maxUsersAmount, setMaxUsersAmount] = useState(0);
 
+  const { user, isLoading: isAuthLoading, isInitialized } = useAuth();
   const { createCourse, isLoading } = useCreateCourse();
+  const normalizedRole = normalizeRole(user?.role);
+  const canCreateCourse =
+    isInitialized &&
+    !isAuthLoading &&
+    (normalizedRole === 'TEACHER' || normalizedRole === 'ADMIN');
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -36,6 +44,11 @@ const CreateCoursePage: React.FC = () => {
 
       if (description.trim().length < 10) {
         toast.error('Описание должно содержать минимум 10 символов');
+        return;
+      }
+
+      if (!canCreateCourse) {
+        toast.error('Создавать курсы могут только преподаватели или администраторы');
         return;
       }
 
@@ -59,11 +72,28 @@ const CreateCoursePage: React.FC = () => {
 
         toast.success('Курс успешно создан!');
       } catch (err) {
+        if (
+          typeof err === 'object' &&
+          err !== null &&
+          'response' in err &&
+          (err as { response?: { status?: number } }).response?.status === 403
+        ) {
+          toast.error('Недостаточно прав для создания курса');
+          return;
+        }
         console.error('Ошибка создания курса:', err);
         toast.error('Произошла ошибка при создании курса');
       }
     },
-    [name, description, tags, maxUsersAmount, createCourse, previewFile]
+    [
+      name,
+      description,
+      tags,
+      maxUsersAmount,
+      createCourse,
+      previewFile,
+      canCreateCourse,
+    ]
   );
 
   const handleTagAdd = useCallback((tag: string) => {
@@ -110,7 +140,7 @@ const CreateCoursePage: React.FC = () => {
           <CourseButton
             type="submit"
             className={styles.publishCourse}
-            disabled={isLoading}
+            disabled={isLoading || !canCreateCourse}
           >
             {isLoading ? 'Создание' : 'Опубликовать курс'}
           </CourseButton>

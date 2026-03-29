@@ -3,9 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import Header from '../Components/Header';
 import Footer from '../Components/Footer';
 import { useProfile } from '../hooks/useProfile';
+import { getAvatarUrl } from '../utils/fileUtils';
 import styles from '../styles/pages/ProfileEditPage.module.css';
 
 const ProfileEditPage: React.FC = () => {
+  const MAX_AVATAR_SIZE_MB = 5;
+  const MAX_AVATAR_SIZE = MAX_AVATAR_SIZE_MB * 1024 * 1024;
+  const MAX_AVATAR_UPLOAD_SIZE_MB = 1;
+  const MAX_AVATAR_UPLOAD_SIZE = MAX_AVATAR_UPLOAD_SIZE_MB * 1024 * 1024;
+  const MAX_AVATAR_DIMENSION = 512;
   const navigate = useNavigate();
   const {
     profile,
@@ -20,12 +26,13 @@ const ProfileEditPage: React.FC = () => {
     fullName: '',
     handle: '',
     summary: '',
-    numberPhone: '',
     email: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+  const currentAvatarUrl = profile ? getAvatarUrl(profile) ?? undefined : undefined;
 
   useEffect(() => {
     getMyProfile();
@@ -37,10 +44,14 @@ const ProfileEditPage: React.FC = () => {
       fullName: profile.fullName ?? '',
       handle: profile.handle ?? '',
       summary: profile.summary ?? '',
-      numberPhone: profile.numberPhone ?? '',
       email: profile.email ?? '',
     });
   }, [profile]);
+
+  useEffect(() => {
+    if (!avatarPreview) return;
+    return () => URL.revokeObjectURL(avatarPreview);
+  }, [avatarPreview]);
 
   const handleChange = useCallback(
     (
@@ -67,7 +78,6 @@ const ProfileEditPage: React.FC = () => {
           fullName: formData.fullName.trim(),
           handle: formData.handle.trim(),
           summary: formData.summary.trim(),
-          numberPhone: formData.numberPhone.trim(),
         });
         navigate('/profile');
       } finally {
@@ -77,20 +87,137 @@ const ProfileEditPage: React.FC = () => {
     [clearError, formData, navigate, updateProfile]
   );
 
+  const loadImage = useCallback((file: File): Promise<HTMLImageElement> => {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      const objectUrl = URL.createObjectURL(file);
+      image.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        resolve(image);
+      };
+      image.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error('Не удалось прочитать изображение.'));
+      };
+      image.src = objectUrl;
+    });
+  }, []);
+
+  const encodeCanvas = useCallback(
+    (canvas: HTMLCanvasElement, type: string, quality: number) => {
+      return new Promise<Blob | null>(resolve => {
+        canvas.toBlob(resolve, type, quality);
+      });
+    },
+    []
+  );
+
+  const prepareAvatarFile = useCallback(
+    async (file: File): Promise<File> => {
+      const image = await loadImage(file);
+      const { width, height } = image;
+      const scale = Math.min(1, MAX_AVATAR_DIMENSION / Math.max(width, height));
+      const targetWidth = Math.max(1, Math.round(width * scale));
+      const targetHeight = Math.max(1, Math.round(height * scale));
+      const canvas = document.createElement('canvas');
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        throw new Error('Ваш браузер не поддерживает обработку изображений.');
+      }
+      ctx.drawImage(image, 0, 0, targetWidth, targetHeight);
+
+      if (
+        file.size <= MAX_AVATAR_UPLOAD_SIZE &&
+        width === targetWidth &&
+        height === targetHeight
+      ) {
+        return file;
+      }
+
+      const candidates = [
+        { type: 'image/webp', quality: 0.85 },
+        { type: 'image/jpeg', quality: 0.85 },
+        { type: 'image/jpeg', quality: 0.75 },
+        { type: 'image/jpeg', quality: 0.65 },
+      ];
+
+      let bestBlob: Blob | null = null;
+      for (const candidate of candidates) {
+        const blob = await encodeCanvas(canvas, candidate.type, candidate.quality);
+        if (!blob) {
+          continue;
+        }
+        bestBlob = blob;
+        if (blob.size <= MAX_AVATAR_UPLOAD_SIZE) {
+          break;
+        }
+      }
+
+      if (!bestBlob) {
+        throw new Error('Не удалось подготовить изображение.');
+      }
+
+      if (bestBlob.size > MAX_AVATAR_UPLOAD_SIZE) {
+        throw new Error(
+          `Не удалось уменьшить изображение до ${MAX_AVATAR_UPLOAD_SIZE_MB} МБ.`
+        );
+      }
+
+      const extension = bestBlob.type === 'image/webp' ? 'webp' : 'jpg';
+      return new File([bestBlob], `avatar.${extension}`, { type: bestBlob.type });
+    },
+    [
+      MAX_AVATAR_DIMENSION,
+      MAX_AVATAR_UPLOAD_SIZE,
+      MAX_AVATAR_UPLOAD_SIZE_MB,
+      encodeCanvas,
+      loadImage,
+    ]
+  );
+
   const handleAvatarChange = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
       if (!file) return;
-      setAvatarPreview(URL.createObjectURL(file));
+      setAvatarError(null);
+      if (!file.type.startsWith('image/')) {
+        setAvatarError('Выберите изображение в формате PNG, JPG или WEBP.');
+        event.target.value = '';
+        return;
+      }
+      if (file.size > MAX_AVATAR_SIZE) {
+        setAvatarError(
+          `Размер файла не должен превышать ${MAX_AVATAR_SIZE_MB} МБ.`
+        );
+        event.target.value = '';
+        return;
+      }
       setIsAvatarUploading(true);
       clearError();
       try {
-        await updateAvatar(file);
+        const preparedFile = await prepareAvatarFile(file);
+        setAvatarPreview(URL.createObjectURL(preparedFile));
+        await updateAvatar(preparedFile);
+      } catch (uploadError) {
+        const message =
+          uploadError instanceof Error
+            ? uploadError.message
+            : 'Не удалось загрузить изображение.';
+        setAvatarError(message);
+        event.target.value = '';
       } finally {
         setIsAvatarUploading(false);
       }
     },
-    [clearError, updateAvatar]
+    [
+      clearError,
+      prepareAvatarFile,
+      updateAvatar,
+      MAX_AVATAR_SIZE,
+      MAX_AVATAR_SIZE_MB,
+    ]
   );
 
   return (
@@ -124,7 +251,7 @@ const ProfileEditPage: React.FC = () => {
             <div className={styles.avatarBlock}>
               <div className={styles.avatarPreviewWrapper}>
                 <img
-                  src={avatarPreview || profile?.avatarUrl}
+                  src={avatarPreview || currentAvatarUrl}
                   alt="Аватар"
                   className={styles.avatarPreview}
                 />
@@ -138,6 +265,9 @@ const ProfileEditPage: React.FC = () => {
                 />
                 {isAvatarUploading ? 'Загрузка...' : 'Загрузить аватар'}
               </label>
+              {avatarError && (
+                <div className={styles.errorMessage}>{avatarError}</div>
+              )}
             </div>
 
             <label className={styles.field}>
@@ -161,17 +291,6 @@ const ProfileEditPage: React.FC = () => {
                 onChange={handleChange}
                 placeholder="ivanov"
                 required
-              />
-            </label>
-
-            <label className={styles.field}>
-              <span>Телефон</span>
-              <input
-                name="numberPhone"
-                type="tel"
-                value={formData.numberPhone}
-                onChange={handleChange}
-                placeholder="+7 900 000-00-00"
               />
             </label>
 
