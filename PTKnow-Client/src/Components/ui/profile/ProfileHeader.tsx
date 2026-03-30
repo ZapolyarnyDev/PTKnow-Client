@@ -19,10 +19,11 @@ const ProfileHeaderComponent = ({
   onLogout,
 }: ProfileHeaderProps) => {
   const avatarUrl = getAvatarUrl(profile) || DefaultAvatar;
-  const courseLabel = profile.course ? `${profile.course} курс` : 'Курс —';
-  const groupLabel = profile.numberGroup
-    ? `Группа ${profile.numberGroup}`
-    : 'Группа —';
+  const statusLabel = profile.status?.toString().trim() ?? '';
+  const roleLabel = profile.role?.trim() ?? '';
+  const courseLabel = profile.course ? `${profile.course} курс` : '';
+  const groupLabel = profile.numberGroup ? `Группа ${profile.numberGroup}` : '';
+  const hasCourseGroup = Boolean(courseLabel || groupLabel);
   return (
     <div className={styles.profileHeader}>
       <img
@@ -33,19 +34,25 @@ const ProfileHeaderComponent = ({
       <div className={styles.profileText}>
         <p className={styles.profileName}>{profile.fullName}</p>
 
-        <div className={styles.profileStatus}>
-          <img src={StatusSt} alt="Статус" />
-          {profile.status}
-        </div>
-
-        {profile.role && (
-          <div className={styles.profileRole}>{profile.role}</div>
+        {statusLabel && (
+          <div className={styles.profileStatus}>
+            <img src={StatusSt} alt="Статус" />
+            {statusLabel}
+          </div>
         )}
 
-        <div className={styles.profileCourseGroup}>
-          <div className={styles.profileCourse}>{courseLabel}</div>
-          <div className={styles.profileNumberGroup}>{groupLabel}</div>
-        </div>
+        {roleLabel && <div className={styles.profileRole}>{roleLabel}</div>}
+
+        {hasCourseGroup && (
+          <div className={styles.profileCourseGroup}>
+            {courseLabel && (
+              <div className={styles.profileCourse}>{courseLabel}</div>
+            )}
+            {groupLabel && (
+              <div className={styles.profileNumberGroup}>{groupLabel}</div>
+            )}
+          </div>
+        )}
       </div>
 
       {isMyProfile && (

@@ -49,6 +49,34 @@
   border-bottom-right-radius: var(--border-radius);
 }
 
+.profileAbout {
+  width: 100%;
+  max-width: var(--card-width);
+  background-color: white;
+  padding: 1.5rem;
+}
+
+.profileAboutLast {
+  border-bottom-left-radius: var(--border-radius);
+  border-bottom-right-radius: var(--border-radius);
+}
+
+.profileAboutTitle {
+  font-family: var(--font-family-monts);
+  font-weight: 500;
+  font-size: 0.938rem;
+  margin: 0 0 0.75rem 0;
+}
+
+.profileAboutText {
+  font-family: var(--font-family-monts);
+  font-weight: 400;
+  font-size: 0.938rem;
+  line-height: 1.5;
+  margin: 0;
+  color: #2d2d2d;
+}
+
 .profileText {
   color: white;
 }

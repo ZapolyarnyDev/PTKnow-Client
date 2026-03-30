@@ -18,6 +18,11 @@ export const ProfilePage = () => {
   const { logout } = useAuth();
   const [isMyProfile, setIsMyProfile] = useState(false);
   const navigate = useNavigate();
+  const storedUser = localStorage.getItem('userData');
+  const storedEmail = storedUser
+    ? (JSON.parse(storedUser) as { email?: string } | null)?.email
+    : null;
+  const contactEmail = profile?.email || storedEmail || '';
 
   useEffect(() => {
     if (handle) {
@@ -56,6 +61,17 @@ export const ProfilePage = () => {
             onEdit={() => navigate('/profile/edit')}
             onLogout={logout}
           />
+
+          {profile.summary?.trim() && (
+            <div
+              className={`${styles.profileAbout} ${
+                contactEmail ? '' : styles.profileAboutLast
+              }`}
+            >
+              <p className={styles.profileAboutTitle}>О себе</p>
+              <p className={styles.profileAboutText}>{profile.summary.trim()}</p>
+            </div>
+          )}
 
           <ProfileContactsItem profile={profile} />
         </div>

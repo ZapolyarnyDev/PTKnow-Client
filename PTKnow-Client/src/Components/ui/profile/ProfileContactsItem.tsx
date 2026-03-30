@@ -13,7 +13,10 @@ const ProfileContactsItemComponent = ({ profile }: ProfileContacts) => {
   const storedEmail = storedUser
     ? (JSON.parse(storedUser) as User | null)?.email
     : null;
-  const email = profile.email || storedEmail || '—';
+  const email = profile.email || storedEmail || '';
+  if (!email) {
+    return null;
+  }
   return (
     <div className={styles.profileInfo}>
       <p className={styles.profileInfoTitle}>Контактная информация</p>
