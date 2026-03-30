@@ -18,6 +18,7 @@ import ProfileEditPage from '../Pages/ProfileEditPage';
 import ProtectedRoute from './ProtectedRoute';
 import AdminUsersPage from '../Pages/AdminUsersPage';
 import AdminPanelPage from '../Pages/AdminPanelPage';
+import UnderConstructionPage from '../Pages/UnderConstructionPage';
 
 const AppRouter: React.FC = () => {
   return (
@@ -95,7 +96,7 @@ const AppRouter: React.FC = () => {
 
         <Route path="/course/:courseId" element={<CourseDetailsPage />} />
 
-        <Route path="*" element={<Navigate to="/home" replace />} />
+        <Route path="*" element={<UnderConstructionPage />} />
       </Routes>
     </Router>
   );

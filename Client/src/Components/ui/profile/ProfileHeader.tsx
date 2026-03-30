@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import StatusSt from '../../../assets/icons/status_student.svg';
-import Logotype from '../../../assets/logo/Logotype.svg';
+import DefaultAvatar from '../../../assets/icons/profile.svg';
 import styles from '../../../styles/pages/ProfilePage.module.css';
 import type { ProfileResponseDTO } from '../../../types/profile';
 import { getAvatarUrl } from '../../../utils/fileUtils';
@@ -18,7 +18,7 @@ const ProfileHeaderComponent = ({
   onEdit,
   onLogout,
 }: ProfileHeaderProps) => {
-  const avatarUrl = getAvatarUrl(profile) || Logotype;
+  const avatarUrl = getAvatarUrl(profile) || DefaultAvatar;
   const courseLabel = profile.course ? `${profile.course} курс` : 'Курс —';
   const groupLabel = profile.numberGroup
     ? `Группа ${profile.numberGroup}`
