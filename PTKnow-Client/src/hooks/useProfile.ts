@@ -6,6 +6,15 @@ export const useProfile = () => {
   const [profile, setProfile] = useState<ProfileResponseDTO | null>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>();
+  const [notFound, setNotFound] = useState(false);
+
+  const getResponseStatus = (err: unknown) => {
+    if (typeof err === 'object' && err !== null && 'response' in err) {
+      const response = err as { response?: { status?: number } };
+      return response.response?.status;
+    }
+    return undefined;
+  };
 
   const getErrorMessage = (err: unknown, fallback: string) => {
     if (typeof err === 'object' && err !== null && 'response' in err) {
@@ -40,6 +49,7 @@ export const useProfile = () => {
   const getMyProfile = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setNotFound(false);
 
     try {
       const data = await profileApi.getMyProfile();
@@ -56,11 +66,19 @@ export const useProfile = () => {
   const getProfileByHandle = useCallback(async (handle: string) => {
     setLoading(true);
     setError(null);
+    setNotFound(false);
 
     try {
       const data = await profileApi.getProfileByHandle(handle);
       setProfile(data);
     } catch (err) {
+      const status = getResponseStatus(err);
+      if (status === 404) {
+        setNotFound(true);
+        setProfile(null);
+        setError(null);
+        return;
+      }
       const message = getErrorMessage(err, 'Ошибка загрузки профиля');
       setError(message);
       setProfile(null);
@@ -107,6 +125,7 @@ export const useProfile = () => {
     profile,
     loading,
     error,
+    notFound,
     getMyProfile,
     getProfileByHandle,
     updateAvatar,

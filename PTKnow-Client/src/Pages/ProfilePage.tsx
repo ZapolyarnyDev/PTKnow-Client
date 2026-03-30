@@ -13,7 +13,7 @@ import styles from '../styles/pages/ProfilePage.module.css';
 
 export const ProfilePage = () => {
   const { handle } = useParams<{ handle: string }>();
-  const { profile, loading, error, getProfileByHandle, getMyProfile } =
+  const { profile, loading, error, notFound, getProfileByHandle, getMyProfile } =
     useProfile();
   const { logout } = useAuth();
   const [isMyProfile, setIsMyProfile] = useState(false);
@@ -47,6 +47,28 @@ export const ProfilePage = () => {
         <div>Ошибка: {error}</div>
       </div>
     );
+
+  if (handle && notFound) {
+    return (
+      <>
+        <Header />
+        <div className={styles.container}>
+          <div className={styles.profileNotFound}>
+            <h2>Пользователь не найден</h2>
+            <p>Проверьте правильность ссылки на профиль.</p>
+            <button
+              type="button"
+              className={styles.profileNotFoundButton}
+              onClick={() => navigate('/home')}
+            >
+              На главную
+            </button>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
 
   if (!profile) return null;
 
