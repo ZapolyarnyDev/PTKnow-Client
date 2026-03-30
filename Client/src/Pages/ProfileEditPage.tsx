@@ -26,7 +26,6 @@ const ProfileEditPage: React.FC = () => {
     fullName: '',
     handle: '',
     summary: '',
-    email: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
@@ -44,7 +43,6 @@ const ProfileEditPage: React.FC = () => {
       fullName: profile.fullName ?? '',
       handle: profile.handle ?? '',
       summary: profile.summary ?? '',
-      email: profile.email ?? '',
     });
   }, [profile]);
 
@@ -292,21 +290,6 @@ const ProfileEditPage: React.FC = () => {
                 placeholder="ivanov"
                 required
               />
-            </label>
-
-            <label className={styles.field}>
-              <span>Email</span>
-              <input
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="name@example.com"
-                disabled
-              />
-              <span className={styles.fieldHint}>
-                Email указан при регистрации и не изменяется.
-              </span>
             </label>
 
             <label className={`${styles.field} ${styles.summaryField}`}>

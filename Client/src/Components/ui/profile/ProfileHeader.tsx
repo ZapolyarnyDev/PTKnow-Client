@@ -19,6 +19,10 @@ const ProfileHeaderComponent = ({
   onLogout,
 }: ProfileHeaderProps) => {
   const avatarUrl = getAvatarUrl(profile) || Logotype;
+  const courseLabel = profile.course ? `${profile.course} курс` : 'Курс —';
+  const groupLabel = profile.numberGroup
+    ? `Группа ${profile.numberGroup}`
+    : 'Группа —';
   return (
     <div className={styles.profileHeader}>
       <img
@@ -39,8 +43,8 @@ const ProfileHeaderComponent = ({
         )}
 
         <div className={styles.profileCourseGroup}>
-          <div className={styles.profileCourse}>{profile.course} курс</div>
-          <div className={styles.profileNumberGroup}>{profile.numberGroup}</div>
+          <div className={styles.profileCourse}>{courseLabel}</div>
+          <div className={styles.profileNumberGroup}>{groupLabel}</div>
         </div>
       </div>
 

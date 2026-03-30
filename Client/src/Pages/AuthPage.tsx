@@ -13,6 +13,7 @@ const AuthPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPasswordInput, setShowPasswordInput] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const { login, isLoading, error } = useAuth();
   const navigate = useNavigate();
 
@@ -53,6 +54,7 @@ const AuthPage: React.FC = () => {
   const handleBackToEmail = useCallback(() => {
     setShowPasswordInput(false);
     setPassword('');
+    setIsPasswordVisible(false);
   }, []);
 
   return (
@@ -76,9 +78,9 @@ const AuthPage: React.FC = () => {
                 required
               />
             ) : (
-              <div style={{ position: 'relative' }}>
+              <div className={style.passwordField}>
                 <AuthInput
-                  type="password"
+                  type={isPasswordVisible ? 'text' : 'password'}
                   placeholder="Пароль"
                   value={password}
                   className={style.emailAuth}
@@ -89,19 +91,20 @@ const AuthPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleBackToEmail}
-                  style={{
-                    position: 'absolute',
-                    right: '10px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontSize: '16px',
-                    color: '#666',
-                  }}
+                  className={style.backButton}
+                  aria-label="Назад"
                 >
                   ←
+                </button>
+                <button
+                  type="button"
+                  className={style.passwordToggle}
+                  onClick={() => setIsPasswordVisible(prev => !prev)}
+                  aria-label={
+                    isPasswordVisible ? 'Скрыть пароль' : 'Показать пароль'
+                  }
+                >
+                  {isPasswordVisible ? 'Скрыть' : 'Показать'}
                 </button>
               </div>
             )}

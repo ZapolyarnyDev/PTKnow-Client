@@ -18,7 +18,7 @@ const CreateCoursePage: React.FC = () => {
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState<string[]>([]);
-  const [maxUsersAmount, setMaxUsersAmount] = useState(0);
+  const [maxUsersAmount, setMaxUsersAmount] = useState(1);
 
   const { user, isLoading: isAuthLoading, isInitialized } = useAuth();
   const { createCourse, isLoading } = useCreateCourse();
@@ -52,6 +52,16 @@ const CreateCoursePage: React.FC = () => {
         return;
       }
 
+      if (tags.length === 0) {
+        toast.error('Добавьте минимум один тег');
+        return;
+      }
+
+      if (maxUsersAmount < 1) {
+        toast.error('Укажите максимум участников');
+        return;
+      }
+
       try {
         const courseData = {
           name: name.trim(),
@@ -80,6 +90,31 @@ const CreateCoursePage: React.FC = () => {
         ) {
           toast.error('Недостаточно прав для создания курса');
           return;
+        }
+        if (
+          typeof err === 'object' &&
+          err !== null &&
+          'response' in err
+        ) {
+          const response = err as {
+            response?: { data?: { message?: string } | string; status?: number };
+          };
+          const data = response.response?.data;
+          if (typeof data === 'string' && data.trim()) {
+            toast.error(data);
+            console.error('Ошибка создания курса:', err);
+            return;
+          }
+          if (
+            data &&
+            typeof data === 'object' &&
+            'message' in data &&
+            data.message
+          ) {
+            toast.error(String(data.message));
+            console.error('Ошибка создания курса:', err);
+            return;
+          }
         }
         console.error('Ошибка создания курса:', err);
         toast.error('Произошла ошибка при создании курса');

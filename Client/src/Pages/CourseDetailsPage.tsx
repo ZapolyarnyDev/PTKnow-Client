@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import courseDetails from '../assets/image/courseDetails.svg';
 
@@ -11,6 +11,9 @@ import { TeachersCard } from '../Components/ui/Teacher/TeachersCard';
 import { useLessonStore } from '../stores/scheduleStore';
 import { useCourseStore } from '../stores/courseStore';
 import { useLesson } from '../hooks/useLessons';
+import { courseCardApi } from '../api';
+import { useAuth } from '../hooks/useAuth';
+import styles from '../styles/pages/CourseDetailsPage.module.css';
 
 const CourseDetailsPage: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
@@ -24,13 +27,17 @@ const CourseDetailsPage: React.FC = () => {
     fetchCourse,
     loading: courseLoading,
     error: courseError,
+    clearCourse,
   } = useCourseStore();
   const {
     getCourseLessons,
     loading: lessonsLoading,
     error: lessonsError,
   } = useLesson();
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const sortedLessons = useMemo(
     () =>
@@ -75,6 +82,37 @@ const CourseDetailsPage: React.FC = () => {
     }
   }, [navigate, resolvedCourseId]);
 
+  const canDeleteCourse = useMemo(() => {
+    if (!course || !user) return false;
+    const normalizedRole = user.role?.toUpperCase() ?? '';
+    return normalizedRole === 'ADMIN' || user.id === course.owner?.id;
+  }, [course, user]);
+
+  const handleDeleteCourse = useCallback(async () => {
+    if (!resolvedCourseId || isDeleting) {
+      return;
+    }
+
+    const confirmed = window.confirm('Удалить курс без возможности восстановления?');
+    if (!confirmed) {
+      return;
+    }
+
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      await courseCardApi.delete(resolvedCourseId);
+      clearCourse();
+      navigate('/courses');
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Не удалось удалить курс.';
+      setDeleteError(message);
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [clearCourse, isDeleting, navigate, resolvedCourseId]);
+
   if (!resolvedCourseId) {
     return <div>Некорректный идентификатор курса.</div>;
   }
@@ -102,22 +140,28 @@ const CourseDetailsPage: React.FC = () => {
         imageAlt={course?.name || 'Курс'}
       />
 
-      <div style={{ padding: '0 20px 20px', display: 'flex', gap: '12px' }}>
+      <div className={styles.courseActions}>
         <button
           type="button"
           onClick={handleCreateLesson}
           disabled={!resolvedCourseId}
-          style={{
-            border: 'none',
-            borderRadius: '999px',
-            padding: '10px 20px',
-            background: '#0a5be0',
-            color: '#ffffff',
-            cursor: 'pointer',
-          }}
+          className={styles.actionButton}
         >
           Создать урок
         </button>
+        {canDeleteCourse && (
+          <button
+            type="button"
+            onClick={handleDeleteCourse}
+            disabled={!resolvedCourseId || isDeleting}
+            className={`${styles.actionButton} ${styles.deleteButton}`}
+          >
+            {isDeleting ? 'Удаление...' : 'Удалить курс'}
+          </button>
+        )}
+        {deleteError && (
+          <div className={styles.actionError}>{deleteError}</div>
+        )}
       </div>
 
       <div>

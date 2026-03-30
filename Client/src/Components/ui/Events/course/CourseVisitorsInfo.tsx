@@ -101,7 +101,7 @@ const CourseVisitorsInfoComponent = ({
         <CourseFormInput
           type="range"
           id="countUsersSlider"
-          min={0}
+          min={1}
           max={20}
           value={maxUsersAmount}
           onInputChange={handleParticipantsSliderChange}

@@ -34,6 +34,41 @@
     padding-left: 1.75rem;
 }
 
+.passwordField {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.passwordToggle {
+    position: absolute;
+    right: 2.75rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: "Inter", sans-serif;
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: #0956C2;
+}
+
+.passwordToggle:hover {
+    color: #106ced;
+}
+
+.backButton {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #666;
+}
+
 .buttonContainer{
     display: flex;
     flex-direction: column;

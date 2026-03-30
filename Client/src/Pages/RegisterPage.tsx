@@ -16,6 +16,7 @@ const RegisterPage: React.FC = () => {
     email: '',
     password: '',
   });
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const { register, isLoading, error } = useAuth();
   const navigate = useNavigate();
@@ -109,21 +110,37 @@ const RegisterPage: React.FC = () => {
             required
           />
 
-          <AuthInput
-            type="password"
-            name="password"
-            placeholder="Пароль"
-            className={style.inputRegister}
-            value={formData.password}
-            onChange={handleInputChange}
-            required
-            minLength={6}
-          />
+          <div className={style.passwordField}>
+            <AuthInput
+              type={isPasswordVisible ? 'text' : 'password'}
+              name="password"
+              placeholder="Пароль"
+              className={style.inputRegister}
+              value={formData.password}
+              onChange={handleInputChange}
+              required
+              minLength={6}
+            />
+            <button
+              type="button"
+              className={style.passwordToggle}
+              onClick={() => setIsPasswordVisible(prev => !prev)}
+              aria-label={
+                isPasswordVisible ? 'Скрыть пароль' : 'Показать пароль'
+              }
+            >
+              {isPasswordVisible ? 'Скрыть' : 'Показать'}
+            </button>
+          </div>
 
           {error && <div className={style.errorMessage}>{error}</div>}
 
           <div className={style.buttonContainer}>
-            <AuthButton type="submit" isLoading={isLoading}>
+            <AuthButton
+              type="submit"
+              isLoading={isLoading}
+              className={style.buttonRegister}
+            >
               Зарегистрироваться
             </AuthButton>
 

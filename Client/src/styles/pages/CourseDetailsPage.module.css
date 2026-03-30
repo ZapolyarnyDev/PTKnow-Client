@@ -1,3 +1,41 @@
 body {
     background-color: #EDF1F8;
 }
+
+.courseActions {
+    padding: 0 20px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+.actionButton {
+    border: none;
+    border-radius: 999px;
+    padding: 10px 20px;
+    background: #0a5be0;
+    color: #ffffff;
+    cursor: pointer;
+    font-weight: 600;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.actionButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.actionButton:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+.deleteButton {
+    background: #d63939;
+}
+
+.actionError {
+    color: #d63939;
+    font-weight: 500;
+}
