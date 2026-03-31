@@ -6,22 +6,52 @@ import { CourseCard } from './CourseCard';
 interface CourseListProps {
   limit?: number;
   showLoadMore?: boolean;
+  courses?: Array<{
+    id: number;
+    name: string;
+    previewUrl?: string;
+    tags?: string[];
+    description?: string;
+  }>;
+  isLoading?: boolean;
+  error?: string | null;
+  enrolledCourseIds?: number[];
 }
 
 export const CourseList: React.FC<CourseListProps> = ({
   limit,
   showLoadMore = true,
+  courses,
+  isLoading,
+  error,
+  enrolledCourseIds,
 }) => {
-  const { course, loading, error } = useCourse();
+  const shouldUseApi = !courses;
+  const { course, loading, error: courseError } = useCourse({
+    enabled: shouldUseApi,
+  });
   const [visibleCount, setVisibleCount] = useState(limit || 6);
 
-  const displayCourses = useMemo(() => course, [course]);
+  const displayCourses = useMemo(
+    () => courses ?? course,
+    [courses, course]
+  );
   const visibleCourses = useMemo(
     () => displayCourses.slice(0, visibleCount),
     [displayCourses, visibleCount]
   );
-  const displayLoading = useMemo(() => loading, [loading]);
-  const displayError = useMemo(() => error, [error]);
+  const displayLoading = useMemo(
+    () => (typeof isLoading === 'boolean' ? isLoading : courses ? false : loading),
+    [isLoading, courses, loading]
+  );
+  const displayError = useMemo(
+    () => (typeof error === 'string' ? error : courses ? null : courseError),
+    [error, courses, courseError]
+  );
+  const enrolledIds = useMemo(
+    () => (enrolledCourseIds ? new Set(enrolledCourseIds) : null),
+    [enrolledCourseIds]
+  );
 
   const handleShowMore = useCallback(() => {
     setVisibleCount(prev => prev + (limit || 6));
@@ -40,7 +70,11 @@ export const CourseList: React.FC<CourseListProps> = ({
   return (
     <div className={styles.courseList}>
       {visibleCourses.map(courseItem => (
-        <CourseCard key={courseItem.id} {...courseItem} />
+        <CourseCard
+          key={courseItem.id}
+          {...courseItem}
+          enrolledCourseIds={enrolledIds}
+        />
       ))}
 
       {showLoadMore && displayCourses.length > visibleCount && (

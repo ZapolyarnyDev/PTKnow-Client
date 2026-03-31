@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { CourseDTO, CreateCourseDTO } from '../types/CourseCard';
 import { courseCardApi } from '../api';
 
-export const useCourse = () => {
+export const useCourse = (options?: { enabled?: boolean }) => {
   const [course, setCourse] = useState<CourseDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const getMyCourses = async () => {
+  const getMyCourses = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -20,7 +20,7 @@ export const useCourse = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const createCourse = async (
     courseData: CreateCourseDTO
@@ -47,8 +47,11 @@ export const useCourse = () => {
   };
 
   useEffect(() => {
+    if (options?.enabled === false) {
+      return;
+    }
     getMyCourses();
-  }, []);
+  }, [getMyCourses, options?.enabled]);
 
   const refetch = () => {
     getMyCourses();

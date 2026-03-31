@@ -1,0 +1,71 @@
+.container {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem 3rem;
+}
+
+.card {
+  width: min(640px, 100%);
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 16px 36px rgba(9, 86, 194, 0.15);
+  padding: 2.5rem 2rem;
+  text-align: center;
+}
+
+.card h1 {
+  margin: 0 0 0.75rem;
+  font-size: 1.6rem;
+  color: #0d0d0d;
+}
+
+.card p {
+  margin: 0 0 1.5rem;
+  color: #4d4d4d;
+}
+
+.error {
+  margin-bottom: 1.25rem;
+  color: #d63939;
+  font-weight: 500;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.primaryButton {
+  border: none;
+  border-radius: 999px;
+  padding: 0.75rem 1.75rem;
+  background: #0956c2;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: #106ced;
+  transform: translateY(-1px);
+}
+
+.primaryButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.secondaryButton {
+  border-radius: 999px;
+  padding: 0.75rem 1.75rem;
+  background: transparent;
+  border: 1px solid #0956c2;
+  color: #0956c2;
+  font-weight: 600;
+  cursor: pointer;
+}

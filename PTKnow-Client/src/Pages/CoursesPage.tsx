@@ -3,10 +3,16 @@ import { useCallback, useMemo, useState } from 'react';
 import Header from '../Components/Header';
 import Footer from '../Components/Footer';
 import { CourseList } from '../Components/CourseList';
+import { useMyEnrollments } from '../hooks/useMyEnrollments';
 import styles from '../styles/pages/CoursesPage.module.css';
 
 const CoursesPage: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState('all');
+  const { enrolledCourses } = useMyEnrollments();
+  const enrolledIds = useMemo(
+    () => enrolledCourses.map(course => course.id),
+    [enrolledCourses]
+  );
 
   const filters = useMemo(
     () => [
@@ -44,7 +50,7 @@ const CoursesPage: React.FC = () => {
       </div>
       <div className={styles.container}>
         <div className={styles.pageHeader}></div>
-        <CourseList />
+        <CourseList enrolledCourseIds={enrolledIds} />
       </div>
       <Footer />
     </>
