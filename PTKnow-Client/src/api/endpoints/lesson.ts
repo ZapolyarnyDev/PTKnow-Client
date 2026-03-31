@@ -21,7 +21,23 @@ export const lessonApi = {
   },
   getCourseLessons: async (courseId: number): Promise<LessonDTO[]> => {
     const response = await api.get(`/v1/lessons/course/${String(courseId)}`);
-    return response.data;
+    const payload = response.data as unknown;
+    if (Array.isArray(payload)) {
+      return payload as LessonDTO[];
+    }
+    if (payload && typeof payload === 'object') {
+      const data = payload as {
+        items?: LessonDTO[];
+        lessons?: LessonDTO[];
+        data?: LessonDTO[];
+        content?: LessonDTO[];
+      };
+      if (Array.isArray(data.items)) return data.items;
+      if (Array.isArray(data.lessons)) return data.lessons;
+      if (Array.isArray(data.data)) return data.data;
+      if (Array.isArray(data.content)) return data.content;
+    }
+    return [];
   },
   updateLesson: async (
     lessonId: number,

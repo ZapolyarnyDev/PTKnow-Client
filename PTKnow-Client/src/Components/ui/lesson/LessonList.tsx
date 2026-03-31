@@ -2,7 +2,13 @@ import { memo, useMemo } from 'react';
 import { useLessonStore } from '../../../stores/scheduleStore';
 import { LessonCard } from './LessonCard';
 
-const LessonListComponent = () => {
+interface LessonListProps {
+  canManageLessons?: boolean;
+}
+
+const LessonListComponent: React.FC<LessonListProps> = ({
+  canManageLessons = false,
+}) => {
   const { lessons, selectedDate } = useLessonStore();
 
   const filtered = useMemo(
@@ -17,7 +23,11 @@ const LessonListComponent = () => {
   return (
     <div className="lesson-list">
       {filtered.map(lesson => (
-        <LessonCard key={lesson.id} lesson={lesson} />
+        <LessonCard
+          key={lesson.id}
+          lesson={lesson}
+          canManageLessons={canManageLessons}
+        />
       ))}
     </div>
   );

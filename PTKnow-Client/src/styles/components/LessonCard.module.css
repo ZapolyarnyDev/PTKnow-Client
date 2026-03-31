@@ -1,6 +1,6 @@
 .container {
   width: 764px;
-  height: 190px;
+  min-height: 190px;
 }
 
 .card {
@@ -16,6 +16,12 @@
   border-radius: 28px;
 
   margin-bottom: 20px;
+}
+
+.date {
+  margin: 0 21px;
+  font-size: 14px;
+  color: #6b7280;
 }
 
 .left {
@@ -38,4 +44,93 @@
   font-size: 22px;
   font-weight: 500;
   white-space: nowrap;
+}
+
+.metaColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.previewButton {
+  border: none;
+  border-radius: 999px;
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.previewButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.deleteButton {
+  border: none;
+  border-radius: 999px;
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.deleteButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.preview {
+  margin: 0 21px 24px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: #111827;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.previewError {
+  color: #b00020;
+  font-size: 13px;
+}
+
+.preview :global(h1) {
+  font-size: 20px;
+  margin-top: 0;
+}
+
+.preview :global(h2) {
+  font-size: 18px;
+  margin-top: 18px;
+}
+
+.preview :global(h3) {
+  font-size: 16px;
+  margin-top: 16px;
+}
+
+.preview :global(p) {
+  margin: 0 0 12px;
+}
+
+.preview :global(code) {
+  background: #f3f4f6;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.preview :global(pre) {
+  background: #0f172a;
+  color: #f9fafb;
+  padding: 12px 14px;
+  border-radius: 12px;
+  overflow-x: auto;
 }

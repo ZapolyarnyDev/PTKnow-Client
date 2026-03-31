@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { lessonApi } from '../api/endpoints/lesson';
+import type { FileMetaDTO } from '../types/CourseCard';
 import type { CreateLessonDTO, LessonDTO } from '../types/lesson';
 
 export const useLesson = () => {
@@ -54,14 +55,23 @@ export const useLesson = () => {
       setLoading(true);
       setError(null);
 
-      try {
-        const lessonsData = await lessonApi.getCourseLessons(courseId);
-        setLessons(lessonsData);
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : 'Ошибка загрузки уроков курса';
-        setError(errorMessage);
-        throw err;
+    try {
+      const lessonsData = await lessonApi.getCourseLessons(courseId);
+      setLessons(lessonsData);
+    } catch (err) {
+      if (typeof err === 'object' && err !== null && 'response' in err) {
+        const response = err as { response?: { status?: number } };
+        const status = response.response?.status;
+        if (status === 403) {
+          setLessons([]);
+          setError('Уроки доступны после записи на курс');
+          return;
+        }
+      }
+      const errorMessage =
+        err instanceof Error ? err.message : 'Ошибка загрузки уроков курса';
+      setError(errorMessage);
+      throw err;
       } finally {
         setLoading(false);
       }
@@ -91,6 +101,25 @@ export const useLesson = () => {
     },
     [lesson]
   );
+
+  const addLessonMaterial = useCallback(
+    async (lessonId: number, file: File): Promise<FileMetaDTO> => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        return await lessonApi.addLessonMaterials(lessonId, file);
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Ошибка загрузки материала урока';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
   const clearError = useCallback((): void => setError(null), []);
   const clearLesson = useCallback((): void => setLesson(null), []);
 
@@ -104,6 +133,7 @@ export const useLesson = () => {
     createLesson,
     getCourseLessons,
     deleteLesson,
+    addLessonMaterial,
     clearError,
     clearLesson,
   };
