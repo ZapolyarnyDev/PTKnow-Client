@@ -1,15 +1,45 @@
 import { memo } from 'react';
+import type { CourseTeacherDTO } from '../../../types/CourseCard';
 import styles from '../../../styles/components/TeachersCard.module.css';
 
-const TeachersCardComponent = () => {
+interface TeachersCardProps {
+  teachers: CourseTeacherDTO[];
+}
+
+const getInitials = (name: string) => {
+  const trimmed = name.trim();
+  if (!trimmed) return '—';
+  const parts = trimmed.split(' ');
+  const first = parts[0]?.[0] ?? '';
+  const second = parts[1]?.[0] ?? '';
+  return `${first}${second}`.toUpperCase();
+};
+
+const TeachersCardComponent: React.FC<TeachersCardProps> = ({ teachers }) => {
   return (
     <div className={styles.card}>
-      <h2>Преподаватели</h2>
-
-      <div className={styles.teacher}>
-        <div className={styles.avatar}></div>
-        <span>Владислав Ильин</span>
-      </div>
+      <div className={styles.header}>Преподаватели</div>
+      {teachers.length === 0 ? (
+        <p className={styles.empty}>Данные о преподавателях появятся позже.</p>
+      ) : (
+        <div className={styles.list}>
+          {teachers.map(teacher => {
+            const name =
+              teacher.fullName || teacher.profileHandle || teacher.email || '—';
+            return (
+              <div key={teacher.id} className={styles.teacherRow}>
+                <div className={styles.avatar}>{getInitials(name)}</div>
+                <div className={styles.teacherInfo}>
+                  <span className={styles.teacherName}>{name}</span>
+                  <span className={styles.teacherRole}>
+                    {teacher.owner ? 'Автор курса' : 'Преподаватель'}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

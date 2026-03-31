@@ -1,24 +1,59 @@
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import Footer from '../Components/Footer';
 import Header from '../Components/Header';
 import { useLesson } from '../hooks/useLessons';
+import { useAuth } from '../hooks/useAuth';
+import { useCourseStore } from '../stores/courseStore';
+import type { FileMetaDTO } from '../types/CourseCard';
 import styles from '../styles/pages/CreateLessonPage.module.css';
 
 const CreateLessonPage: React.FC = () => {
   const { courseId: courseIdParam } = useParams<{ courseId: string }>();
   const parsedCourseId = courseIdParam ? Number(courseIdParam) : null;
   const courseId = Number.isFinite(parsedCourseId) ? parsedCourseId : null;
-  const { createLesson, loading, error, clearError } = useLesson();
+  const { createLesson, addLessonMaterial, loading, error, clearError } =
+    useLesson();
+  const { user, isLoading: authLoading, isInitialized } = useAuth();
+  const {
+    course,
+    fetchCourse,
+    loading: courseLoading,
+    error: courseError,
+  } = useCourseStore();
+  const navigate = useNavigate();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [contentMd, setContentMd] = useState('');
   const [beginAt, setBeginAt] = useState('');
   const [endsAt, setEndsAt] = useState('');
   const [type, setType] = useState('');
+  const [mdFile, setMdFile] = useState<File | null>(null);
+  const [uploadedMaterial, setUploadedMaterial] = useState<FileMetaDTO | null>(
+    null
+  );
   const [localError, setLocalError] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadMessage, setUploadMessage] = useState<string | null>(null);
 
-  const isFormDisabled = loading || !courseId;
+  useEffect(() => {
+    if (courseId) {
+      fetchCourse(courseId);
+    }
+  }, [courseId, fetchCourse]);
+
+  const canManageLessons = useMemo(() => {
+    if (!user || !course) return false;
+    const normalizedRole = user.role?.toUpperCase() ?? '';
+    return normalizedRole === 'ADMIN' || user.id === course.owner?.id;
+  }, [course, user]);
+
+  const isFormDisabled =
+    loading ||
+    !courseId ||
+    authLoading ||
+    courseLoading ||
+    !canManageLessons;
 
   const toIso = (value: string) => (value ? new Date(value).toISOString() : '');
 
@@ -29,6 +64,31 @@ const CreateLessonPage: React.FC = () => {
     if (localError) {
       setLocalError(null);
     }
+    if (uploadError) {
+      setUploadError(null);
+    }
+    if (uploadMessage) {
+      setUploadMessage(null);
+    }
+  };
+
+  const handleMdFileChange = (file: File | null) => {
+    setUploadedMaterial(null);
+    setUploadMessage(null);
+    setUploadError(null);
+    setMdFile(null);
+
+    if (!file) {
+      return;
+    }
+
+    const fileName = file.name.toLowerCase();
+    if (!fileName.endsWith('.md') && !fileName.endsWith('.markdown')) {
+      setUploadError('Можно загружать только файлы .md или .markdown.');
+      return;
+    }
+
+    setMdFile(file);
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -37,6 +97,16 @@ const CreateLessonPage: React.FC = () => {
 
     if (!courseId) {
       setLocalError('Не найден идентификатор курса.');
+      return;
+    }
+
+    if (!user || !isInitialized) {
+      setLocalError('Сначала войдите, чтобы создавать уроки.');
+      return;
+    }
+
+    if (!canManageLessons) {
+      setLocalError('Создавать уроки может только автор курса.');
       return;
     }
 
@@ -60,7 +130,7 @@ const CreateLessonPage: React.FC = () => {
     }
 
     try {
-      await createLesson(courseId, {
+      const newLesson = await createLesson(courseId, {
         name: name.trim(),
         description: description.trim(),
         contentMd: contentMd.trim(),
@@ -69,12 +139,27 @@ const CreateLessonPage: React.FC = () => {
         type: type.trim(),
       });
 
+      if (mdFile) {
+        try {
+          const uploaded = await addLessonMaterial(newLesson.id, mdFile);
+          setUploadedMaterial(uploaded);
+          setUploadMessage('Файл успешно добавлен к уроку.');
+        } catch (materialError) {
+          const message =
+            materialError instanceof Error
+              ? materialError.message
+              : 'Не удалось загрузить материал.';
+          setUploadError(message);
+        }
+      }
+
       setName('');
       setDescription('');
       setContentMd('');
       setBeginAt('');
       setEndsAt('');
       setType('');
+      setMdFile(null);
     } catch (submitError) {
       console.error('Ошибка создания урока:', submitError);
     }
@@ -83,115 +168,185 @@ const CreateLessonPage: React.FC = () => {
   return (
     <>
       <Header />
-      <div className={styles.container}>
-        <div className={styles.header}>
-          <h1>Создание урока</h1>
-          {!courseId && (
-            <p className={styles.notice}>
-              Добавьте идентификатор курса в URL, чтобы продолжить.
-            </p>
-          )}
+      <main className={styles.page}>
+        <div className={styles.container}>
+          <div className={styles.header}>
+            <div>
+              <h1>Создание урока</h1>
+              <p>Добавьте структуру, расписание и материалы урока.</p>
+            </div>
+            <div className={styles.badges}>
+              <span className={styles.badge}>Урок</span>
+              {course?.handle && (
+                <span className={styles.badgeSecondary}>@{course.handle}</span>
+              )}
+            </div>
+          </div>
+
+          <div className={styles.noticeStack}>
+            {!courseId && (
+              <div className={styles.notice}>
+                Добавьте идентификатор курса в URL, чтобы продолжить.
+              </div>
+            )}
+            {courseError && (
+              <div className={styles.notice}>Ошибка загрузки курса: {courseError}</div>
+            )}
+            {!authLoading && !user && (
+              <div className={styles.notice}>
+                Войдите в аккаунт автора курса, чтобы добавлять уроки.
+                <button
+                  type="button"
+                  className={styles.noticeAction}
+                  onClick={() => navigate('/auth')}
+                >
+                  Войти
+                </button>
+              </div>
+            )}
+            {user && !canManageLessons && (
+              <div className={styles.notice}>
+                У вас нет прав для создания уроков в этом курсе.
+              </div>
+            )}
+          </div>
+
+          <form className={styles.form} onSubmit={handleSubmit}>
+            <div className={styles.section}>
+              <label className={styles.field}>
+                <span>Название урока</span>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={event => {
+                    resetErrors();
+                    setName(event.target.value);
+                  }}
+                  placeholder="Введите название"
+                  disabled={isFormDisabled}
+                  required
+                />
+              </label>
+
+              <label className={styles.field}>
+                <span>Описание</span>
+                <textarea
+                  value={description}
+                  onChange={event => {
+                    resetErrors();
+                    setDescription(event.target.value);
+                  }}
+                  placeholder="Коротко опишите урок"
+                  disabled={isFormDisabled}
+                  required
+                />
+              </label>
+            </div>
+
+            <div className={styles.section}>
+              <label className={styles.field}>
+                <span>Содержание (Markdown)</span>
+                <textarea
+                  value={contentMd}
+                  onChange={event => {
+                    resetErrors();
+                    setContentMd(event.target.value);
+                  }}
+                  placeholder="Добавьте материал урока"
+                  disabled={isFormDisabled}
+                />
+              </label>
+
+              <label className={styles.field}>
+                <span>Файл материала (.md)</span>
+                <input
+                  type="file"
+                  accept=".md,.markdown,text/markdown"
+                  onChange={event => {
+                    resetErrors();
+                    const file = event.target.files?.[0] ?? null;
+                    handleMdFileChange(file);
+                  }}
+                  disabled={isFormDisabled}
+                />
+                {mdFile && (
+                  <span className={styles.helper}>Выбран: {mdFile.name}</span>
+                )}
+                {uploadedMaterial && (
+                  <span className={styles.helper}>
+                    Загружен: {uploadedMaterial.originalFilename}
+                  </span>
+                )}
+              </label>
+            </div>
+
+            <div className={styles.section}>
+              <div className={styles.row}>
+                <label className={styles.field}>
+                  <span>Начало</span>
+                  <input
+                    type="datetime-local"
+                    value={beginAt}
+                    onChange={event => {
+                      resetErrors();
+                      setBeginAt(event.target.value);
+                    }}
+                    disabled={isFormDisabled}
+                    required
+                  />
+                </label>
+
+                <label className={styles.field}>
+                  <span>Окончание</span>
+                  <input
+                    type="datetime-local"
+                    value={endsAt}
+                    onChange={event => {
+                      resetErrors();
+                      setEndsAt(event.target.value);
+                    }}
+                    disabled={isFormDisabled}
+                    required
+                  />
+                </label>
+              </div>
+
+              <label className={styles.field}>
+                <span>Тип занятия</span>
+                <input
+                  type="text"
+                  value={type}
+                  onChange={event => {
+                    resetErrors();
+                    setType(event.target.value);
+                  }}
+                  placeholder="Например: LECTURE"
+                  disabled={isFormDisabled}
+                  required
+                />
+              </label>
+            </div>
+
+            {(localError || error || uploadError || uploadMessage) && (
+              <div
+                className={
+                  uploadMessage && !(localError || error || uploadError)
+                    ? styles.success
+                    : styles.error
+                }
+              >
+                {localError || error || uploadError || uploadMessage}
+              </div>
+            )}
+
+            <div className={styles.actions}>
+              <button type="submit" disabled={isFormDisabled}>
+                {loading ? 'Создание...' : 'Создать урок'}
+              </button>
+            </div>
+          </form>
         </div>
-
-        <form className={styles.form} onSubmit={handleSubmit}>
-          <label className={styles.field}>
-            <span>Название урока</span>
-            <input
-              type="text"
-              value={name}
-              onChange={event => {
-                resetErrors();
-                setName(event.target.value);
-              }}
-              placeholder="Введите название"
-              disabled={isFormDisabled}
-              required
-            />
-          </label>
-
-          <label className={styles.field}>
-            <span>Описание</span>
-            <textarea
-              value={description}
-              onChange={event => {
-                resetErrors();
-                setDescription(event.target.value);
-              }}
-              placeholder="Коротко опишите урок"
-              disabled={isFormDisabled}
-              required
-            />
-          </label>
-
-          <label className={styles.field}>
-            <span>Содержание (Markdown)</span>
-            <textarea
-              value={contentMd}
-              onChange={event => {
-                resetErrors();
-                setContentMd(event.target.value);
-              }}
-              placeholder="Добавьте материал урока"
-              disabled={isFormDisabled}
-            />
-          </label>
-
-          <div className={styles.row}>
-            <label className={styles.field}>
-              <span>Начало</span>
-              <input
-                type="datetime-local"
-                value={beginAt}
-                onChange={event => {
-                  resetErrors();
-                  setBeginAt(event.target.value);
-                }}
-                disabled={isFormDisabled}
-                required
-              />
-            </label>
-
-            <label className={styles.field}>
-              <span>Окончание</span>
-              <input
-                type="datetime-local"
-                value={endsAt}
-                onChange={event => {
-                  resetErrors();
-                  setEndsAt(event.target.value);
-                }}
-                disabled={isFormDisabled}
-                required
-              />
-            </label>
-          </div>
-
-          <label className={styles.field}>
-            <span>Тип занятия</span>
-            <input
-              type="text"
-              value={type}
-              onChange={event => {
-                resetErrors();
-                setType(event.target.value);
-              }}
-              placeholder="Например: LECTURE"
-              disabled={isFormDisabled}
-              required
-            />
-          </label>
-
-          {(localError || error) && (
-            <div className={styles.error}>{localError || error}</div>
-          )}
-
-          <div className={styles.actions}>
-            <button type="submit" disabled={isFormDisabled}>
-              {loading ? 'Создание...' : 'Создать урок'}
-            </button>
-          </div>
-        </form>
-      </div>
+      </main>
       <Footer />
     </>
   );

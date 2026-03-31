@@ -1,18 +1,64 @@
 .card {
-  background: #f3f3f3;
+  background: #ffffff;
+  border-radius: 16px;
   padding: 20px;
-  border-radius: 20px;
-}
-
-.teacher {
+  box-shadow: 0 16px 32px rgba(9, 86, 194, 0.08);
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 16px;
 }
 
+.header {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.teacherRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
 .avatar {
-  width: 60px;
-  height: 60px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: #1da1f2;
+  background: #e6efff;
+  color: #0956c2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.teacherInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.teacherName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.teacherRole {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.empty {
+  margin: 0;
+  font-size: 14px;
+  color: #6b7280;
 }
