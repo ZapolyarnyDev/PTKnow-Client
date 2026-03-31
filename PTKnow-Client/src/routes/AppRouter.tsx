@@ -19,6 +19,8 @@ import ProtectedRoute from './ProtectedRoute';
 import AdminUsersPage from '../Pages/AdminUsersPage';
 import AdminPanelPage from '../Pages/AdminPanelPage';
 import UnderConstructionPage from '../Pages/UnderConstructionPage';
+import CourseRegisterPage from '../Pages/CourseRegisterPage';
+import MyCoursesPage from '../Pages/MyCoursesPage';
 
 const AppRouter: React.FC = () => {
   return (
@@ -93,6 +95,10 @@ const AppRouter: React.FC = () => {
             // {/* </ProtectedRoute> */}
           }
         />
+
+        <Route path="/my-courses" element={<MyCoursesPage />} />
+
+        <Route path="/course/:courseId/register" element={<CourseRegisterPage />} />
 
         <Route path="/course/:courseId" element={<CourseDetailsPage />} />
 

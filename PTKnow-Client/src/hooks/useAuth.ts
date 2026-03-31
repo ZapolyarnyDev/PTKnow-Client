@@ -78,6 +78,17 @@ const getStoredUser = (): User | null => {
   }
 };
 
+const getStoredAccessToken = (): string | null => {
+  const token = localStorage.getItem('accessToken');
+  if (!token || token === 'undefined') {
+    if (token === 'undefined') {
+      localStorage.removeItem('accessToken');
+    }
+    return null;
+  }
+  return token;
+};
+
 const persistUser = (nextUser: User | null) => {
   if (nextUser) {
     const normalizedRole = normalizeRole(nextUser.role);
@@ -154,7 +165,18 @@ export const useAuth = () => {
     setError(null);
     try {
       const tokenResponse = await authAPI.login(data);
-      const token = tokenResponse || localStorage.getItem('accessToken');
+      let token =
+        typeof tokenResponse === 'string' && tokenResponse.trim()
+          ? tokenResponse.trim()
+          : getStoredAccessToken();
+      if (!token) {
+        try {
+          await authAPI.refreshToken();
+          token = getStoredAccessToken();
+        } catch (refreshError) {
+          console.warn('Failed to refresh token after login:', refreshError);
+        }
+      }
       let profile: ProfileResponseDTO | null = null;
       try {
         profile = await authAPI.getProfile();
@@ -184,13 +206,30 @@ export const useAuth = () => {
       };
 
       const tokenResponse = await authAPI.register(registerData);
-      let token = tokenResponse || localStorage.getItem('accessToken');
+      let token =
+        typeof tokenResponse === 'string' && tokenResponse.trim()
+          ? tokenResponse.trim()
+          : getStoredAccessToken();
       if (!token) {
         const loginToken = await authAPI.login({
           email: data.email,
           password: data.password,
         });
-        token = loginToken || localStorage.getItem('accessToken');
+        token =
+          typeof loginToken === 'string' && loginToken.trim()
+            ? loginToken.trim()
+            : getStoredAccessToken();
+        if (!token) {
+          try {
+            await authAPI.refreshToken();
+            token = getStoredAccessToken();
+          } catch (refreshError) {
+            console.warn(
+              'Failed to refresh token after registration:',
+              refreshError
+            );
+          }
+        }
       }
       let profile: ProfileResponseDTO | null = null;
       try {
@@ -231,11 +270,16 @@ export const useAuth = () => {
   const checkAuth = useCallback(async (): Promise<boolean> => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem('accessToken');
+      let token = getStoredAccessToken();
       if (!token) {
-        persistUser(null);
-        setUser(null);
-        return false;
+        try {
+          await authAPI.refreshToken();
+          token = getStoredAccessToken();
+        } catch (refreshError) {
+          persistUser(null);
+          setUser(null);
+          return false;
+        }
       }
       const profile = await authAPI.getProfile();
       const nextUser = buildUser(profile, token, getStoredUser());

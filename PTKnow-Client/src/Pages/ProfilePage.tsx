@@ -72,6 +72,16 @@ export const ProfilePage = () => {
 
   if (!profile) return null;
 
+  const enrolledCourses = profile.enrolledCourses ?? [];
+  const enrolledCourseCards = enrolledCourses.map(course => ({
+    id: course.id,
+    name: course.name,
+    previewUrl: course.previewUrl,
+    tags: [],
+    description: '',
+  }));
+  const enrolledCourseIds = enrolledCourses.map(course => course.id);
+
   return (
     <>
       <Header />
@@ -104,7 +114,18 @@ export const ProfilePage = () => {
           <h3>Курсы, которые я посещаю</h3>
         </div>
         <div className={styles.profileMyCourse}>
-          <CourseList limit={3} showLoadMore={false} />
+          {enrolledCourseCards.length === 0 ? (
+            <p className={styles.profileEmptyCourses}>
+              Пока нет записей на курсы.
+            </p>
+          ) : (
+            <CourseList
+              limit={3}
+              showLoadMore={false}
+              courses={enrolledCourseCards}
+              enrolledCourseIds={enrolledCourseIds}
+            />
+          )}
         </div>
       </div>
 
