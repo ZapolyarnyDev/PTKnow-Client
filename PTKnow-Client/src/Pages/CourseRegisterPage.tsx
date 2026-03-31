@@ -6,6 +6,7 @@ import { courseCardApi } from '../api';
 import { useAuth } from '../hooks/useAuth';
 import { useMyEnrollments } from '../hooks/useMyEnrollments';
 import { normalizeRole } from '../utils/roleUtils';
+import { FormAlert } from '../Components/ui/forms/FormAlert';
 import styles from '../styles/pages/CourseRegisterPage.module.css';
 
 const CourseRegisterPage: React.FC = () => {
@@ -100,7 +101,7 @@ const CourseRegisterPage: React.FC = () => {
           <p>
             Подтвердите запись, чтобы получить доступ к полной информации о курсе.
           </p>
-          {error && <div className={styles.error}>{error}</div>}
+          {error && <FormAlert message={error} variant="error" />}
           <div className={styles.actions}>
             <button
               type="button"

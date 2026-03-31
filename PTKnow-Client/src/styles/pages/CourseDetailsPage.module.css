@@ -336,17 +336,6 @@
   opacity: 0.6;
 }
 
-.settingsError {
-  margin-top: 12px;
-  color: #b00020;
-  font-size: 13px;
-}
-
-.settingsSuccess {
-  margin-top: 12px;
-  color: #1f6f3b;
-  font-size: 13px;
-}
 
 .lessonsWarning {
   margin-bottom: 12px;

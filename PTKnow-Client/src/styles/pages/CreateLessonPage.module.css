@@ -144,15 +144,6 @@
   font-size: 12px;
 }
 
-.error {
-  color: #b00020;
-  font-size: 14px;
-}
-
-.success {
-  color: #1f6f3b;
-  font-size: 14px;
-}
 
 .actions {
   display: flex;

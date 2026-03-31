@@ -6,6 +6,7 @@ import Header from '../Components/Header';
 import { CourseMainInfo } from '../Components/ui/Events/course/CourseMainInfo';
 import { CourseVisitorsInfo } from '../Components/ui/Events/course/CourseVisitorsInfo';
 import { CourseButton } from '../Components/ui/forms/CourseButton';
+import { FormAlert } from '../Components/ui/forms/FormAlert';
 import { useCreateCourse } from '../hooks/useCreateCourse';
 import { useAuth } from '../hooks/useAuth';
 import { normalizeRole } from '../utils/roleUtils';
@@ -19,6 +20,7 @@ const CreateCoursePage: React.FC = () => {
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [maxUsersAmount, setMaxUsersAmount] = useState(1);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const { user, isLoading: isAuthLoading, isInitialized } = useAuth();
   const { createCourse, isLoading } = useCreateCourse();
@@ -33,32 +35,45 @@ const CreateCoursePage: React.FC = () => {
       e.preventDefault();
 
       if (!name.trim()) {
-        toast.error('Введите название курса');
+        const message = 'Введите название курса.';
+        setFormError(message);
+        toast.error(message);
         return;
       }
 
       if (!description.trim()) {
-        toast.error('Введите описание курса');
+        const message = 'Введите описание курса.';
+        setFormError(message);
+        toast.error(message);
         return;
       }
 
       if (description.trim().length < 10) {
-        toast.error('Описание должно содержать минимум 10 символов');
+        const message = 'Описание должно содержать минимум 10 символов.';
+        setFormError(message);
+        toast.error(message);
         return;
       }
 
       if (!canCreateCourse) {
-        toast.error('Создавать курсы могут только преподаватели или администраторы');
+        const message =
+          'Создавать курсы могут только преподаватели или администраторы.';
+        setFormError(message);
+        toast.error(message);
         return;
       }
 
       if (tags.length === 0) {
-        toast.error('Добавьте минимум один тег');
+        const message = 'Добавьте минимум один тег.';
+        setFormError(message);
+        toast.error(message);
         return;
       }
 
       if (maxUsersAmount < 1) {
-        toast.error('Укажите максимум участников');
+        const message = 'Укажите максимум участников.';
+        setFormError(message);
+        toast.error(message);
         return;
       }
 
@@ -70,6 +85,7 @@ const CreateCoursePage: React.FC = () => {
           maxUsersAmount: maxUsersAmount,
         };
 
+        setFormError(null);
         await createCourse(courseData, previewFile || undefined);
 
         setName('');
@@ -88,7 +104,9 @@ const CreateCoursePage: React.FC = () => {
           'response' in err &&
           (err as { response?: { status?: number } }).response?.status === 403
         ) {
-          toast.error('Недостаточно прав для создания курса');
+          const message = 'Недостаточно прав для создания курса.';
+          setFormError(message);
+          toast.error(message);
           return;
         }
         if (
@@ -101,6 +119,7 @@ const CreateCoursePage: React.FC = () => {
           };
           const data = response.response?.data;
           if (typeof data === 'string' && data.trim()) {
+            setFormError(data);
             toast.error(data);
             console.error('Ошибка создания курса:', err);
             return;
@@ -111,13 +130,17 @@ const CreateCoursePage: React.FC = () => {
             'message' in data &&
             data.message
           ) {
-            toast.error(String(data.message));
+            const message = String(data.message);
+            setFormError(message);
+            toast.error(message);
             console.error('Ошибка создания курса:', err);
             return;
           }
         }
         console.error('Ошибка создания курса:', err);
-        toast.error('Произошла ошибка при создании курса');
+        const message = 'Произошла ошибка при создании курса.';
+        setFormError(message);
+        toast.error(message);
       }
     },
     [
@@ -160,6 +183,8 @@ const CreateCoursePage: React.FC = () => {
             onDescriptionChange={setDescription}
             onPreviewChange={handlePreviewChange}
           />
+
+          {formError && <FormAlert message={formError} variant="error" />}
 
           <CourseVisitorsInfo
             tagInput={tagInput}

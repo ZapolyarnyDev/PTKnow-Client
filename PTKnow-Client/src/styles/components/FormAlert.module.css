@@ -1,0 +1,34 @@
+.alertError,
+.alertSuccess {
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+  box-shadow: 0 10px 24px rgba(17, 24, 39, 0.08);
+}
+
+.alertError {
+  background: #fff5f5;
+  border: 1px solid #f5c2c7;
+  color: #b42318;
+}
+
+.alertSuccess {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+.alertTitle {
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.alertMessage {
+  font-size: 14px;
+  line-height: 1.5;
+}

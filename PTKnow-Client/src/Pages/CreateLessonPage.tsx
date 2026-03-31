@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Footer from '../Components/Footer';
 import Header from '../Components/Header';
+import { FormAlert } from '../Components/ui/forms/FormAlert';
 import { useLesson } from '../hooks/useLessons';
 import { useAuth } from '../hooks/useAuth';
 import { useCourseStore } from '../stores/courseStore';
@@ -328,15 +329,14 @@ const CreateLessonPage: React.FC = () => {
             </div>
 
             {(localError || error || uploadError || uploadMessage) && (
-              <div
-                className={
+              <FormAlert
+                message={localError || error || uploadError || uploadMessage}
+                variant={
                   uploadMessage && !(localError || error || uploadError)
-                    ? styles.success
-                    : styles.error
+                    ? 'success'
+                    : 'error'
                 }
-              >
-                {localError || error || uploadError || uploadMessage}
-              </div>
+              />
             )}
 
             <div className={styles.actions}>
