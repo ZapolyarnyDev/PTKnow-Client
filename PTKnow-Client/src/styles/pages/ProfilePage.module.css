@@ -307,6 +307,13 @@ hr {
   margin-top: 3rem;
 }
 
+.profileEmptyCourses {
+  font-family: var(--font-family-monts);
+  font-size: 0.95rem;
+  color: #6b6b6b;
+  margin: 0;
+}
+
 .profileNotFound {
   margin: 3rem auto 0;
   padding: 2.5rem 2rem;

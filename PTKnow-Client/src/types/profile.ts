@@ -1,3 +1,4 @@
+import type { CourseSummaryDTO } from './CourseCard';
 import type { UserStatus } from './user';
 
 export interface ProfileResponseDTO {
@@ -11,6 +12,8 @@ export interface ProfileResponseDTO {
   course?: number;
   numberGroup?: string;
   email?: string;
+  enrolledCourses?: CourseSummaryDTO[];
+  teachingCourses?: CourseSummaryDTO[];
 }
 
 export interface ProfileUpdateDTO {
