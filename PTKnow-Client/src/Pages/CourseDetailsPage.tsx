@@ -16,6 +16,7 @@ import { courseCardApi } from '../api';
 import { useAuth } from '../hooks/useAuth';
 import { useMyEnrollments } from '../hooks/useMyEnrollments';
 import type { CourseTeacherDTO } from '../types/CourseCard';
+import { getFileUrl } from '../utils/fileUtils';
 import styles from '../styles/pages/CourseDetailsPage.module.css';
 
 const formatLessonTime = (value: string) => {
@@ -57,6 +58,13 @@ const CourseDetailsPage: React.FC = () => {
   const navigate = useNavigate();
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [settingsName, setSettingsName] = useState('');
+  const [settingsDescription, setSettingsDescription] = useState('');
+  const [settingsTags, setSettingsTags] = useState('');
+  const [settingsStatus, setSettingsStatus] = useState('');
+  const [settingsError, setSettingsError] = useState<string | null>(null);
+  const [settingsSuccess, setSettingsSuccess] = useState<string | null>(null);
+  const [settingsLoading, setSettingsLoading] = useState(false);
 
   const normalizedLessons = useMemo(
     () => (Array.isArray(fetchedLessons) ? fetchedLessons : []),
@@ -90,6 +98,16 @@ const CourseDetailsPage: React.FC = () => {
       console.error('Ошибка загрузки уроков:', error);
     });
   }, [fetchCourse, getCourseLessons, resolvedCourseId]);
+
+  useEffect(() => {
+    if (!course) {
+      return;
+    }
+    setSettingsName(course.name ?? '');
+    setSettingsDescription(course.description ?? '');
+    setSettingsTags(course.tags?.join(', ') ?? '');
+    setSettingsStatus(course.state ?? '');
+  }, [course]);
 
   useEffect(() => {
     if (sortedLessons.length === 0) {
@@ -149,6 +167,12 @@ const CourseDetailsPage: React.FC = () => {
     return enrolledCourses.some(courseItem => courseItem.id === resolvedCourseId);
   }, [enrolledCourses, resolvedCourseId]);
 
+  const canJoinCourse = useMemo(() => {
+    if (!user) return true;
+    const normalizedRole = user.role?.toUpperCase() ?? '';
+    return normalizedRole !== 'ADMIN' && normalizedRole !== 'TEACHER';
+  }, [user]);
+
   const handleDeleteCourse = useCallback(async () => {
     if (!resolvedCourseId || isDeleting) {
       return;
@@ -189,6 +213,68 @@ const CourseDetailsPage: React.FC = () => {
       console.error('Не удалось покинуть курс:', error);
     }
   }, [isEnrolled, navigate, resolvedCourseId]);
+
+  const handleSaveSettings = useCallback(async () => {
+    if (!course || !resolvedCourseId || settingsLoading) {
+      return;
+    }
+
+    setSettingsError(null);
+    setSettingsSuccess(null);
+
+    if (!settingsName.trim()) {
+      setSettingsError('Название курса не может быть пустым.');
+      return;
+    }
+
+    if (!settingsDescription.trim()) {
+      setSettingsError('Описание курса не может быть пустым.');
+      return;
+    }
+
+    const nextTags = settingsTags
+      .split(',')
+      .map(tag => tag.trim())
+      .filter(Boolean);
+
+    setSettingsLoading(true);
+    try {
+      await courseCardApi.updateCourse(resolvedCourseId, {
+        name: settingsName.trim(),
+        description: settingsDescription.trim(),
+        tags: nextTags.length > 0 ? nextTags : course.tags ?? [],
+        maxUsersAmount: course.maxUsersAmount,
+      });
+
+      if (settingsStatus && settingsStatus !== course.state) {
+        if (settingsStatus === 'PUBLISHED') {
+          await courseCardApi.publishCourse(resolvedCourseId);
+        } else if (settingsStatus === 'ARCHIVED') {
+          await courseCardApi.archiveCourse(resolvedCourseId);
+        } else if (settingsStatus === 'DRAFT') {
+          setSettingsError('Нельзя вернуть курс в черновик через настройки.');
+        }
+      }
+
+      await fetchCourse(resolvedCourseId);
+      setSettingsSuccess('Настройки курса обновлены.');
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Не удалось обновить курс.';
+      setSettingsError(message);
+    } finally {
+      setSettingsLoading(false);
+    }
+  }, [
+    course,
+    fetchCourse,
+    resolvedCourseId,
+    settingsDescription,
+    settingsLoading,
+    settingsName,
+    settingsStatus,
+    settingsTags,
+  ]);
 
   if (!resolvedCourseId) {
     return (
@@ -262,7 +348,7 @@ const CourseDetailsPage: React.FC = () => {
         <div className={styles.heroCard}>
           <div className={styles.heroMedia}>
             <img
-              src={course?.previewUrl || courseDetails}
+              src={getFileUrl(course?.previewUrl) || courseDetails}
               alt={course?.name || 'Курс'}
               className={styles.heroImage}
             />
@@ -297,13 +383,15 @@ const CourseDetailsPage: React.FC = () => {
             </div>
           </div>
           <div className={styles.heroActions}>
-            <button
-              type="button"
-              className={styles.primaryButton}
-              onClick={isEnrolled ? handleLeaveCourse : handleJoin}
-            >
-              {isEnrolled ? 'Покинуть' : 'Вступить'}
-            </button>
+            {canJoinCourse && (
+              <button
+                type="button"
+                className={styles.primaryButton}
+                onClick={isEnrolled ? handleLeaveCourse : handleJoin}
+              >
+                {isEnrolled ? 'Покинуть' : 'Вступить'}
+              </button>
+            )}
           </div>
         </div>
         <div className={styles.summaryCard}>
@@ -403,6 +491,65 @@ const CourseDetailsPage: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {canManageLessons && (
+            <div className={styles.blockCard}>
+              <div className={styles.blockHeader}>Настройки курса</div>
+              <div className={styles.settingsGrid}>
+                <label className={styles.settingsField}>
+                  <span>Название курса</span>
+                  <input
+                    type="text"
+                    value={settingsName}
+                    onChange={event => setSettingsName(event.target.value)}
+                  />
+                </label>
+                <label className={styles.settingsField}>
+                  <span>Описание курса</span>
+                  <textarea
+                    value={settingsDescription}
+                    onChange={event => setSettingsDescription(event.target.value)}
+                  />
+                </label>
+                <label className={styles.settingsField}>
+                  <span>Теги курса</span>
+                  <input
+                    type="text"
+                    value={settingsTags}
+                    onChange={event => setSettingsTags(event.target.value)}
+                    placeholder="Например: IT, дизайн, frontend"
+                  />
+                </label>
+                <label className={styles.settingsField}>
+                  <span>Статус</span>
+                  <select
+                    value={settingsStatus}
+                    onChange={event => setSettingsStatus(event.target.value)}
+                  >
+                    <option value="DRAFT">DRAFT</option>
+                    <option value="PUBLISHED">PUBLISHED</option>
+                    <option value="ARCHIVED">ARCHIVED</option>
+                  </select>
+                </label>
+              </div>
+              {settingsError && (
+                <div className={styles.settingsError}>{settingsError}</div>
+              )}
+              {settingsSuccess && (
+                <div className={styles.settingsSuccess}>{settingsSuccess}</div>
+              )}
+              <div className={styles.settingsActions}>
+                <button
+                  type="button"
+                  className={styles.settingsButton}
+                  onClick={handleSaveSettings}
+                  disabled={settingsLoading}
+                >
+                  {settingsLoading ? 'Сохранение...' : 'Сохранить'}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         <aside className={styles.sideColumn}>

@@ -15,6 +15,11 @@ export const useCreateCourse = () => {
 
     try {
       const course = await courseCardApi.createCourse(courseData, preview);
+      if (course.state !== 'PUBLISHED') {
+        const published = await courseCardApi.publishCourse(course.id);
+        setCreatedCourse(published);
+        return published;
+      }
       setCreatedCourse(course);
       return course;
     } catch (err) {

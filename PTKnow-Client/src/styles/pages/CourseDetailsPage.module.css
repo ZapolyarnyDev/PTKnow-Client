@@ -276,6 +276,78 @@
   color: #111827;
 }
 
+.settingsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.settingsField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+  color: #111827;
+}
+
+.settingsField input,
+.settingsField textarea,
+.settingsField select {
+  border: 1px solid #d6d6d6;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #f9fafb;
+}
+
+.settingsField textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.settingsField input:focus,
+.settingsField textarea:focus,
+.settingsField select:focus {
+  outline: none;
+  border-color: #0956c2;
+  box-shadow: 0 0 0 3px rgba(9, 86, 194, 0.15);
+  background: #ffffff;
+}
+
+.settingsActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.settingsButton {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 20px;
+  background: #0956c2;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.settingsButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.settingsError {
+  margin-top: 12px;
+  color: #b00020;
+  font-size: 13px;
+}
+
+.settingsSuccess {
+  margin-top: 12px;
+  color: #1f6f3b;
+  font-size: 13px;
+}
+
 .lessonsWarning {
   margin-bottom: 12px;
   padding: 12px 16px;
