@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../api';
 import { getFileUrl } from '../utils/fileUtils';
 
@@ -30,54 +30,70 @@ export const AuthImage: React.FC<AuthImageProps> = ({
 }) => {
   const resolvedSrc = useMemo(() => (src ? getFileUrl(src) : null), [src]);
   const [displaySrc, setDisplaySrc] = useState<string | null>(fallbackSrc ?? null);
+  const objectUrlRef = useRef<string | null>(null);
+  const authAttemptedRef = useRef(false);
+  const isFetchingRef = useRef(false);
+
+  const revokeObjectUrl = useCallback(() => {
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
+  }, []);
+
+  const loadWithAuth = useCallback(async () => {
+    if (!resolvedSrc || authAttemptedRef.current || isFetchingRef.current) {
+      return;
+    }
+
+    authAttemptedRef.current = true;
+    isFetchingRef.current = true;
+
+    try {
+      const response = await api.get(resolvedSrc, { responseType: 'blob' });
+      revokeObjectUrl();
+      objectUrlRef.current = URL.createObjectURL(response.data);
+      setDisplaySrc(objectUrlRef.current);
+    } catch {
+      setDisplaySrc(fallbackSrc ?? null);
+    } finally {
+      isFetchingRef.current = false;
+    }
+  }, [fallbackSrc, resolvedSrc, revokeObjectUrl]);
 
   useEffect(() => {
-    let isActive = true;
-    let objectUrl: string | null = null;
+    authAttemptedRef.current = false;
+    isFetchingRef.current = false;
+    revokeObjectUrl();
 
     if (!resolvedSrc) {
       setDisplaySrc(fallbackSrc ?? null);
-      return () => {
-        if (objectUrl) {
-          URL.revokeObjectURL(objectUrl);
-        }
-      };
+      return undefined;
+    }
+
+    setDisplaySrc(resolvedSrc);
+    return revokeObjectUrl;
+  }, [fallbackSrc, resolvedSrc, revokeObjectUrl]);
+
+  const handleError = useCallback(() => {
+    if (!resolvedSrc) {
+      return;
     }
 
     if (!isProtectedFileUrl(resolvedSrc)) {
-      setDisplaySrc(resolvedSrc);
-      return () => {
-        if (objectUrl) {
-          URL.revokeObjectURL(objectUrl);
-        }
-      };
+      setDisplaySrc(fallbackSrc ?? null);
+      return;
     }
 
-    const loadImage = async () => {
-      try {
-        const response = await api.get(resolvedSrc, { responseType: 'blob' });
-        if (!isActive) {
-          return;
-        }
-        objectUrl = URL.createObjectURL(response.data);
-        setDisplaySrc(objectUrl);
-      } catch {
-        if (!isActive) {
-          return;
-        }
-        setDisplaySrc(fallbackSrc ?? null);
-      }
-    };
+    void loadWithAuth();
+  }, [fallbackSrc, loadWithAuth, resolvedSrc]);
 
-    loadImage();
-
-    return () => {
-      isActive = false;
-      if (objectUrl) {
-        URL.revokeObjectURL(objectUrl);
-      }
-    };
-  }, [fallbackSrc, resolvedSrc]);
-
-  return <img src={displaySrc ?? ''} alt={alt} className={className} />;
+  return (
+    <img
+      src={displaySrc ?? ''}
+      alt={alt}
+      className={className}
+      onError={handleError}
+    />
+  );
 };
