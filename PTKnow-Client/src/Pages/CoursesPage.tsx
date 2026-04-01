@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import Header from '../Components/Header';
 import Footer from '../Components/Footer';
@@ -7,6 +8,7 @@ import { useMyEnrollments } from '../hooks/useMyEnrollments';
 import styles from '../styles/pages/CoursesPage.module.css';
 
 const CoursesPage: React.FC = () => {
+  const location = useLocation();
   const [activeFilter, setActiveFilter] = useState('all');
   const { enrolledCourses } = useMyEnrollments();
   const enrolledIds = useMemo(
@@ -50,7 +52,7 @@ const CoursesPage: React.FC = () => {
       </div>
       <div className={styles.container}>
         <div className={styles.pageHeader}></div>
-        <CourseList enrolledCourseIds={enrolledIds} />
+        <CourseList key={`courses-${location.key}`} enrolledCourseIds={enrolledIds} />
       </div>
       <Footer />
     </>

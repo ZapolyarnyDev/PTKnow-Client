@@ -17,6 +17,7 @@ const RegisterPage: React.FC = () => {
     password: '',
   });
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const { register, isLoading, error } = useAuth();
   const navigate = useNavigate();
@@ -28,8 +29,11 @@ const RegisterPage: React.FC = () => {
         ...prev,
         [name]: value,
       }));
+      if (formError) {
+        setFormError(null);
+      }
     },
-    []
+    [formError]
   );
 
   const handleSubmit = useCallback(
@@ -42,19 +46,21 @@ const RegisterPage: React.FC = () => {
         !formData.email ||
         !formData.password
       ) {
-        alert('Все поля обязательны для заполнения');
+        setFormError('Все поля обязательны для заполнения.');
         return;
       }
 
       if (formData.password.length < 12) {
-        alert('Пароль должен содержать минимум 6 символов');
+        setFormError('Пароль должен содержать минимум 12 символов.');
         return;
       }
 
       if (!formData.email.includes('@')) {
-        alert('Введите корректный email адрес');
+        setFormError('Введите корректный адрес электронной почты.');
         return;
       }
+
+      setFormError(null);
 
       const success = await register(formData);
       if (success) {
@@ -133,7 +139,12 @@ const RegisterPage: React.FC = () => {
             </button>
           </div>
 
-          {error && <div className={style.errorMessage}>{error}</div>}
+          {(formError || error) && (
+            <div className={style.errorMessage} role="alert" aria-live="polite">
+              <span className={style.errorIcon}>!</span>
+              <span className={style.errorText}>{formError || error}</span>
+            </div>
+          )}
 
           <div className={style.buttonContainer}>
             <AuthButton

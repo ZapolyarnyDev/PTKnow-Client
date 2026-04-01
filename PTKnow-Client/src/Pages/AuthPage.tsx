@@ -111,7 +111,10 @@ const AuthPage: React.FC = () => {
           </div>
 
           {error && (
-            <div style={{ color: 'red', margin: '10px 0' }}>{error}</div>
+            <div className={style.errorMessage} role="alert" aria-live="polite">
+              <span className={style.errorIcon}>!</span>
+              <span className={style.errorText}>{error}</span>
+            </div>
           )}
 
           <div className={style.buttonContainer}>

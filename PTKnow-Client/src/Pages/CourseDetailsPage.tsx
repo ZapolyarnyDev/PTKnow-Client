@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { toast, ToastContainer } from 'react-toastify';
 import { useNavigate, useParams } from 'react-router-dom';
 import courseDetails from '../assets/image/courseDetails.svg';
 
@@ -188,12 +189,14 @@ const CourseDetailsPage: React.FC = () => {
     setDeleteError(null);
     try {
       await courseCardApi.delete(resolvedCourseId);
+      toast.success('Курс удален.');
       clearCourse();
       navigate('/courses');
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Не удалось удалить курс.';
       setDeleteError(message);
+      toast.error(message);
     } finally {
       setIsDeleting(false);
     }
@@ -593,6 +596,18 @@ const CourseDetailsPage: React.FC = () => {
         </aside>
         </section>
       </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       <Footer />
     </>
   );

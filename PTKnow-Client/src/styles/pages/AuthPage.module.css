@@ -1,119 +1,150 @@
-.container{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
 }
 
-.formAuth{
-    padding: 2.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
+.formAuth {
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
-.legendAuth{
-    font-family: "Inter", sans-serif;
-    font-weight: 500;
-    font-size: 2rem;
-    margin-left: 2.5rem;
-    margin-bottom: 2.375rem;
+.legendAuth {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 2rem;
+  margin-left: 2.5rem;
+  margin-bottom: 2.375rem;
 }
 
 .emailAuth {
-    width: 21.8125rem;
-    height: 3.125rem;
-    border: 1px solid #0956C2;
-    border-radius: 32px;
+  width: 21.8125rem;
+  height: 3.125rem;
+  border: 1px solid #0956c2;
+  border-radius: 32px;
 
-    color: black;
-    font-family: "Roboto", sans-serif;
-    font-size: 1rem;
-    font-weight: 500;
-    
-    padding-left: 1.75rem;
+  color: black;
+  font-family: 'Roboto', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+
+  padding-left: 1.75rem;
 }
 
 .passwordField {
-    position: relative;
-    width: 100%;
-    display: flex;
-    align-items: center;
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
 }
 
 .passwordToggle {
-    position: absolute;
-    right: 2.75rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-family: "Inter", sans-serif;
-    font-weight: 500;
-    font-size: 0.875rem;
-    color: #0956C2;
+  position: absolute;
+  right: 2.75rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: #0956c2;
 }
 
 .passwordToggle:hover {
-    color: #106ced;
+  color: #106ced;
 }
 
 .backButton {
-    position: absolute;
-    right: 0.75rem;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1rem;
-    color: #666;
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #666;
 }
 
-.buttonContainer{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.buttonContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.buttonAuth{
-    width: 21.8125rem;
-    height: 3.1875rem;
-    background-color: #0956C2;
-    border-radius: 32px;
-    cursor: pointer;
-    
-    color: white;
-    font-family: "Inter", sans-serif;
-    font-weight: 600;
-    font-size: 1rem;
-
-    transition: background-color 0.3s, transform 0.2s;
-
+.errorMessage {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  width: 21.8125rem;
+  padding: 0.75rem 1rem;
+  border-radius: 16px;
+  border: 1px solid #f3b6b6;
+  background: linear-gradient(180deg, #fff6f6 0%, #ffecec 100%);
+  color: #8f1b1b;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  box-shadow: 0 10px 24px rgba(143, 27, 27, 0.08);
 }
 
-.registerText{
-    padding-top: 1.0625rem;
-
-    font-family: "Inter", sans-serif;
-    font-weight: 400;
-    font-size: 1rem;
-    line-height: 44px;
+.errorIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background-color: #f8caca;
+  color: #8f1b1b;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
-.registerLink{
-    font-family: "Inter", sans-serif;
-    font-weight: 400;
-    font-size: 1rem;
-    line-height: 15px;
-    color: #0956C2;
+.errorText {
+  margin-top: 0.05rem;
 }
 
+.buttonAuth {
+  width: 21.8125rem;
+  height: 3.1875rem;
+  background-color: #0956c2;
+  border-radius: 32px;
+  cursor: pointer;
+
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.registerText {
+  padding-top: 1.0625rem;
+
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 44px;
+}
+
+.registerLink {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 15px;
+  color: #0956c2;
+}
 
 .buttonAuth:hover {
-    background-color: #106ced;
-    transform: translateY(-2px);
+  background-color: #106ced;
+  transform: translateY(-2px);
 }
 
 .buttonAuth:active {
-    transform: translateY(1px);
+  transform: translateY(1px);
 }

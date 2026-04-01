@@ -1,126 +1,147 @@
-:root{
-    --color-white: #ffff;
-    --font-family: "Inter", sans-serif;
+:root {
+  --color-white: #ffff;
+  --font-family: 'Inter', sans-serif;
 }
 
-.container{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
 }
 
-.formRegister{
-    padding: 2.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
+.formRegister {
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
-.legendRegister{
-    font-family: "Inter", sans-serif;
-    font-weight: 500;
-    font-size: 2rem;
-    margin-left: 4.6875rem;
-    margin-bottom: 2.375rem;
+.legendRegister {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 2rem;
+  margin-left: 4.6875rem;
+  margin-bottom: 2.375rem;
 }
 
 .inputRegister {
-    width: 21.8125rem;
-    height: 3.125rem;
-    border: 1px solid #0956C2;
-    border-radius: 32px;
+  width: 21.8125rem;
+  height: 3.125rem;
+  border: 1px solid #0956c2;
+  border-radius: 32px;
 
-    color: black;
-    font-family: "Roboto", sans-serif;
-    font-size: 1rem;
-    font-weight: 500;
-    
-    padding-left: 1.75rem;
+  color: black;
+  font-family: 'Roboto', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+
+  padding-left: 1.75rem;
 }
 
 .passwordField {
-    position: relative;
-    width: 100%;
-    display: flex;
-    align-items: center;
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
 }
 
 .passwordToggle {
-    position: absolute;
-    right: 1rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-family: "Inter", sans-serif;
-    font-weight: 500;
-    font-size: 0.875rem;
-    color: #0956C2;
+  position: absolute;
+  right: 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: #0956c2;
 }
 
 .passwordToggle:hover {
-    color: #106ced;
+  color: #106ced;
 }
 
-.buttonContainer{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.buttonContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.buttonRegister{
-    width: 21.8125rem;
-    height: 3.1875rem;
-    background-color: #0956C2;
-    border-radius: 32px;
-    
-    color: white;
-    font-family: "Inter", sans-serif;
-    font-weight: 600;
-    font-size: 1rem;
+.buttonRegister {
+  width: 21.8125rem;
+  height: 3.1875rem;
+  background-color: #0956c2;
+  border-radius: 32px;
 
-    transition: background-color 0.3s, transform 0.2s;
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
 
+  transition: background-color 0.3s, transform 0.2s;
 }
 
-.loginText{
-    padding-top: 1.0625rem;
+.loginText {
+  padding-top: 1.0625rem;
 
-    font-family: "Inter", sans-serif;
-    font-weight: 400;
-    font-size: 1rem;
-    line-height: 44px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 44px;
 }
 
-.loginLink{
-    font-family: "Inter", sans-serif;
-    font-weight: 400;
-    font-size: 1rem;
-    line-height: 15px;
-    color: #0956C2;
+.loginLink {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 15px;
+  color: #0956c2;
 }
 
 .buttonRegister:hover {
-    background-color: #106ced;
-    transform: translateY(-2px);
+  background-color: #106ced;
+  transform: translateY(-2px);
 }
 
 .buttonRegister:active {
-    transform: translateY(1px);
+  transform: translateY(1px);
 }
 
-
 .errorMessage {
-    color: #ff4444;
-    background-color: #ffebee;
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ffcdd2;
-    margin: 10px 0;
-    text-align: center;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  width: 21.8125rem;
+  padding: 0.75rem 1rem;
+  border-radius: 16px;
+  border: 1px solid #f3b6b6;
+  background: linear-gradient(180deg, #fff6f6 0%, #ffecec 100%);
+  color: #8f1b1b;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  box-shadow: 0 10px 24px rgba(143, 27, 27, 0.08);
+}
+
+.errorIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background-color: #f8caca;
+  color: #8f1b1b;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.errorText {
+  margin-top: 0.05rem;
 }
 
 .buttonRegister:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+  opacity: 0.6;
+  cursor: not-allowed;
 }
