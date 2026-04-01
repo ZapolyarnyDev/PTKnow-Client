@@ -5,7 +5,7 @@ import type { CourseDTO } from '../types/CourseCard';
 import defaultImg from '../assets/image/2.jpg';
 import { useAuth } from '../hooks/useAuth';
 import { normalizeRole } from '../utils/roleUtils';
-import { getFileUrl } from '../utils/fileUtils';
+import { AuthImage } from './AuthImage';
 
 type CourseCardData = Pick<CourseDTO, 'id' | 'name' | 'previewUrl'> & {
   tags?: string[];
@@ -38,8 +38,9 @@ const CourseCardComponent: React.FC<CourseCardProps> = ({
   return (
     <div className={styles.cardContainer}>
       <div className={styles.imageContainer}>
-        <img
-          src={getFileUrl(previewUrl) || defaultImg}
+        <AuthImage
+          src={previewUrl}
+          fallbackSrc={defaultImg}
           alt={name}
           className={styles.cardImage}
         />

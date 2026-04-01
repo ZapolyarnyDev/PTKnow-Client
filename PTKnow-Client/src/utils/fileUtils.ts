@@ -27,7 +27,17 @@ export const getFileUrl = (fileUrl?: string): string | null => {
     }
     return baseUrl ? `${baseUrl}${fileUrl}` : fileUrl;
   }
-  return fileUrl;
+
+  const baseUrl = getBaseUrl();
+  if (!baseUrl) {
+    return fileUrl;
+  }
+
+  if (fileUrl.startsWith('api/')) {
+    return `${stripApiSuffix(baseUrl)}/${fileUrl}`;
+  }
+
+  return `${baseUrl}/${fileUrl}`;
 };
 
 export const getAvatarUrl = (profile: ProfileResponseDTO): string | null => {

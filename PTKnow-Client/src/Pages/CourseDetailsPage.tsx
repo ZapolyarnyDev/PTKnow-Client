@@ -16,7 +16,7 @@ import { courseCardApi } from '../api';
 import { useAuth } from '../hooks/useAuth';
 import { useMyEnrollments } from '../hooks/useMyEnrollments';
 import type { CourseTeacherDTO } from '../types/CourseCard';
-import { getFileUrl } from '../utils/fileUtils';
+import { AuthImage } from '../Components/AuthImage';
 import { FormAlert } from '../Components/ui/forms/FormAlert';
 import styles from '../styles/pages/CourseDetailsPage.module.css';
 
@@ -348,8 +348,9 @@ const CourseDetailsPage: React.FC = () => {
         <section className={styles.heroSection}>
         <div className={styles.heroCard}>
           <div className={styles.heroMedia}>
-            <img
-              src={getFileUrl(course?.previewUrl) || courseDetails}
+            <AuthImage
+              src={course?.previewUrl}
+              fallbackSrc={courseDetails}
               alt={course?.name || 'Курс'}
               className={styles.heroImage}
             />
