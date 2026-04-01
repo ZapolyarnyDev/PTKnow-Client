@@ -10,6 +10,8 @@ interface ProfileHeaderProps {
   isMyProfile: boolean;
   onEdit?: () => void;
   onLogout?: () => void;
+  onCreateCourse?: () => void;
+  showCreateCourse?: boolean;
 }
 
 const ProfileHeaderComponent = ({
@@ -17,6 +19,8 @@ const ProfileHeaderComponent = ({
   isMyProfile,
   onEdit,
   onLogout,
+  onCreateCourse,
+  showCreateCourse,
 }: ProfileHeaderProps) => {
   const avatarUrl = getAvatarUrl(profile) || DefaultAvatar;
   const statusLabel = profile.status?.toString().trim() ?? '';
@@ -57,6 +61,15 @@ const ProfileHeaderComponent = ({
 
       {isMyProfile && (
         <div className={styles.profileEdit}>
+          {showCreateCourse && (
+            <button
+              type="button"
+              onClick={onCreateCourse}
+              className={styles.profileCreateCourse}
+            >
+              Создание курса
+            </button>
+          )}
           <button onClick={onEdit}>Редактировать</button>
           <button onClick={onLogout} className={styles.profileLogout}>
             Выйти

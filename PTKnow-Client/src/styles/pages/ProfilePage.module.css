@@ -164,6 +164,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .profileEdit > button {
@@ -178,6 +179,10 @@
   color: var(--primary-color);
   border: none;
   transition: all 0.2s ease;
+}
+
+.profileCreateCourse {
+  white-space: nowrap;
 }
 
 .profileLogout {
@@ -305,6 +310,7 @@ hr {
 
 .profileMyCourse {
   margin-top: 3rem;
+  margin-bottom: 5rem;
 }
 
 .profileEmptyCourses {

@@ -9,6 +9,7 @@ import { CourseList } from '../Components/CourseList';
 import Footer from '../Components/Footer';
 import { ProfileContactsItem } from '../Components/ui/profile/ProfileContactsItem';
 import { ProfileHeader } from '../Components/ui/profile/ProfileHeader';
+import { normalizeRole } from '../utils/roleUtils';
 import styles from '../styles/pages/ProfilePage.module.css';
 
 export const ProfilePage = () => {
@@ -81,6 +82,9 @@ export const ProfilePage = () => {
     description: '',
   }));
   const enrolledCourseIds = enrolledCourses.map(course => course.id);
+  const normalizedRole = normalizeRole(profile.role);
+  const canCreateCourse =
+    isMyProfile && (normalizedRole === 'ADMIN' || normalizedRole === 'TEACHER');
 
   return (
     <>
@@ -92,6 +96,8 @@ export const ProfilePage = () => {
             isMyProfile={isMyProfile}
             onEdit={() => navigate('/profile/edit')}
             onLogout={logout}
+            showCreateCourse={canCreateCourse}
+            onCreateCourse={() => navigate('/create-course')}
           />
 
           {profile.summary?.trim() && (
