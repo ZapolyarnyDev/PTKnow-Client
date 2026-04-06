@@ -45,7 +45,9 @@ const buildUser = (
     return null;
   }
   const payload = decodeJwtPayload(token);
-  const role = normalizeRole(profile?.role ?? payload?.role ?? existingUser?.role);
+  const role = normalizeRole(
+    profile?.role ?? payload?.role ?? existingUser?.role
+  );
 
   return {
     id: existingUser?.id ?? profile?.id ?? '',
@@ -203,6 +205,7 @@ export const useAuth = () => {
         fullName: buildFullName(data.firstName, data.lastName, data.middleName),
         email: data.email,
         password: data.password,
+        recaptchaToken: data.recaptchaToken,
       };
 
       const tokenResponse = await authAPI.register(registerData);
@@ -235,7 +238,10 @@ export const useAuth = () => {
       try {
         profile = await authAPI.getProfile();
       } catch (profileError) {
-        console.warn('Failed to load profile after registration:', profileError);
+        console.warn(
+          'Failed to load profile after registration:',
+          profileError
+        );
       }
       const nextUser = buildUser(profile, token, getStoredUser());
       setUser(nextUser);

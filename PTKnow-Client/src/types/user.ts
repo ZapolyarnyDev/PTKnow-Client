@@ -33,11 +33,13 @@ export interface RegistrationDTO {
   fullName: string;
   email: string;
   password: string;
+  recaptchaToken?: string;
 }
 
 export interface LoginDTO {
   email: string;
   password: string;
+  recaptchaToken?: string;
 }
 
 export interface RegisterData {
@@ -46,6 +48,7 @@ export interface RegisterData {
   middleName?: string;
   email: string;
   password: string;
+  recaptchaToken?: string;
 }
 
 export type LoginData = LoginDTO;

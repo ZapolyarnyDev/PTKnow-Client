@@ -1,5 +1,6 @@
 import { useCallback, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 import Footer from '../Components/Footer.tsx';
 import Header from '../Components/Header.tsx';
@@ -14,8 +15,10 @@ const AuthPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [showPasswordInput, setShowPasswordInput] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [recaptchaError, setRecaptchaError] = useState<string | null>(null);
   const { login, isLoading, error } = useAuth();
   const navigate = useNavigate();
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   const handleEmailSubmit = useCallback(
     (e: FormEvent) => {
@@ -31,13 +34,23 @@ const AuthPage: React.FC = () => {
     async (e: FormEvent) => {
       e.preventDefault();
       if (email && password) {
-        const success = await login({ email, password });
+        setRecaptchaError(null);
+        if (!executeRecaptcha) {
+          setRecaptchaError('reCAPTCHA не готова. Попробуйте снова.');
+          return;
+        }
+        const recaptchaToken = await executeRecaptcha('login');
+        if (!recaptchaToken) {
+          setRecaptchaError('Не удалось выполнить проверку reCAPTCHA.');
+          return;
+        }
+        const success = await login({ email, password, recaptchaToken });
         if (success) {
           navigate('/profile');
         }
       }
     },
-    [email, password, login, navigate]
+    [email, password, login, navigate, executeRecaptcha]
   );
 
   const handleInputChange = useCallback(
@@ -110,10 +123,10 @@ const AuthPage: React.FC = () => {
             )}
           </div>
 
-          {error && (
+          {(error || recaptchaError) && (
             <div className={style.errorMessage} role="alert" aria-live="polite">
               <span className={style.errorIcon}>!</span>
-              <span className={style.errorText}>{error}</span>
+              <span className={style.errorText}>{recaptchaError || error}</span>
             </div>
           )}
 

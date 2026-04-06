@@ -36,13 +36,21 @@ npm install
 По умолчанию клиент использует `http://localhost:8080/api`.
 Если адрес бэкенда другой, измените его в `src/api/axiosConfig.ts`.
 
-5. Запустите dev-сервер
+5. Настройте reCAPTCHA v3
+
+Создайте `.env.local` и добавьте ключ сайта:
+
+```
+VITE_RECAPTCHA_SITE_KEY=your_site_key
+```
+
+6. Запустите dev-сервер
 
 ```bash
 npm run dev
 ```
 
-6. Соберите production-версию
+7. Соберите production-версию
 
 ```bash
 npm run build

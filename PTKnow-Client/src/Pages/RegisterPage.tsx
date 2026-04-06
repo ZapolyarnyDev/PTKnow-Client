@@ -1,5 +1,6 @@
 import { useCallback, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { useAuth } from '../hooks/useAuth';
 
 import Footer from '../Components/Footer';
@@ -18,9 +19,11 @@ const RegisterPage: React.FC = () => {
   });
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [recaptchaError, setRecaptchaError] = useState<string | null>(null);
 
   const { register, isLoading, error } = useAuth();
   const navigate = useNavigate();
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,12 +65,23 @@ const RegisterPage: React.FC = () => {
 
       setFormError(null);
 
-      const success = await register(formData);
+      setRecaptchaError(null);
+      if (!executeRecaptcha) {
+        setRecaptchaError('reCAPTCHA не готова. Попробуйте снова.');
+        return;
+      }
+      const recaptchaToken = await executeRecaptcha('register');
+      if (!recaptchaToken) {
+        setRecaptchaError('Не удалось выполнить проверку reCAPTCHA.');
+        return;
+      }
+
+      const success = await register({ ...formData, recaptchaToken });
       if (success) {
         navigate('/profile');
       }
     },
-    [register, navigate, formData]
+    [register, navigate, formData, executeRecaptcha]
   );
 
   return (
@@ -139,10 +153,12 @@ const RegisterPage: React.FC = () => {
             </button>
           </div>
 
-          {(formError || error) && (
+          {(formError || error || recaptchaError) && (
             <div className={style.errorMessage} role="alert" aria-live="polite">
               <span className={style.errorIcon}>!</span>
-              <span className={style.errorText}>{formError || error}</span>
+              <span className={style.errorText}>
+                {formError || recaptchaError || error}
+              </span>
             </div>
           )}
 
