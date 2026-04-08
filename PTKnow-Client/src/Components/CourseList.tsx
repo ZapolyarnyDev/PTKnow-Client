@@ -60,7 +60,29 @@ export const CourseList: React.FC<CourseListProps> = ({
   }, [limit]);
 
   if (displayLoading) {
-    return <div className={styles.loading}>Загрузка курсов...</div>;
+    return (
+      <div className={styles.courseList} aria-label="Загрузка курсов">
+        {Array.from({ length: limit || 6 }).map((_, index) => (
+          <div key={index} className={styles.skeletonCard} aria-hidden="true">
+            <div className={styles.skeletonImage} />
+            <div className={styles.skeletonBody}>
+              <div className={styles.skeletonTags}>
+                <span className={styles.skeletonTag} />
+                <span className={styles.skeletonTag} />
+              </div>
+              <div className={styles.skeletonTitle} />
+              <div className={styles.skeletonTitleShort} />
+              <div className={styles.skeletonText} />
+              <div className={styles.skeletonText} />
+              <div className={styles.skeletonTextShort} />
+            </div>
+            <div className={styles.skeletonFooter}>
+              <div className={styles.skeletonButton} />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
   }
 
   if (displayError) {
