@@ -6,6 +6,7 @@ import defaultImg from '../assets/image/2.jpg';
 import { useAuth } from '../hooks/useAuth';
 import { normalizeRole } from '../utils/roleUtils';
 import { AuthImage } from './AuthImage';
+import { getFileUrl } from '../utils/fileUtils';
 
 type CourseCardData = Pick<CourseDTO, 'id' | 'name'> & {
   previewUrl?: string | null;
@@ -28,6 +29,7 @@ const CourseCardComponent: React.FC<CourseCardProps> = ({
   const { user } = useAuth();
   const isEnrolled = useMemo(() => enrolledCourseIds?.has(id) ?? false, [enrolledCourseIds, id]);
   const normalizedRole = normalizeRole(user?.role);
+  const resolvedPreviewUrl = useMemo(() => getFileUrl(previewUrl ?? undefined), [previewUrl]);
   const shouldSkipEnroll =
     !user ||
     normalizedRole === 'ADMIN' ||
@@ -41,7 +43,7 @@ const CourseCardComponent: React.FC<CourseCardProps> = ({
     <div className={styles.cardContainer}>
       <div className={styles.imageContainer}>
         <AuthImage
-          src={previewUrl}
+          src={resolvedPreviewUrl}
           fallbackSrc={defaultImg}
           alt={name}
           className={styles.cardImage}
