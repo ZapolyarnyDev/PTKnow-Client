@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import Header from '../Components/Header';
 import Footer from '../Components/Footer';
+import Header from '../Components/Header';
 import { usersApi } from '../api';
 import type { AdminUserDTO } from '../types/user';
 import styles from '../styles/pages/AdminUsersPage.module.css';
@@ -20,7 +20,9 @@ const SORT_OPTIONS = [
 
 const AdminUsersPage: React.FC = () => {
   const [users, setUsers] = useState<AdminUserDTO[]>([]);
+  const [selectedUser, setSelectedUser] = useState<AdminUserDTO | null>(null);
   const [loading, setLoading] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savingIds, setSavingIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
@@ -45,13 +47,11 @@ const AdminUsersPage: React.FC = () => {
         role: roleFilter || undefined,
         status: statusFilter || undefined,
       });
-
       setUsers(data.items);
       setHasNext(data.hasNext);
       setTotalPages(data.totalPages);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Ошибка загрузки';
-      setError(message);
+      setError(err instanceof Error ? err.message : 'Ошибка загрузки');
     } finally {
       setLoading(false);
     }
@@ -69,6 +69,22 @@ const AdminUsersPage: React.FC = () => {
     });
   }, []);
 
+  const handleSelectUser = useCallback(async (userId: string) => {
+    setDetailLoading(true);
+    setError(null);
+
+    try {
+      const data = await usersApi.getUserById(userId);
+      setSelectedUser(data);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Не удалось загрузить пользователя.'
+      );
+    } finally {
+      setDetailLoading(false);
+    }
+  }, []);
+
   const handleRoleChange = useCallback(
     async (user: AdminUserDTO, nextRole: string) => {
       if (user.role === nextRole) {
@@ -79,16 +95,13 @@ const AdminUsersPage: React.FC = () => {
       setError(null);
 
       try {
-        const updated = await usersApi.updateUserRole(user.id, {
-          role: nextRole,
-        });
-        setUsers(prev =>
-          prev.map(item => (item.id === updated.id ? updated : item))
-        );
+        const updated = await usersApi.updateUserRole(user.id, { role: nextRole });
+        setUsers(prev => prev.map(item => (item.id === updated.id ? updated : item)));
+        setSelectedUser(prev => (prev?.id === updated.id ? updated : prev));
       } catch (err) {
-        const message =
-          err instanceof Error ? err.message : 'Ошибка обновления роли';
-        setError(message);
+        setError(
+          err instanceof Error ? err.message : 'Не удалось обновить роль пользователя.'
+        );
       } finally {
         clearSaving(user.id);
       }
@@ -109,13 +122,14 @@ const AdminUsersPage: React.FC = () => {
         const updated = await usersApi.updateUserStatus(user.id, {
           status: nextStatus,
         });
-        setUsers(prev =>
-          prev.map(item => (item.id === updated.id ? updated : item))
-        );
+        setUsers(prev => prev.map(item => (item.id === updated.id ? updated : item)));
+        setSelectedUser(prev => (prev?.id === updated.id ? updated : prev));
       } catch (err) {
-        const message =
-          err instanceof Error ? err.message : 'Ошибка обновления статуса';
-        setError(message);
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'Не удалось обновить статус пользователя.'
+        );
       } finally {
         clearSaving(user.id);
       }
@@ -207,57 +221,107 @@ const AdminUsersPage: React.FC = () => {
           {loading && <div className={styles.stateMessage}>Загрузка...</div>}
           {error && <div className={styles.errorMessage}>{error}</div>}
 
-          <div className={styles.table}>
-            <div className={styles.tableHeader}>
-              <span>Пользователь</span>
-              <span>Handle</span>
-              <span>Email</span>
-              <span>Роль / статус</span>
+          <div className={styles.contentGrid}>
+            <div className={styles.table}>
+              <div className={styles.tableHeader}>
+                <span>Пользователь</span>
+                <span>Handle</span>
+                <span>Email</span>
+                <span>Роль / статус</span>
+              </div>
+
+              {users.map(user => (
+                <div key={user.id} className={styles.tableRow}>
+                  <button
+                    type="button"
+                    className={styles.userInfoButton}
+                    onClick={() => handleSelectUser(user.id)}
+                  >
+                    <div className={styles.userName}>{user.fullName}</div>
+                    <div className={styles.userMeta}>ID: {user.id}</div>
+                  </button>
+                  <div className={styles.cellMuted}>{user.profileHandle}</div>
+                  <div className={styles.cellMuted}>{user.email}</div>
+                  <div>
+                    <select
+                      className={styles.roleSelect}
+                      value={user.role}
+                      onChange={event => handleRoleChange(user, event.target.value)}
+                      disabled={savingIds.has(user.id)}
+                    >
+                      {ROLE_OPTIONS.map(role => (
+                        <option key={role} value={role}>
+                          {role}
+                        </option>
+                      ))}
+                    </select>
+                    <select
+                      className={styles.roleSelect}
+                      value={user.status}
+                      onChange={event => handleStatusChange(user, event.target.value)}
+                      disabled={savingIds.has(user.id)}
+                    >
+                      {STATUS_OPTIONS.map(status => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                    </select>
+                    {savingIds.has(user.id) && (
+                      <span className={styles.savingHint}>Сохранение...</span>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
 
-            {users.map(user => (
-              <div key={user.id} className={styles.tableRow}>
-                <div className={styles.userInfo}>
-                  <div className={styles.userName}>{user.fullName}</div>
-                  <div className={styles.userMeta}>ID: {user.id}</div>
+            <aside className={styles.detailCard}>
+              <div className={styles.detailTitle}>Карточка пользователя</div>
+              {detailLoading && (
+                <div className={styles.stateMessage}>Загрузка данных...</div>
+              )}
+              {!detailLoading && !selectedUser && (
+                <div className={styles.detailEmpty}>
+                  Выберите пользователя из списка, чтобы открыть детали.
                 </div>
-                <div className={styles.cellMuted}>{user.profileHandle}</div>
-                <div className={styles.cellMuted}>{user.email}</div>
-                <div>
-                  <select
-                    className={styles.roleSelect}
-                    value={user.role}
-                    onChange={event =>
-                      handleRoleChange(user, event.target.value)
-                    }
-                    disabled={savingIds.has(user.id)}
-                  >
-                    {ROLE_OPTIONS.map(role => (
-                      <option key={role} value={role}>
-                        {role}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    className={styles.roleSelect}
-                    value={user.status}
-                    onChange={event =>
-                      handleStatusChange(user, event.target.value)
-                    }
-                    disabled={savingIds.has(user.id)}
-                  >
-                    {STATUS_OPTIONS.map(status => (
-                      <option key={status} value={status}>
-                        {status}
-                      </option>
-                    ))}
-                  </select>
-                  {savingIds.has(user.id) && (
-                    <span className={styles.savingHint}>Сохранение...</span>
-                  )}
+              )}
+              {selectedUser && (
+                <div className={styles.detailList}>
+                  <div className={styles.detailItem}>
+                    <span>Имя</span>
+                    <strong>{selectedUser.fullName}</strong>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <span>Email</span>
+                    <strong>{selectedUser.email}</strong>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <span>Handle</span>
+                    <strong>{selectedUser.profileHandle || '—'}</strong>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <span>Роль</span>
+                    <strong>{selectedUser.role}</strong>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <span>Статус</span>
+                    <strong>{selectedUser.status}</strong>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <span>Провайдер</span>
+                    <strong>{selectedUser.authProvider}</strong>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <span>Дата регистрации</span>
+                    <strong>{selectedUser.registeredAt}</strong>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <span>ID</span>
+                    <strong className={styles.breakWord}>{selectedUser.id}</strong>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )}
+            </aside>
           </div>
 
           <div className={styles.pagination}>

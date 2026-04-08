@@ -90,6 +90,12 @@
   gap: 12px;
 }
 
+.contentGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 20px;
+}
+
 .tableHeader,
 .tableRow {
   display: grid;
@@ -116,6 +122,18 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.userInfoButton {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
 }
 
 .userName {
@@ -161,7 +179,50 @@
   color: #475569;
 }
 
+.detailCard {
+  background: #f8fafc;
+  border-radius: 18px;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  height: fit-content;
+}
+
+.detailTitle {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.detailEmpty {
+  color: #64748b;
+}
+
+.detailList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.detailItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detailItem span {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.breakWord {
+  word-break: break-all;
+}
+
 @media (max-width: 960px) {
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
+
   .filters {
     grid-template-columns: 1fr;
   }

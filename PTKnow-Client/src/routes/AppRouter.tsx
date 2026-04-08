@@ -98,6 +98,11 @@ const AppRouter: React.FC = () => {
           }
         />
 
+        <Route
+          path="/courses/:courseId/lessons/:lessonId/edit"
+          element={<CreateLessonPage />}
+        />
+
         <Route path="/my-courses" element={<MyCoursesPage />} />
 
         <Route path="/course/:courseId/register" element={<CourseRegisterPage />} />

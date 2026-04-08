@@ -2,7 +2,12 @@ import { useCallback, useState } from 'react';
 import { filesAPI } from '../api/endpoints/file';
 import { lessonApi } from '../api/endpoints/lesson';
 import type { FileMetaDTO } from '../types/CourseCard';
-import type { CreateLessonDTO, LessonDTO } from '../types/lesson';
+import type {
+  CreateLessonDTO,
+  LessonDTO,
+  UpdateLessonDTO,
+  UpdateLessonStateDTO,
+} from '../types/lesson';
 
 export const useLesson = () => {
   const [lesson, setLesson] = useState<LessonDTO | null>(null);
@@ -122,6 +127,101 @@ export const useLesson = () => {
     },
     []
   );
+
+  const replaceLesson = useCallback(
+    async (
+      lessonId: number,
+      lessonData: UpdateLessonDTO
+    ): Promise<LessonDTO> => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const updatedLesson = await lessonApi.replaceLesson(lessonId, lessonData);
+        setLesson(updatedLesson);
+        setLessons(prev =>
+          prev.map(item => (item.id === updatedLesson.id ? updatedLesson : item))
+        );
+        return updatedLesson;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'РћС€РёР±РєР° РѕР±РЅРѕРІР»РµРЅРёСЏ СѓСЂРѕРєР°';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
+  const updateLessonState = useCallback(
+    async (
+      lessonId: number,
+      data: UpdateLessonStateDTO
+    ): Promise<LessonDTO> => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const updatedLesson = await lessonApi.updateLessonState(lessonId, data);
+        setLesson(prev => (prev?.id === lessonId ? updatedLesson : prev));
+        setLessons(prev =>
+          prev.map(item => (item.id === updatedLesson.id ? updatedLesson : item))
+        );
+        return updatedLesson;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : 'РћС€РёР±РєР° РѕР±РЅРѕРІР»РµРЅРёСЏ СЃРѕСЃС‚РѕСЏРЅРёСЏ СѓСЂРѕРєР°';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
+  const deleteLessonMaterial = useCallback(
+    async (lessonId: number, fileId: string): Promise<void> => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        await lessonApi.deleteLessonMaterial(lessonId, fileId);
+        setLesson(prev =>
+          prev?.id === lessonId
+            ? {
+                ...prev,
+                materials: prev.materials.filter(material => material.id !== fileId),
+              }
+            : prev
+        );
+        setLessons(prev =>
+          prev.map(item =>
+            item.id === lessonId
+              ? {
+                  ...item,
+                  materials: item.materials.filter(
+                    material => material.id !== fileId
+                  ),
+                }
+              : item
+          )
+        );
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'РћС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ РјР°С‚РµСЂРёР°Р»Р°';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
   const clearError = useCallback((): void => setError(null), []);
   const clearLesson = useCallback((): void => setLesson(null), []);
 
@@ -134,6 +234,9 @@ export const useLesson = () => {
     getLessonById,
     createLesson,
     getCourseLessons,
+    replaceLesson,
+    updateLessonState,
+    deleteLessonMaterial,
     deleteLesson,
     addLessonMaterial,
     clearError,
