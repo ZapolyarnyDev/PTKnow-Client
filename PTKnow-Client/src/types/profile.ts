@@ -9,8 +9,6 @@ export interface ProfileResponseDTO {
   id?: string;
   status?: UserStatus;
   role?: string;
-  course?: number;
-  numberGroup?: string;
   email?: string;
   enrolledCourses?: CourseSummaryDTO[];
   teachingCourses?: CourseSummaryDTO[];

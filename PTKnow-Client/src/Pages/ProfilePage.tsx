@@ -19,11 +19,7 @@ export const ProfilePage = () => {
   const { logout } = useAuth();
   const [isMyProfile, setIsMyProfile] = useState(false);
   const navigate = useNavigate();
-  const storedUser = localStorage.getItem('userData');
-  const storedEmail = storedUser
-    ? (JSON.parse(storedUser) as { email?: string } | null)?.email
-    : null;
-  const contactEmail = profile?.email || storedEmail || '';
+  const contactEmail = profile?.email || '';
 
   useEffect(() => {
     if (handle) {
