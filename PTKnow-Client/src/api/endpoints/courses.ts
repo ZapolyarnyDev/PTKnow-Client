@@ -109,9 +109,8 @@ export const courseCardApi = {
   addCourseTeacher: async (
     id: number,
     data: UpdateCourseTeacherDTO
-  ): Promise<CourseTeacherDTO> => {
-    const response = await api.post(`/v1/course/${String(id)}/teachers`, data);
-    return response.data;
+  ): Promise<void> => {
+    await api.post(`/v1/course/${String(id)}/teachers`, data);
   },
 
   removeCourseTeacher: async (id: number, teacherId: string): Promise<void> => {
@@ -121,11 +120,8 @@ export const courseCardApi = {
   addCourseEditor: async (
     id: number,
     userId: string
-  ): Promise<CourseTeacherDTO> => {
-    const response = await api.post(
-      `/v1/course/${String(id)}/editors/${userId}`
-    );
-    return response.data;
+  ): Promise<void> => {
+    await api.post(`/v1/course/${String(id)}/editors/${userId}`);
   },
 
   removeCourseEditor: async (id: number, userId: string): Promise<void> => {
