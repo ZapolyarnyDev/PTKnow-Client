@@ -53,8 +53,8 @@ const RegisterPage: React.FC = () => {
         return;
       }
 
-      if (formData.password.length < 12) {
-        setFormError('Пароль должен содержать минимум 12 символов.');
+      if (formData.password.length < 8) {
+        setFormError('Пароль должен содержать минимум 8 символов.');
         return;
       }
 
@@ -139,7 +139,7 @@ const RegisterPage: React.FC = () => {
               value={formData.password}
               onChange={handleInputChange}
               required
-              minLength={6}
+              minLength={8}
             />
             <button
               type="button"
