@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 import Footer from '../Components/Footer';
 import Header from '../Components/Header';
@@ -38,6 +38,8 @@ const CoursesPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [hasNext, setHasNext] = useState(false);
   const [totalPages, setTotalPages] = useState(0);
+  const [suggestions, setSuggestions] = useState<CourseDTO[]>([]);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
 
   const { enrolledCourses } = useMyEnrollments();
   const { user } = useAuth();
@@ -47,6 +49,8 @@ const CoursesPage: React.FC = () => {
     () => enrolledCourses.map(course => course.id),
     [enrolledCourses]
   );
+  const showHandleAutocomplete =
+    searchQuery.trim().startsWith('@') && searchQuery.trim().length > 1;
 
   useEffect(() => {
     if (!canFilterByState && selectedState) {
@@ -59,6 +63,7 @@ const CoursesPage: React.FC = () => {
       event.preventDefault();
       setSubmittedQuery(searchQuery.trim());
       setPage(0);
+      setSuggestions([]);
     },
     [searchQuery]
   );
@@ -109,6 +114,47 @@ const CoursesPage: React.FC = () => {
     };
   }, [canFilterByState, page, selectedState, sort, submittedQuery]);
 
+  useEffect(() => {
+    if (!showHandleAutocomplete) {
+      setSuggestions([]);
+      setSuggestionsLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    const query = searchQuery.trim();
+
+    const timeoutId = window.setTimeout(async () => {
+      setSuggestionsLoading(true);
+      try {
+        const response = await courseCardApi.getAllCourses({
+          page: 0,
+          size: 5,
+          sort: 'name,asc',
+          q: query,
+          state: canFilterByState ? selectedState || undefined : undefined,
+        });
+
+        if (!cancelled) {
+          setSuggestions(response.items);
+        }
+      } catch {
+        if (!cancelled) {
+          setSuggestions([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setSuggestionsLoading(false);
+        }
+      }
+    }, 220);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
+  }, [canFilterByState, searchQuery, selectedState, showHandleAutocomplete]);
+
   return (
     <>
       <Header />
@@ -132,8 +178,30 @@ const CoursesPage: React.FC = () => {
                 type="search"
                 value={searchQuery}
                 onChange={event => setSearchQuery(event.target.value)}
-                placeholder="Поиск по названию курса"
+                placeholder="Поиск по названию курса или @handle"
               />
+
+              {showHandleAutocomplete && (
+                <div className={styles.suggestions}>
+                  {suggestionsLoading ? (
+                    <div className={styles.suggestionState}>Поиск курсов...</div>
+                  ) : suggestions.length > 0 ? (
+                    suggestions.map(course => (
+                      <Link
+                        key={course.id}
+                        to={`/course/${course.id}`}
+                        className={styles.suggestionItem}
+                        onClick={() => setSuggestions([])}
+                      >
+                        <span className={styles.suggestionName}>{course.name}</span>
+                        <span className={styles.suggestionHandle}>@{course.handle}</span>
+                      </Link>
+                    ))
+                  ) : (
+                    <div className={styles.suggestionState}>Совпадений по handle не найдено</div>
+                  )}
+                </div>
+              )}
             </div>
             <button className={styles.searchButton} type="submit">
               Найти
