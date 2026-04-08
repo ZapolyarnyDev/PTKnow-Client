@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 
 import BookIcon from '../assets/icons/book.svg';
@@ -46,6 +46,8 @@ const Header: React.FC = () => {
     [location.pathname]
   );
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement | null>(null);
 
   const { user, logout } = useAuth();
   const isAuthenticated = Boolean(user);
@@ -60,6 +62,7 @@ const Header: React.FC = () => {
 
   const handleLogout = useCallback(async () => {
     await logout();
+    setIsProfileMenuOpen(false);
     setIsMobileMenuOpen(false);
     window.location.href = ROUTES.HOME;
   }, [logout]);
@@ -70,6 +73,28 @@ const Header: React.FC = () => {
 
   const closeMobileMenu = useCallback(() => {
     setIsMobileMenuOpen(false);
+  }, []);
+
+  useEffect(() => {
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!profileMenuRef.current?.contains(event.target as Node)) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleEscape);
+    };
   }, []);
 
   const handleNavLinkClick = useCallback(() => {
@@ -166,8 +191,12 @@ const Header: React.FC = () => {
 
         <div className={styles.authSection}>
           {isAuthenticated ? (
-            <div className={styles.profileSection}>
-              <Link to={ROUTES.PROFILE} className={styles.profileLink}>
+            <div ref={profileMenuRef} className={styles.profileSection}>
+              <Link
+                to={ROUTES.PROFILE}
+                className={styles.profileLink}
+                onClick={() => setIsProfileMenuOpen(false)}
+              >
                 <div className={styles.userInfo}>
                   <img
                     src={avatarUrl || Logotype}
@@ -179,8 +208,39 @@ const Header: React.FC = () => {
                   {displayName && <p className={styles.userName}>{displayName}</p>}
                   {user?.handle && <p className={styles.handleName}>{user.handle}</p>}
                 </div>
-                <img src={ProfileIcon} alt="" />
               </Link>
+              <button
+                type="button"
+                className={`${styles.profileToggle} ${
+                  isProfileMenuOpen ? styles.profileToggleOpen : ''
+                }`}
+                aria-label="Открыть меню профиля"
+                aria-expanded={isProfileMenuOpen}
+                onClick={() => setIsProfileMenuOpen(prev => !prev)}
+              >
+                <span className={styles.profileChevron} aria-hidden="true" />
+              </button>
+
+              <div
+                className={`${styles.profileDropdown} ${
+                  isProfileMenuOpen ? styles.profileDropdownOpen : ''
+                }`}
+              >
+                <Link
+                  to={ROUTES.PROFILE}
+                  className={styles.profileDropdownLink}
+                  onClick={() => setIsProfileMenuOpen(false)}
+                >
+                  Профиль
+                </Link>
+                <button
+                  type="button"
+                  className={styles.profileDropdownLogout}
+                  onClick={handleLogout}
+                >
+                  Выйти
+                </button>
+              </div>
             </div>
           ) : (
             !isAuthPage && (
