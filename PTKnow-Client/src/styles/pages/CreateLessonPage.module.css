@@ -265,6 +265,26 @@
   font-size: 0.85rem;
 }
 
+.fileList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.fileChip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0 0.8rem;
+  border-radius: 999px;
+  background: #edf3ff;
+  color: #102a56;
+  font-size: 0.82rem;
+  font-weight: 700;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
 .actions {
   display: flex;
   justify-content: flex-end;

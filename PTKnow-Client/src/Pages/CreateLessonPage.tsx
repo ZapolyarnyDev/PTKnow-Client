@@ -43,10 +43,8 @@ const CreateLessonPage: React.FC = () => {
   const [beginAt, setBeginAt] = useState('');
   const [endsAt, setEndsAt] = useState('');
   const [type, setType] = useState('');
-  const [mdFile, setMdFile] = useState<File | null>(null);
-  const [uploadedMaterial, setUploadedMaterial] = useState<FileMetaDTO | null>(
-    null
-  );
+  const [materialFiles, setMaterialFiles] = useState<File[]>([]);
+  const [uploadedMaterials, setUploadedMaterials] = useState<FileMetaDTO[]>([]);
   const [localError, setLocalError] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
@@ -127,23 +125,17 @@ const CreateLessonPage: React.FC = () => {
     }
   };
 
-  const handleMdFileChange = (file: File | null) => {
-    setUploadedMaterial(null);
+  const handleMaterialFilesChange = (files: FileList | null) => {
+    setUploadedMaterials([]);
     setUploadMessage(null);
     setUploadError(null);
-    setMdFile(null);
+    setMaterialFiles([]);
 
-    if (!file) {
+    if (!files || files.length === 0) {
       return;
     }
 
-    const fileName = file.name.toLowerCase();
-    if (!fileName.endsWith('.md') && !fileName.endsWith('.markdown')) {
-      setUploadError('Можно загружать только файлы .md или .markdown.');
-      return;
-    }
-
-    setMdFile(file);
+    setMaterialFiles(Array.from(files));
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -200,11 +192,17 @@ const CreateLessonPage: React.FC = () => {
           ? await replaceLesson(lessonId, payload)
           : await createLesson(courseId, payload);
 
-      if (mdFile) {
+      if (materialFiles.length > 0) {
         try {
-          const uploaded = await addLessonMaterial(savedLesson.id, mdFile);
-          setUploadedMaterial(uploaded);
-          setUploadMessage('Материал успешно добавлен к уроку.');
+          const uploaded = await Promise.all(
+            materialFiles.map(file => addLessonMaterial(savedLesson.id, file))
+          );
+          setUploadedMaterials(uploaded);
+          setUploadMessage(
+            uploaded.length === 1
+              ? 'Материал успешно добавлен к уроку.'
+              : `Материалы успешно добавлены: ${uploaded.length}`
+          );
         } catch (materialError) {
           const message =
             materialError instanceof Error
@@ -364,25 +362,41 @@ const CreateLessonPage: React.FC = () => {
               <div className={styles.uploadCard}>
                 <div>
                   <h3>Материал урока</h3>
-                  <p>Загрузите Markdown-файл, если хотите приложить отдельный конспект</p>
+                  <p>Загрузите один или несколько файлов любого типа, которые должны сопровождать урок</p>
                 </div>
                 <label className={styles.uploadField}>
                   <input
                     type="file"
-                    accept=".md,.markdown,text/markdown"
+                    multiple
                     onChange={event => {
                       resetErrors();
-                      const file = event.target.files?.[0] ?? null;
-                      handleMdFileChange(file);
+                      handleMaterialFilesChange(event.target.files);
                     }}
                     disabled={isFormDisabled}
                   />
-                  <span>{mdFile ? mdFile.name : 'Выбрать .md файл'}</span>
-                </label>
-                {uploadedMaterial && (
-                  <span className={styles.helper}>
-                    Уже загружено: {uploadedMaterial.originalFilename}
+                  <span>
+                    {materialFiles.length > 0
+                      ? `Выбрано файлов: ${materialFiles.length}`
+                      : 'Выбрать файлы'}
                   </span>
+                </label>
+                {materialFiles.length > 0 && (
+                  <div className={styles.fileList}>
+                    {materialFiles.map(file => (
+                      <span key={`${file.name}-${file.size}`} className={styles.fileChip}>
+                        {file.name}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {uploadedMaterials.length > 0 && (
+                  <div className={styles.fileList}>
+                    {uploadedMaterials.map(file => (
+                      <span key={file.id} className={styles.fileChip}>
+                        {file.originalFilename}
+                      </span>
+                    ))}
+                  </div>
                 )}
               </div>
             </section>
