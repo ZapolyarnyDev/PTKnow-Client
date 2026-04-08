@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+
 import { useCourse } from '../hooks/useCourse';
 import styles from '../styles/components/CourseList.module.css';
 import { CourseCard } from './CourseCard';
@@ -16,6 +17,8 @@ interface CourseListProps {
   isLoading?: boolean;
   error?: string | null;
   enrolledCourseIds?: number[];
+  emptyTitle?: string;
+  emptyDescription?: string;
 }
 
 export const CourseList: React.FC<CourseListProps> = ({
@@ -25,6 +28,8 @@ export const CourseList: React.FC<CourseListProps> = ({
   isLoading,
   error,
   enrolledCourseIds,
+  emptyTitle = 'Пока нет курсов',
+  emptyDescription = 'Здесь появятся доступные направления, как только они будут опубликованы.',
 }) => {
   const shouldUseApi = !courses;
   const { course, loading, error: courseError } = useCourse({
@@ -32,10 +37,7 @@ export const CourseList: React.FC<CourseListProps> = ({
   });
   const [visibleCount, setVisibleCount] = useState(limit || 6);
 
-  const displayCourses = useMemo(
-    () => courses ?? course,
-    [courses, course]
-  );
+  const displayCourses = useMemo(() => courses ?? course, [courses, course]);
   const visibleCourses = useMemo(
     () => displayCourses.slice(0, visibleCount),
     [displayCourses, visibleCount]
@@ -62,26 +64,35 @@ export const CourseList: React.FC<CourseListProps> = ({
   }
 
   if (displayError) {
+    return <div className={styles.error}>Ошибка загрузки курсов: {displayError}</div>;
+  }
+
+  if (displayCourses.length === 0) {
     return (
-      <div className={styles.error}>Ошибка загрузки курсов: {displayError}</div>
+      <div className={styles.emptyState}>
+        <h3 className={styles.emptyTitle}>{emptyTitle}</h3>
+        <p className={styles.emptyDescription}>{emptyDescription}</p>
+      </div>
     );
   }
 
   return (
-    <div className={styles.courseList}>
-      {visibleCourses.map(courseItem => (
-        <CourseCard
-          key={courseItem.id}
-          {...courseItem}
-          enrolledCourseIds={enrolledIds}
-        />
-      ))}
+    <>
+      <div className={styles.courseList}>
+        {visibleCourses.map(courseItem => (
+          <CourseCard
+            key={courseItem.id}
+            {...courseItem}
+            enrolledCourseIds={enrolledIds}
+          />
+        ))}
+      </div>
 
       {showLoadMore && displayCourses.length > visibleCount && (
         <button className={styles.showMoreButton} onClick={handleShowMore}>
           Показать еще ({displayCourses.length - visibleCount})
         </button>
       )}
-    </div>
+    </>
   );
 };

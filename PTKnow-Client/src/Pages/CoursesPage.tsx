@@ -1,25 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import Header from '../Components/Header';
 import Footer from '../Components/Footer';
-import { courseCardApi } from '../api';
+import Header from '../Components/Header';
 import { CourseList } from '../Components/CourseList';
+import { courseCardApi } from '../api';
 import { useAuth } from '../hooks/useAuth';
 import { useMyEnrollments } from '../hooks/useMyEnrollments';
 import type { CourseDTO } from '../types/CourseCard';
 import styles from '../styles/pages/CoursesPage.module.css';
 
 const PAGE_SIZE = 12;
-
-const FILTERS = [
-  { id: 'all', label: 'Все направления' },
-  { id: 'it', label: 'IT и программирование' },
-  { id: 'design', label: 'Дизайн' },
-  { id: 'languages', label: 'Языки' },
-  { id: 'music', label: 'Музыка' },
-  { id: 'sports', label: 'Спорт' },
-] as const;
 
 const SORT_OPTIONS = [
   { value: 'id,desc', label: 'Сначала новые' },
@@ -39,7 +30,6 @@ const CoursesPage: React.FC = () => {
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [submittedQuery, setSubmittedQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState<string>('all');
   const [selectedState, setSelectedState] = useState('');
   const [sort, setSort] = useState('id,desc');
   const [page, setPage] = useState(0);
@@ -48,26 +38,21 @@ const CoursesPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [hasNext, setHasNext] = useState(false);
   const [totalPages, setTotalPages] = useState(0);
+
   const { enrolledCourses } = useMyEnrollments();
   const { user } = useAuth();
 
+  const canFilterByState = user?.role === 'ADMIN' || user?.role === 'TEACHER';
   const enrolledIds = useMemo(
     () => enrolledCourses.map(course => course.id),
     [enrolledCourses]
   );
-  const canFilterByState =
-    user?.role === 'ADMIN' || user?.role === 'TEACHER';
 
   useEffect(() => {
     if (!canFilterByState && selectedState) {
       setSelectedState('');
     }
   }, [canFilterByState, selectedState]);
-
-  const handleFilterClick = useCallback((filterId: string) => {
-    setActiveFilter(filterId);
-    setPage(0);
-  }, []);
 
   const handleSearchSubmit = useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
@@ -92,7 +77,6 @@ const CoursesPage: React.FC = () => {
           sort,
           q: submittedQuery || undefined,
           state: canFilterByState ? selectedState || undefined : undefined,
-          tag: activeFilter === 'all' ? undefined : activeFilter,
         });
 
         if (cancelled) {
@@ -104,7 +88,9 @@ const CoursesPage: React.FC = () => {
         setTotalPages(response.totalPages);
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Ошибка загрузки курсов');
+          setError(
+            err instanceof Error ? err.message : 'Не удалось загрузить курсы.'
+          );
           setCourses([]);
           setHasNext(false);
           setTotalPages(0);
@@ -121,109 +107,111 @@ const CoursesPage: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [activeFilter, canFilterByState, page, selectedState, sort, submittedQuery]);
+  }, [canFilterByState, page, selectedState, sort, submittedQuery]);
 
   return (
     <>
       <Header />
-      <div className={styles.controls}>
-        <form className={styles.searchForm} onSubmit={handleSearchSubmit}>
-          <input
-            className={styles.searchInput}
-            type="search"
-            value={searchQuery}
-            onChange={event => setSearchQuery(event.target.value)}
-            placeholder="Поиск по названию курса"
-          />
-          <button className={styles.searchButton} type="submit">
-            Найти
-          </button>
-        </form>
+      <main className={styles.page}>
+        <section className={styles.hero}>
+          <div className={styles.heroText}>
+            <p className={styles.heroLabel}>Каталог курсов</p>
+            <h1 className={styles.heroTitle}>Подберите направление для обучения</h1>
+            <p className={styles.heroDescription}>
+              Ищите по названию курса и сортируйте каталог так, как удобно именно вам.
+            </p>
+          </div>
 
-        <div className={styles.selects}>
-          {canFilterByState && (
+          <form className={styles.searchForm} onSubmit={handleSearchSubmit}>
+            <div className={styles.searchInputWrap}>
+              <span className={styles.searchIcon} aria-hidden="true">
+                ⌕
+              </span>
+              <input
+                className={styles.searchInput}
+                type="search"
+                value={searchQuery}
+                onChange={event => setSearchQuery(event.target.value)}
+                placeholder="Поиск по названию курса"
+              />
+            </div>
+            <button className={styles.searchButton} type="submit">
+              Найти
+            </button>
+          </form>
+
+          <div className={styles.controlsRow}>
+            {canFilterByState && (
+              <select
+                className={styles.select}
+                value={selectedState}
+                onChange={event => {
+                  setSelectedState(event.target.value);
+                  setPage(0);
+                }}
+              >
+                {STATE_OPTIONS.map(option => (
+                  <option key={option.label} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            )}
+
             <select
               className={styles.select}
-              value={selectedState}
+              value={sort}
               onChange={event => {
-                setSelectedState(event.target.value);
+                setSort(event.target.value);
                 setPage(0);
               }}
             >
-              {STATE_OPTIONS.map(option => (
-                <option key={option.label} value={option.value}>
+              {SORT_OPTIONS.map(option => (
+                <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
               ))}
             </select>
-          )}
+          </div>
+        </section>
 
-          <select
-            className={styles.select}
-            value={sort}
-            onChange={event => {
-              setSort(event.target.value);
-              setPage(0);
-            }}
-          >
-            {SORT_OPTIONS.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+        <section className={styles.catalogSection}>
+          <CourseList
+            key={`courses-${location.key}-${page}-${selectedState}-${sort}-${submittedQuery}`}
+            courses={courses}
+            isLoading={loading}
+            error={error}
+            showLoadMore={false}
+            enrolledCourseIds={enrolledIds}
+            emptyTitle="Курсы не найдены"
+            emptyDescription="Попробуйте изменить поисковый запрос или параметры сортировки."
+          />
 
-      <div className={styles.coursesFilter}>
-        {FILTERS.map(filter => (
-          <button
-            key={filter.id}
-            className={`${styles.filterButton} ${
-              activeFilter === filter.id ? styles.filterButtonActive : ''
-            }`}
-            onClick={() => handleFilterClick(filter.id)}
-            type="button"
-            aria-pressed={activeFilter === filter.id}
-          >
-            {filter.label}
-          </button>
-        ))}
-      </div>
-
-      <div className={styles.container}>
-        <div className={styles.pageHeader}></div>
-        <CourseList
-          key={`courses-${location.key}-${page}-${activeFilter}-${selectedState}-${sort}-${submittedQuery}`}
-          courses={courses}
-          isLoading={loading}
-          error={error}
-          showLoadMore={false}
-          enrolledCourseIds={enrolledIds}
-        />
-
-        <div className={styles.pagination}>
-          <button
-            className={styles.paginationButton}
-            type="button"
-            onClick={() => setPage(prev => Math.max(0, prev - 1))}
-            disabled={page === 0 || loading}
-          >
-            Назад
-          </button>
-          <span className={styles.paginationInfo}>
-            Страница {totalPages === 0 ? 0 : page + 1} из {Math.max(totalPages, 1)}
-          </span>
-          <button
-            className={styles.paginationButton}
-            type="button"
-            onClick={() => setPage(prev => prev + 1)}
-            disabled={!hasNext || loading}
-          >
-            Далее
-          </button>
-        </div>
-      </div>
+          <div className={styles.pagination}>
+            <button
+              className={styles.paginationButton}
+              type="button"
+              onClick={() => setPage(prev => Math.max(0, prev - 1))}
+              disabled={page === 0 || loading}
+              aria-label="Предыдущая страница"
+            >
+              ←
+            </button>
+            <span className={styles.paginationInfo}>
+              {totalPages === 0 ? '0 / 1' : `${page + 1} / ${Math.max(totalPages, 1)}`}
+            </span>
+            <button
+              className={styles.paginationButton}
+              type="button"
+              onClick={() => setPage(prev => prev + 1)}
+              disabled={!hasNext || loading}
+              aria-label="Следующая страница"
+            >
+              →
+            </button>
+          </div>
+        </section>
+      </main>
       <Footer />
     </>
   );
