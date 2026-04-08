@@ -6,12 +6,21 @@ import Footer from '../Components/Footer.tsx';
 import Header from '../Components/Header.tsx';
 import { AuthButton } from '../Components/ui/forms/AuthButton.tsx';
 import { AuthInput } from '../Components/ui/forms/AuthForm.tsx';
+import { ErrorModal } from '../Components/ui/forms/ErrorModal.tsx';
 import { useAuth } from '../hooks/useAuth.ts';
 import style from '../styles/pages/AuthPage.module.css';
 
 type AuthMode = 'login' | 'register';
 
-const AuthPage: React.FC = () => {
+type AuthPageContentProps = {
+  resolveRecaptchaToken: (
+    action: 'login' | 'register'
+  ) => Promise<string | undefined>;
+};
+
+const AuthPageContent: React.FC<AuthPageContentProps> = ({
+  resolveRecaptchaToken,
+}) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [mode, setMode] = useState<AuthMode>(
     searchParams.get('mode') === 'register' ? 'register' : 'login'
@@ -24,9 +33,9 @@ const AuthPage: React.FC = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [recaptchaError, setRecaptchaError] = useState<string | null>(null);
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
 
-  const { login, register, isLoading, error } = useAuth();
-  const { executeRecaptcha } = useGoogleReCaptcha();
+  const { login, register, isLoading, error, clearError } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -34,10 +43,17 @@ const AuthPage: React.FC = () => {
     setMode(nextMode);
   }, [searchParams]);
 
+  const visibleError = formError || recaptchaError || error;
+
+  useEffect(() => {
+    setIsErrorModalOpen(Boolean(visibleError));
+  }, [visibleError]);
+
   const switchMode = useCallback(
     (nextMode: AuthMode) => {
       setFormError(null);
       setRecaptchaError(null);
+      clearError();
       setIsPasswordVisible(false);
       setMode(nextMode);
 
@@ -47,7 +63,7 @@ const AuthPage: React.FC = () => {
         setSearchParams({}, { replace: true });
       }
     },
-    [setSearchParams]
+    [clearError, setSearchParams]
   );
 
   const pageTitle = useMemo(
@@ -67,28 +83,26 @@ const AuthPage: React.FC = () => {
       setFormError(null);
       setRecaptchaError(null);
 
-      if (!executeRecaptcha) {
-        setRecaptchaError('reCAPTCHA не готова. Попробуйте снова.');
-        return;
-      }
+      try {
+        const recaptchaToken = await resolveRecaptchaToken('login');
+        const success = await login({
+          email: email.trim(),
+          password,
+          recaptchaToken,
+        });
 
-      const recaptchaToken = await executeRecaptcha('login');
-      if (!recaptchaToken) {
-        setRecaptchaError('Не удалось выполнить проверку reCAPTCHA.');
-        return;
-      }
-
-      const success = await login({
-        email: email.trim(),
-        password,
-        recaptchaToken,
-      });
-
-      if (success) {
-        navigate('/profile');
+        if (success) {
+          navigate('/profile');
+        }
+      } catch (recaptchaFailure) {
+        setRecaptchaError(
+          recaptchaFailure instanceof Error
+            ? recaptchaFailure.message
+            : 'Не удалось выполнить проверку безопасности.'
+        );
       }
     },
-    [email, executeRecaptcha, login, navigate, password]
+    [email, login, navigate, password, resolveRecaptchaToken]
   );
 
   const handleRegister = useCallback(
@@ -113,48 +127,58 @@ const AuthPage: React.FC = () => {
       setFormError(null);
       setRecaptchaError(null);
 
-      if (!executeRecaptcha) {
-        setRecaptchaError('reCAPTCHA не готова. Попробуйте снова.');
-        return;
-      }
+      try {
+        const recaptchaToken = await resolveRecaptchaToken('register');
+        const success = await register({
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          middleName: middleName.trim() || undefined,
+          email: email.trim(),
+          password,
+          recaptchaToken,
+        });
 
-      const recaptchaToken = await executeRecaptcha('register');
-      if (!recaptchaToken) {
-        setRecaptchaError('Не удалось выполнить проверку reCAPTCHA.');
-        return;
-      }
-
-      const success = await register({
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        middleName: middleName.trim() || undefined,
-        email: email.trim(),
-        password,
-        recaptchaToken,
-      });
-
-      if (success) {
-        navigate('/profile');
+        if (success) {
+          navigate('/profile');
+        }
+      } catch (recaptchaFailure) {
+        setRecaptchaError(
+          recaptchaFailure instanceof Error
+            ? recaptchaFailure.message
+            : 'Не удалось выполнить проверку безопасности.'
+        );
       }
     },
     [
       email,
-      executeRecaptcha,
       firstName,
       lastName,
       middleName,
       navigate,
       password,
       register,
+      resolveRecaptchaToken,
     ]
   );
 
-  const visibleError = formError || recaptchaError || error;
   const isRegister = mode === 'register';
+
+  const handleCloseErrorModal = useCallback(() => {
+    setIsErrorModalOpen(false);
+    setFormError(null);
+    setRecaptchaError(null);
+    clearError();
+  }, [clearError]);
 
   return (
     <>
       <Header />
+      <ErrorModal
+        title={isRegister ? 'Не удалось завершить регистрацию' : 'Не удалось выполнить вход'}
+        message={visibleError}
+        isOpen={isErrorModalOpen}
+        onClose={handleCloseErrorModal}
+      />
       <div className={style.container}>
         <form
           onSubmit={isRegister ? handleRegister : handleLogin}
@@ -259,13 +283,6 @@ const AuthPage: React.FC = () => {
             </div>
           </div>
 
-          {visibleError && (
-            <div className={style.errorMessage} role="alert" aria-live="polite">
-              <span className={style.errorIcon}>!</span>
-              <span className={style.errorText}>{visibleError}</span>
-            </div>
-          )}
-
           <div className={style.buttonContainer}>
             <AuthButton
               type="submit"
@@ -280,6 +297,42 @@ const AuthPage: React.FC = () => {
       <Footer />
     </>
   );
+};
+
+const AuthPageWithRecaptcha: React.FC = () => {
+  const { executeRecaptcha } = useGoogleReCaptcha();
+
+  const resolveRecaptchaToken = useCallback(
+    async (action: 'login' | 'register') => {
+      if (!executeRecaptcha) {
+        throw new Error(
+          'Сервис проверки временно недоступен. Обновите страницу и попробуйте снова.'
+        );
+      }
+
+      const token = await executeRecaptcha(action);
+      if (!token) {
+        throw new Error(
+          'Не удалось выполнить проверку безопасности. Попробуйте еще раз.'
+        );
+      }
+
+      return token;
+    },
+    [executeRecaptcha]
+  );
+
+  return <AuthPageContent resolveRecaptchaToken={resolveRecaptchaToken} />;
+};
+
+const AuthPageWithoutRecaptcha: React.FC = () => {
+  const resolveRecaptchaToken = useCallback(async () => undefined, []);
+  return <AuthPageContent resolveRecaptchaToken={resolveRecaptchaToken} />;
+};
+
+const AuthPage: React.FC = () => {
+  const recaptchaEnabled = Boolean(import.meta.env.VITE_RECAPTCHA_SITE_KEY);
+  return recaptchaEnabled ? <AuthPageWithRecaptcha /> : <AuthPageWithoutRecaptcha />;
 };
 
 export default AuthPage;
