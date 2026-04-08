@@ -36,23 +36,36 @@ const MyCoursesPage: React.FC = () => {
   return (
     <>
       <Header />
-      <main className={styles.container}>
-        <div className={styles.header}>
-          <h1>Мои курсы</h1>
-          <p>Курсы, на которые вы уже записаны.</p>
-        </div>
+      <main className={styles.page}>
+        <section className={styles.hero}>
+          <div className={styles.heroText}>
+            <p className={styles.heroLabel}>Личный кабинет</p>
+            <h1 className={styles.heroTitle}>Мои курсы</h1>
+            <p className={styles.heroDescription}>
+              Здесь собраны все курсы, на которые вы уже записаны и к которым
+              можно быстро вернуться
+            </p>
+          </div>
 
-        {!loading && enrolledCourseCards.length === 0 && (
-          <p className={styles.empty}>У вас пока нет записей на курсы.</p>
-        )}
+          <div className={styles.heroStats}>
+            <div className={styles.statCard}>
+              <span className={styles.statValue}>{enrolledCourses.length}</span>
+              <span className={styles.statLabel}>активных записей</span>
+            </div>
+          </div>
+        </section>
 
-        <CourseList
-          showLoadMore={false}
-          courses={enrolledCourseCards}
-          isLoading={loading}
-          error={error}
-          enrolledCourseIds={enrolledCourseIds}
-        />
+        <section className={styles.catalogSection}>
+          <CourseList
+            showLoadMore={false}
+            courses={enrolledCourseCards}
+            isLoading={loading}
+            error={error}
+            enrolledCourseIds={enrolledCourseIds}
+            emptyTitle="Вы пока не записаны ни на один курс"
+            emptyDescription="Когда выберете интересный курс в каталоге, он появится здесь"
+          />
+        </section>
       </main>
       <Footer />
     </>
