@@ -6,7 +6,6 @@ import type {
   UpdateCourseDTO,
   UpdateCourseTeacherDTO,
 } from '../../types/CourseCard';
-import type { UserSummaryDTO } from '../../types/user';
 import { api } from '../axiosConfig';
 
 export const courseCardApi = {
@@ -138,12 +137,12 @@ export const courseCardApi = {
     return response.data;
   },
 
-  getCourseStudents: async (id: number): Promise<UserSummaryDTO[]> => {
+  getCourseStudents: async (id: number): Promise<EnrollmentDTO[]> => {
     const response = await api.get(`/v1/course/${String(id)}/students`);
     return response.data;
   },
 
-  getCourseMembers: async (id: number): Promise<UserSummaryDTO[]> => {
+  getCourseMembers: async (id: number): Promise<EnrollmentDTO[]> => {
     const response = await api.get(`/v1/course/${String(id)}/members`);
     return response.data;
   },
