@@ -9,6 +9,7 @@ interface AuthInputProps {
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
   required?: boolean;
   minLength?: number;
+  maxLength?: number;
   className?: string;
 }
 
@@ -21,6 +22,7 @@ const AuthInputComponent = ({
   onBlur,
   required = false,
   minLength,
+  maxLength,
   className = '',
 }: AuthInputProps) => {
   return (
@@ -34,6 +36,7 @@ const AuthInputComponent = ({
       onBlur={onBlur}
       required={required}
       minLength={minLength}
+      maxLength={maxLength}
     />
   );
 };

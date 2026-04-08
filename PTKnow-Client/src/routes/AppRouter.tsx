@@ -25,11 +25,13 @@ import CourseRegisterPage from '../Pages/CourseRegisterPage';
 import MyCoursesPage from '../Pages/MyCoursesPage';
 import ProfileSearchPage from '../Pages/ProfileSearchPage';
 import CommandPalette from '../Components/CommandPalette';
+import CommandPaletteHint from '../Components/CommandPaletteHint';
 
 const AppRouter: React.FC = () => {
   return (
     <Router>
       <CommandPalette />
+      <CommandPaletteHint />
       <Routes>
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/home" element={<HomePage />} />

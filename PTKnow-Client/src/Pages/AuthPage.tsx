@@ -24,6 +24,12 @@ type AuthPageContentProps = {
   ) => Promise<string | undefined>;
 };
 
+const EMAIL_MAX_LENGTH = 254;
+const PASSWORD_MIN_LENGTH = 8;
+const PASSWORD_MAX_LENGTH = 128;
+const NAME_MIN_LENGTH = 2;
+const NAME_MAX_LENGTH = 64;
+
 const MailIcon = () => (
   <svg viewBox="0 0 24 24" className={style.fieldSvg} aria-hidden="true">
     <path
@@ -107,31 +113,51 @@ const AuthPageContent: React.FC<AuthPageContentProps> = ({
 
   const fieldErrors = useMemo(() => {
     const nextErrors: Partial<Record<FieldName, string>> = {};
+    const trimmedEmail = email.trim();
+    const trimmedFirstName = firstName.trim();
+    const trimmedLastName = lastName.trim();
+    const trimmedMiddleName = middleName.trim();
 
-    if (!email.trim()) {
+    if (!trimmedEmail) {
       nextErrors.email = 'Укажите адрес электронной почты';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+    } else if (trimmedEmail.length > EMAIL_MAX_LENGTH) {
+      nextErrors.email = 'Почта слишком длинная';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
       nextErrors.email = 'Почта введена в неверном формате';
     }
 
     if (!password) {
       nextErrors.password = 'Введите пароль';
-    } else if (password.length < 8) {
+    } else if (password.length < PASSWORD_MIN_LENGTH) {
       nextErrors.password = 'Минимум 8 символов';
+    } else if (password.length > PASSWORD_MAX_LENGTH) {
+      nextErrors.password = 'Пароль слишком длинный';
     }
 
     if (mode === 'register') {
-      if (!firstName.trim()) {
+      if (!trimmedFirstName) {
         nextErrors.firstName = 'Укажите имя';
+      } else if (trimmedFirstName.length < NAME_MIN_LENGTH) {
+        nextErrors.firstName = 'Имя должно содержать минимум 2 символа';
+      } else if (trimmedFirstName.length > NAME_MAX_LENGTH) {
+        nextErrors.firstName = 'Имя слишком длинное';
       }
 
-      if (!lastName.trim()) {
+      if (!trimmedLastName) {
         nextErrors.lastName = 'Укажите фамилию';
+      } else if (trimmedLastName.length < NAME_MIN_LENGTH) {
+        nextErrors.lastName = 'Фамилия должна содержать минимум 2 символа';
+      } else if (trimmedLastName.length > NAME_MAX_LENGTH) {
+        nextErrors.lastName = 'Фамилия слишком длинная';
+      }
+
+      if (trimmedMiddleName && trimmedMiddleName.length > NAME_MAX_LENGTH) {
+        nextErrors.middleName = 'Отчество слишком длинное';
       }
     }
 
     return nextErrors;
-  }, [email, firstName, lastName, mode, password]);
+  }, [email, firstName, lastName, middleName, mode, password]);
 
   const visibleError = formError || recaptchaError || error;
 
@@ -179,7 +205,7 @@ const AuthPageContent: React.FC<AuthPageContentProps> = ({
   const validateBeforeSubmit = useCallback(() => {
     const relevantFields: FieldName[] =
       mode === 'register'
-        ? ['email', 'password', 'firstName', 'lastName']
+        ? ['email', 'password', 'firstName', 'lastName', 'middleName']
         : ['email', 'password'];
 
     setTouchedFields(prev => {
@@ -376,6 +402,7 @@ const AuthPageContent: React.FC<AuthPageContentProps> = ({
                   value={email}
                   className={style.inputAuth}
                   onChange={event => setEmail(event.target.value)}
+                  maxLength={EMAIL_MAX_LENGTH}
                   required
                 />,
                 <MailIcon />
@@ -395,6 +422,8 @@ const AuthPageContent: React.FC<AuthPageContentProps> = ({
                     value={firstName}
                     className={style.inputAuth}
                     onChange={event => setFirstName(event.target.value)}
+                    minLength={NAME_MIN_LENGTH}
+                    maxLength={NAME_MAX_LENGTH}
                     required={isRegister}
                   />,
                   <UserIcon />
@@ -407,6 +436,8 @@ const AuthPageContent: React.FC<AuthPageContentProps> = ({
                     value={lastName}
                     className={style.inputAuth}
                     onChange={event => setLastName(event.target.value)}
+                    minLength={NAME_MIN_LENGTH}
+                    maxLength={NAME_MAX_LENGTH}
                     required={isRegister}
                   />,
                   <UserIcon />
@@ -419,6 +450,7 @@ const AuthPageContent: React.FC<AuthPageContentProps> = ({
                     value={middleName}
                     className={style.inputAuth}
                     onChange={event => setMiddleName(event.target.value)}
+                    maxLength={NAME_MAX_LENGTH}
                   />,
                   <UserIcon />
                 )}
@@ -452,7 +484,8 @@ const AuthPageContent: React.FC<AuthPageContentProps> = ({
                       className={style.inputAuth}
                       onChange={event => setPassword(event.target.value)}
                       required
-                      minLength={8}
+                      minLength={PASSWORD_MIN_LENGTH}
+                      maxLength={PASSWORD_MAX_LENGTH}
                     />
                     <button
                       type="button"

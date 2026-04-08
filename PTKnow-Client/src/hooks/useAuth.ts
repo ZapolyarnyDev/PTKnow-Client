@@ -139,6 +139,7 @@ type UseAuthValue = {
 
 const AuthContext = createContext<UseAuthValue | null>(null);
 let authInitializationPromise: Promise<boolean> | null = null;
+const COMMAND_PALETTE_HINT_KEY = 'commandPaletteHintPending';
 
 const useProvideAuth = (): UseAuthValue => {
   const [user, setUser] = useState<User | null>(() => getStoredUser());
@@ -199,6 +200,7 @@ const useProvideAuth = (): UseAuthValue => {
       const nextUser = buildUser(profile, token, getStoredUser());
       setUser(nextUser);
       persistUser(nextUser);
+      sessionStorage.setItem(COMMAND_PALETTE_HINT_KEY, 'true');
       return true;
     } catch (err: unknown) {
       setError(getAuthActionErrorMessage(err, 'login'));
@@ -263,6 +265,7 @@ const useProvideAuth = (): UseAuthValue => {
       const nextUser = buildUser(profile, token, getStoredUser());
       setUser(nextUser);
       persistUser(nextUser);
+      sessionStorage.setItem(COMMAND_PALETTE_HINT_KEY, 'true');
       return true;
     } catch (err: unknown) {
       setError(getAuthActionErrorMessage(err, 'register'));
