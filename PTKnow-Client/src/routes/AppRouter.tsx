@@ -10,6 +10,7 @@ import AuthPage from '../Pages/AuthPage';
 import CoursesPage from '../Pages/CoursesPage';
 import CreateCoursePage from '../Pages/CreateCoursePage';
 import CreateLessonPage from '../Pages/CreateLessonPage';
+import HomePage from '../Pages/HomePage';
 import { ProfilePage } from '../Pages/ProfilePage';
 import RegisterPage from '../Pages/RegisterPage';
 import GuestRoute from './GuestRoute';
@@ -29,7 +30,7 @@ const AppRouter: React.FC = () => {
     <Router>
       <Routes>
         <Route path="/" element={<Navigate to="/home" replace />} />
-        <Route path="/home" element={<CoursesPage />} />
+        <Route path="/home" element={<HomePage />} />
         <Route path="/courses" element={<CoursesPage />} />
         <Route
           path="/auth"
