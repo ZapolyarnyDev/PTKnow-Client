@@ -171,14 +171,16 @@
   width: 10.25rem;
   height: 3rem;
   border-radius: 1000px;
-  background-color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.92);
   cursor: pointer;
   font-family: var(--font-family-monts);
   font-weight: 500;
   font-size: 0.875rem;
   color: var(--primary-color);
   border: none;
-  transition: all 0.2s ease;
+  box-shadow: 0 0.5rem 1.1rem rgba(7, 31, 70, 0.08);
+  transition: background-color 0.2s ease, box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 .profileCreateCourse {
@@ -189,22 +191,28 @@
   width: 8.5rem;
   height: 3rem;
   border-radius: 1000px;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: #d94b4b;
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   font-family: var(--font-family-monts);
   font-weight: 500;
   font-size: 0.875rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  box-shadow: 0 0.6rem 1.4rem rgba(115, 25, 25, 0.18);
+  transition: background-color 0.2s ease, box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 .profileLogout:hover {
-  background-color: rgba(255, 255, 255, 0.3);
+  background-color: #c73d3d;
+  box-shadow: 0 0.75rem 1.6rem rgba(115, 25, 25, 0.24);
+  transform: translateY(-1px);
 }
 
 .profileEdit > button:not(.profileLogout):hover {
-  background-color: #f0f0f0;
+  background-color: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 0.65rem 1.3rem rgba(7, 31, 70, 0.12);
+  transform: translateY(-1px);
 }
 
 .profileInfoTitle {
