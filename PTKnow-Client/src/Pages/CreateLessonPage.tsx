@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 
 import Footer from '../Components/Footer';
 import Header from '../Components/Header';
@@ -92,6 +92,21 @@ const CreateLessonPage: React.FC = () => {
     authLoading ||
     courseLoading ||
     !canManageLessons;
+
+  if (!courseId) {
+    return <Navigate to="/home" replace />;
+  }
+
+  if (
+    isInitialized &&
+    !authLoading &&
+    !courseLoading &&
+    user &&
+    course &&
+    !canManageLessons
+  ) {
+    return <Navigate to="/home" replace />;
+  }
 
   const toIso = (value: string) => (value ? new Date(value).toISOString() : '');
 

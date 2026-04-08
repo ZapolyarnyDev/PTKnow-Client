@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import Header from '../Components/Header';
-import Footer from '../Components/Footer';
+import { Navigate } from 'react-router-dom';
+
 import { CourseList } from '../Components/CourseList';
+import Footer from '../Components/Footer';
+import Header from '../Components/Header';
 import { useAuth } from '../hooks/useAuth';
 import { useMyEnrollments } from '../hooks/useMyEnrollments';
 import styles from '../styles/pages/MyCoursesPage.module.css';
@@ -28,6 +29,10 @@ const MyCoursesPage: React.FC = () => {
     [enrolledCourses]
   );
 
+  if (!user) {
+    return <Navigate to="/home" replace />;
+  }
+
   return (
     <>
       <Header />
@@ -37,28 +42,17 @@ const MyCoursesPage: React.FC = () => {
           <p>Курсы, на которые вы уже записаны.</p>
         </div>
 
-        {!user && (
-          <div className={styles.notice}>
-            <p>Войдите в аккаунт, чтобы увидеть список ваших курсов.</p>
-            <Link to="/auth" className={styles.noticeButton}>
-              Войти
-            </Link>
-          </div>
-        )}
-
-        {user && !loading && enrolledCourseCards.length === 0 && (
+        {!loading && enrolledCourseCards.length === 0 && (
           <p className={styles.empty}>У вас пока нет записей на курсы.</p>
         )}
 
-        {user && (
-          <CourseList
-            showLoadMore={false}
-            courses={enrolledCourseCards}
-            isLoading={loading}
-            error={error}
-            enrolledCourseIds={enrolledCourseIds}
-          />
-        )}
+        <CourseList
+          showLoadMore={false}
+          courses={enrolledCourseCards}
+          isLoading={loading}
+          error={error}
+          enrolledCourseIds={enrolledCourseIds}
+        />
       </main>
       <Footer />
     </>

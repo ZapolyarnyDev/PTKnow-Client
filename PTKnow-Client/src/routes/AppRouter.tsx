@@ -15,7 +15,8 @@ import RegisterPage from '../Pages/RegisterPage';
 import GuestRoute from './GuestRoute';
 import CourseDetailsPage from '../Pages/CourseDetailsPage';
 import ProfileEditPage from '../Pages/ProfileEditPage';
-import ProtectedRoute from './ProtectedRoute';
+import RequiredAuth from './RequiredAuth';
+import RequiredRole from './RequiredRole';
 import AdminUsersPage from '../Pages/AdminUsersPage';
 import AdminPanelPage from '../Pages/AdminPanelPage';
 import UnderConstructionPage from '../Pages/UnderConstructionPage';
@@ -51,61 +52,86 @@ const AppRouter: React.FC = () => {
         <Route
           path="/profile"
           element={
-            // <ProtectedRoute>
-            <ProfilePage />
-            // </ProtectedRoute>
+            <RequiredAuth>
+              <ProfilePage />
+            </RequiredAuth>
           }
         />
 
         <Route path="/profile/:handle" element={<ProfilePage />} />
         <Route path="/profiles" element={<ProfileSearchPage />} />
 
-        <Route path="/profile/edit" element={<ProfileEditPage />} />
+        <Route
+          path="/profile/edit"
+          element={
+            <RequiredAuth>
+              <ProfileEditPage />
+            </RequiredAuth>
+          }
+        />
 
         <Route
           path="/create-course"
           element={
-            // <ProtectedRoute requiredRole={["Teacher", "admin"]}>
-            <CreateCoursePage />
-            // {/* </ProtectedRoute> */}
+            <RequiredRole roles={['TEACHER', 'ADMIN']}>
+              <CreateCoursePage />
+            </RequiredRole>
           }
         />
 
         <Route
           path="/admin"
           element={
-            <ProtectedRoute requiredRole="ADMIN">
+            <RequiredRole roles="ADMIN">
               <AdminPanelPage />
-            </ProtectedRoute>
+            </RequiredRole>
           }
         />
 
         <Route
           path="/admin/users"
           element={
-            <ProtectedRoute requiredRole="ADMIN">
+            <RequiredRole roles="ADMIN">
               <AdminUsersPage />
-            </ProtectedRoute>
+            </RequiredRole>
           }
         />
 
         <Route
           path="/courses/:courseId/lessons/new"
           element={
-            // <ProtectedRoute requiredRole={["Teacher", "admin"]}>
-            <CreateLessonPage />
-            // {/* </ProtectedRoute> */}
+            <RequiredRole roles={['TEACHER', 'ADMIN']}>
+              <CreateLessonPage />
+            </RequiredRole>
           }
         />
 
         <Route
           path="/courses/:courseId/lessons/:lessonId/edit"
-          element={<CreateLessonPage />}
+          element={
+            <RequiredRole roles={['TEACHER', 'ADMIN']}>
+              <CreateLessonPage />
+            </RequiredRole>
+          }
         />
 
-        <Route path="/my-courses" element={<MyCoursesPage />} />
+        <Route
+          path="/my-courses"
+          element={
+            <RequiredAuth>
+              <MyCoursesPage />
+            </RequiredAuth>
+          }
+        />
 
-        <Route path="/course/:courseId/register" element={<CourseRegisterPage />} />
+        <Route
+          path="/course/:courseId/register"
+          element={
+            <RequiredRole roles={['GUEST', 'STUDENT']}>
+              <CourseRegisterPage />
+            </RequiredRole>
+          }
+        />
 
         <Route path="/course/:courseId" element={<CourseDetailsPage />} />
 
