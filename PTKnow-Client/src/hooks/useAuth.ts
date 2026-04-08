@@ -1,4 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
+import {
+  createContext,
+  createElement,
+  useState,
+  useEffect,
+  useCallback,
+  useContext,
+  type PropsWithChildren,
+} from 'react';
 import { authAPI } from '../api';
 import type { ProfileResponseDTO } from '../types/profile';
 import type {
@@ -104,7 +112,25 @@ const persistUser = (nextUser: User | null) => {
   }
 };
 
-export const useAuth = () => {
+type UseAuthValue = {
+  user: User | null;
+  isLoading: boolean;
+  error: string | null;
+  isInitialized: boolean;
+  login: (data: LoginData) => Promise<boolean>;
+  register: (data: RegisterData) => Promise<boolean>;
+  logout: () => Promise<void>;
+  checkAuth: () => Promise<boolean>;
+  parseFullName: (fullName: string) => {
+    lastName: string;
+    firstName: string;
+    middleName: string;
+  };
+};
+
+const AuthContext = createContext<UseAuthValue | null>(null);
+
+const useProvideAuth = (): UseAuthValue => {
   const [user, setUser] = useState<User | null>(() => getStoredUser());
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -329,4 +355,17 @@ export const useAuth = () => {
     checkAuth,
     parseFullName,
   };
+};
+
+export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
+  const auth = useProvideAuth();
+  return createElement(AuthContext.Provider, { value: auth }, children);
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
+  }
+  return context;
 };
