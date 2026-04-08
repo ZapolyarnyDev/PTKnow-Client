@@ -6,6 +6,7 @@ interface AuthInputProps {
   placeholder: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
   required?: boolean;
   minLength?: number;
   className?: string;
@@ -17,6 +18,7 @@ const AuthInputComponent = ({
   placeholder,
   value,
   onChange,
+  onBlur,
   required = false,
   minLength,
   className = '',
@@ -29,6 +31,7 @@ const AuthInputComponent = ({
       className={className}
       value={value}
       onChange={onChange}
+      onBlur={onBlur}
       required={required}
       minLength={minLength}
     />
