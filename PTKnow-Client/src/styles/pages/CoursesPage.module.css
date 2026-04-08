@@ -134,6 +134,9 @@
 .catalogSection {
   max-width: 76rem;
   margin: 0 auto;
+  min-height: 55vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .pagination {
@@ -141,7 +144,8 @@
   justify-content: center;
   align-items: center;
   gap: 0.875rem;
-  margin: 2rem 0 0;
+  margin: auto 0 0;
+  padding-top: 3rem;
 }
 
 .paginationButton {
