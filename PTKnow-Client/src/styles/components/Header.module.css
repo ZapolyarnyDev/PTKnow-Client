@@ -71,9 +71,28 @@
   position: relative;
   display: inline-flex;
   align-items: center;
+  gap: 0.625rem;
   padding: 0.25rem 0;
   color: #233754;
   text-decoration: none;
+}
+
+.navIconWrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.75rem;
+  background: #eef1f5;
+  flex-shrink: 0;
+}
+
+.navIcon {
+  width: 1rem;
+  height: 1rem;
+  filter: brightness(0) saturate(100%) invert(24%) sepia(93%) saturate(2393%)
+    hue-rotate(208deg) brightness(86%) contrast(97%);
 }
 
 .navLink::after {
@@ -220,7 +239,9 @@
 }
 
 .mobileNavLink {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   padding: 1rem 2rem;
   font-family: 'Inter', sans-serif;
   font-weight: 500;

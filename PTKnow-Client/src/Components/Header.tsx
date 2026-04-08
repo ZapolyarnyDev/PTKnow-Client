@@ -1,7 +1,10 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 
+import BookIcon from '../assets/icons/book.svg';
+import CalendarIcon from '../assets/icons/calendar.svg';
 import ProfileIcon from '../assets/icons/profile.svg';
+import ProjectsIcon from '../assets/icons/projects.svg';
 import Logotype from '../assets/logo/Logotype.svg';
 import { useAuth } from '../hooks/useAuth';
 import RequiredAuth from '../routes/RequiredAuth';
@@ -24,14 +27,15 @@ const ROUTES = {
 interface NavItem {
   to: string;
   label: string;
+  icon: string;
   authOnly?: boolean;
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { to: ROUTES.COURSES, label: 'Все курсы' },
-  { to: ROUTES.MY_COURSES, label: 'Мои курсы', authOnly: true },
-  { to: ROUTES.EVENTS, label: 'Мероприятия' },
-  { to: ROUTES.PROJECTS, label: 'Проекты' },
+  { to: ROUTES.COURSES, label: 'Все курсы', icon: BookIcon },
+  { to: ROUTES.MY_COURSES, label: 'Мои курсы', icon: ProfileIcon, authOnly: true },
+  { to: ROUTES.EVENTS, label: 'Мероприятия', icon: CalendarIcon },
+  { to: ROUTES.PROJECTS, label: 'Проекты', icon: ProjectsIcon },
 ];
 
 const Header: React.FC = () => {
@@ -80,6 +84,9 @@ const Header: React.FC = () => {
             isActive ? `${styles.navLink} ${styles.active}` : styles.navLink
           }
         >
+          <span className={styles.navIconWrap}>
+            <img src={item.icon} alt="" className={styles.navIcon} />
+          </span>
           {item.label}
         </NavLink>
       </li>
@@ -106,6 +113,9 @@ const Header: React.FC = () => {
           }
           onClick={handleNavLinkClick}
         >
+          <span className={styles.navIconWrap}>
+            <img src={item.icon} alt="" className={styles.navIcon} />
+          </span>
           {item.label}
         </NavLink>
       </li>
@@ -143,6 +153,9 @@ const Header: React.FC = () => {
                     isActive ? `${styles.navLink} ${styles.active}` : styles.navLink
                   }
                 >
+                  <span className={styles.navIconWrap}>
+                    <img src={ProfileIcon} alt="" className={styles.navIcon} />
+                  </span>
                   Админ
                 </NavLink>
               </li>
@@ -202,6 +215,9 @@ const Header: React.FC = () => {
                 }
                 onClick={handleNavLinkClick}
               >
+                <span className={styles.navIconWrap}>
+                  <img src={ProfileIcon} alt="" className={styles.navIcon} />
+                </span>
                 Админ
               </NavLink>
             </li>
