@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 
 import Footer from '../Components/Footer';
@@ -8,6 +9,10 @@ import PlusIcon from '../assets/icons/plus.svg';
 import Logotype from '../assets/logo/Logotype.svg';
 import { useAuth } from '../hooks/useAuth';
 import styles from '../styles/pages/HomePage.module.css';
+import {
+  formatContinueLessonTime,
+  getContinueCourseState,
+} from '../utils/continueCourse';
 
 type HomeLink = {
   to: string;
@@ -22,6 +27,8 @@ const HomePage: React.FC = () => {
   const isAuthenticated = Boolean(user);
   const canTeach = role === 'TEACHER' || role === 'ADMIN';
   const isAdmin = role === 'ADMIN';
+  const continueCourse = useMemo(() => getContinueCourseState(), []);
+  const continueTime = formatContinueLessonTime(continueCourse?.lessonBeginAt);
 
   const links: HomeLink[] = [
     {
@@ -87,7 +94,7 @@ const HomePage: React.FC = () => {
               <h1 className={styles.title}>Добро пожаловать!</h1>
               <p className={styles.subtitle}>
                 {isAuthenticated
-                  ? 'Выберите нужный раздел и продолжайте работу в своём ритме.'
+                  ? 'Выберите нужный раздел и продолжайте работу в своем ритме.'
                   : 'Зарегистрируйтесь, чтобы открыть личный профиль, курсы и доступ к учебному пространству.'}
               </p>
             </div>
@@ -100,10 +107,33 @@ const HomePage: React.FC = () => {
             <div>
               <p className={styles.questionLabel}>Первый шаг</p>
               <p className={styles.questionText}>
-                Начнём грызть гранит науки вместе?
+                Начнем грызть гранит науки вместе?
               </p>
             </div>
           </div>
+
+          {isAuthenticated && continueCourse && (
+            <Link
+              to={`/course/${continueCourse.courseId}`}
+              className={styles.continueCard}
+            >
+              <div className={styles.continueContent}>
+                <p className={styles.continueLabel}>Продолжить с места</p>
+                <h2 className={styles.continueTitle}>{continueCourse.courseName}</h2>
+                <p className={styles.continueDescription}>
+                  {continueCourse.lessonName
+                    ? `Следующий ориентир: ${continueCourse.lessonName}`
+                    : 'Вернуться в последний открытый курс'}
+                </p>
+              </div>
+              <div className={styles.continueMeta}>
+                <span className={styles.continueTime}>
+                  {continueTime ?? 'В любое удобное время'}
+                </span>
+                <span className={styles.continueAction}>Открыть курс →</span>
+              </div>
+            </Link>
+          )}
         </section>
 
         <section className={styles.linksSection}>

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 
 import { CourseList } from '../Components/CourseList';
 import Footer from '../Components/Footer';
@@ -7,10 +7,16 @@ import Header from '../Components/Header';
 import { useAuth } from '../hooks/useAuth';
 import { useMyEnrollments } from '../hooks/useMyEnrollments';
 import styles from '../styles/pages/MyCoursesPage.module.css';
+import {
+  formatContinueLessonTime,
+  getContinueCourseState,
+} from '../utils/continueCourse';
 
 const MyCoursesPage: React.FC = () => {
   const { user } = useAuth();
   const { enrolledCourses, loading, error } = useMyEnrollments();
+  const continueCourse = useMemo(() => getContinueCourseState(), []);
+  const continueTime = formatContinueLessonTime(continueCourse?.lessonBeginAt);
 
   const enrolledCourseCards = useMemo(
     () =>
@@ -54,6 +60,31 @@ const MyCoursesPage: React.FC = () => {
             </div>
           </div>
         </section>
+
+        {continueCourse && (
+          <section className={styles.resumeSection}>
+            <Link
+              to={`/course/${continueCourse.courseId}`}
+              className={styles.continueCard}
+            >
+              <div className={styles.continueContent}>
+                <p className={styles.continueLabel}>Продолжить с места</p>
+                <h2 className={styles.continueTitle}>{continueCourse.courseName}</h2>
+                <p className={styles.continueDescription}>
+                  {continueCourse.lessonName
+                    ? `Ближайший ориентир: ${continueCourse.lessonName}`
+                    : 'Вернуться к последнему открытому курсу'}
+                </p>
+              </div>
+              <div className={styles.continueMeta}>
+                <span className={styles.continueTime}>
+                  {continueTime ?? 'Можно открыть прямо сейчас'}
+                </span>
+                <span className={styles.continueAction}>Продолжить →</span>
+              </div>
+            </Link>
+          </section>
+        )}
 
         <section className={styles.catalogSection}>
           <CourseList

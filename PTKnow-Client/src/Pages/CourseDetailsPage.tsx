@@ -24,6 +24,7 @@ import type {
 import { AuthImage } from '../Components/AuthImage';
 import { FormAlert } from '../Components/ui/forms/FormAlert';
 import styles from '../styles/pages/CourseDetailsPage.module.css';
+import { buildContinueCourseState, saveContinueCourseState } from '../utils/continueCourse';
 
 const formatLessonTime = (value: string) => {
   const date = new Date(value);
@@ -107,6 +108,16 @@ const CourseDetailsPage: React.FC = () => {
     );
     return upcoming ?? sortedLessons[0];
   }, [sortedLessons]);
+
+  useEffect(() => {
+    if (!resolvedCourseId || !course?.name) {
+      return;
+    }
+
+    saveContinueCourseState(
+      buildContinueCourseState(resolvedCourseId, course.name, nextLesson)
+    );
+  }, [course?.name, nextLesson, resolvedCourseId]);
 
   useEffect(() => {
     if (!resolvedCourseId) {
