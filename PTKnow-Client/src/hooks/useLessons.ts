@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { filesAPI } from '../api/endpoints/file';
 import { lessonApi } from '../api/endpoints/lesson';
 import type { FileMetaDTO } from '../types/CourseCard';
 import type { CreateLessonDTO, LessonDTO } from '../types/lesson';
@@ -108,7 +109,8 @@ export const useLesson = () => {
       setError(null);
 
       try {
-        return await lessonApi.addLessonMaterials(lessonId, file);
+        const fileId = await lessonApi.addLessonMaterials(lessonId, file);
+        return await filesAPI.getFileMeta(fileId);
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Ошибка загрузки материала урока';
