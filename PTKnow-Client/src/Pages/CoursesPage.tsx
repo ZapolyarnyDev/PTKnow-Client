@@ -164,7 +164,7 @@ const CoursesPage: React.FC = () => {
             <p className={styles.heroLabel}>Каталог курсов</p>
             <h1 className={styles.heroTitle}>Подберите направление для обучения</h1>
             <p className={styles.heroDescription}>
-              Ищите по названию курса и сортируйте каталог так по направлениям
+              Ищите курсы по названию или через @КороткоеИмя
             </p>
           </div>
 
@@ -178,7 +178,7 @@ const CoursesPage: React.FC = () => {
                 type="search"
                 value={searchQuery}
                 onChange={event => setSearchQuery(event.target.value)}
-                placeholder="Поиск по названию курса или @handle"
+                placeholder="Поиск по названию курса или @КороткоеИмя"
               />
 
               {showHandleAutocomplete && (
@@ -198,7 +198,9 @@ const CoursesPage: React.FC = () => {
                       </Link>
                     ))
                   ) : (
-                    <div className={styles.suggestionState}>Совпадений по handle не найдено</div>
+                    <div className={styles.suggestionState}>
+                      Совпадений по короткому имени не найдено
+                    </div>
                   )}
                 </div>
               )}
