@@ -13,43 +13,33 @@ type AuthMode = 'login' | 'register';
 
 const AuthPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialMode = searchParams.get('mode') === 'register' ? 'register' : 'login';
-
-  const [mode, setMode] = useState<AuthMode>(initialMode);
+  const [mode, setMode] = useState<AuthMode>(
+    searchParams.get('mode') === 'register' ? 'register' : 'login'
+  );
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [middleName, setMiddleName] = useState('');
-  const [showDetails, setShowDetails] = useState(initialMode === 'register');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [recaptchaError, setRecaptchaError] = useState<string | null>(null);
 
   const { login, register, isLoading, error } = useAuth();
-  const navigate = useNavigate();
   const { executeRecaptcha } = useGoogleReCaptcha();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const nextMode = searchParams.get('mode') === 'register' ? 'register' : 'login';
     setMode(nextMode);
-    setShowDetails(nextMode === 'register');
   }, [searchParams]);
 
-  const pageTitle = useMemo(
-    () => (mode === 'register' ? 'Регистрация' : 'С возвращением'),
-    [mode]
-  );
-
-  const syncMode = useCallback(
-    (nextMode: AuthMode, expanded: boolean) => {
-      setMode(nextMode);
-      setShowDetails(expanded);
-      setPassword('');
-      setRecaptchaError(null);
+  const switchMode = useCallback(
+    (nextMode: AuthMode) => {
       setFormError(null);
+      setRecaptchaError(null);
       setIsPasswordVisible(false);
-
+      setMode(nextMode);
       if (nextMode === 'register') {
         setSearchParams({ mode: 'register' }, { replace: true });
       } else {
@@ -59,29 +49,10 @@ const AuthPage: React.FC = () => {
     [setSearchParams]
   );
 
-  const openRegister = useCallback(() => {
-    syncMode('register', true);
-  }, [syncMode]);
-
-  const openLoginPassword = useCallback(
-    (event: FormEvent) => {
-      event.preventDefault();
-      if (!email.trim()) {
-        setFormError('Введите адрес электронной почты.');
-        return;
-      }
-      setFormError(null);
-      syncMode('login', true);
-    },
-    [email, syncMode]
+  const pageTitle = useMemo(
+    () => (mode === 'register' ? 'Создание аккаунта' : 'Вход в аккаунт'),
+    [mode]
   );
-
-  const collapseToEmail = useCallback(() => {
-    syncMode('login', false);
-    setFirstName('');
-    setLastName('');
-    setMiddleName('');
-  }, [syncMode]);
 
   const handleLogin = useCallback(
     async (event: FormEvent) => {
@@ -106,7 +77,7 @@ const AuthPage: React.FC = () => {
         return;
       }
 
-      const success = await login({ email, password, recaptchaToken });
+      const success = await login({ email: email.trim(), password, recaptchaToken });
       if (success) {
         navigate('/profile');
       }
@@ -148,10 +119,10 @@ const AuthPage: React.FC = () => {
       }
 
       const success = await register({
-        firstName,
-        lastName,
-        middleName: middleName || undefined,
-        email,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        middleName: middleName.trim() || undefined,
+        email: email.trim(),
         password,
         recaptchaToken,
       });
@@ -160,14 +131,17 @@ const AuthPage: React.FC = () => {
         navigate('/profile');
       }
     },
-    [email, executeRecaptcha, firstName, lastName, middleName, navigate, password, register]
+    [
+      email,
+      executeRecaptcha,
+      firstName,
+      lastName,
+      middleName,
+      navigate,
+      password,
+      register,
+    ]
   );
-
-  const handleSubmit = mode === 'register'
-    ? handleRegister
-    : showDetails
-      ? handleLogin
-      : openLoginPassword;
 
   const visibleError = formError || recaptchaError || error;
 
@@ -175,53 +149,77 @@ const AuthPage: React.FC = () => {
     <>
       <Header />
       <div className={style.container}>
-        <form onSubmit={handleSubmit} className={style.formAuth}>
+        <form
+          onSubmit={mode === 'register' ? handleRegister : handleLogin}
+          className={style.formAuth}
+        >
+          <div className={style.tabs} role="tablist" aria-label="Авторизация">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === 'login'}
+              className={`${style.tab} ${mode === 'login' ? style.tabActive : ''}`}
+              onClick={() => switchMode('login')}
+            >
+              Вход
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === 'register'}
+              className={`${style.tab} ${mode === 'register' ? style.tabActive : ''}`}
+              onClick={() => switchMode('register')}
+            >
+              Регистрация
+            </button>
+          </div>
+
           <legend className={style.legendAuth}>{pageTitle}</legend>
 
-          <AuthInput
-            type="email"
-            placeholder="Адрес электронной почты"
-            value={email}
-            className={style.emailAuth}
-            onChange={event => setEmail(event.target.value)}
-            required
-          />
+          <div className={style.fieldGroup}>
+            <AuthInput
+              type="email"
+              placeholder="Адрес электронной почты"
+              value={email}
+              className={style.inputAuth}
+              onChange={event => setEmail(event.target.value)}
+              required
+            />
 
-          {mode === 'register' && (
-            <>
-              <AuthInput
-                type="text"
-                placeholder="Имя"
-                value={firstName}
-                className={style.emailAuth}
-                onChange={event => setFirstName(event.target.value)}
-                required
-              />
-              <AuthInput
-                type="text"
-                placeholder="Фамилия"
-                value={lastName}
-                className={style.emailAuth}
-                onChange={event => setLastName(event.target.value)}
-                required
-              />
-              <AuthInput
-                type="text"
-                placeholder="Отчество"
-                value={middleName}
-                className={style.emailAuth}
-                onChange={event => setMiddleName(event.target.value)}
-              />
-            </>
-          )}
+            {mode === 'register' && (
+              <>
+                <AuthInput
+                  type="text"
+                  placeholder="Имя"
+                  value={firstName}
+                  className={style.inputAuth}
+                  onChange={event => setFirstName(event.target.value)}
+                  required
+                />
+                <AuthInput
+                  type="text"
+                  placeholder="Фамилия"
+                  value={lastName}
+                  className={style.inputAuth}
+                  onChange={event => setLastName(event.target.value)}
+                  required
+                />
+                <AuthInput
+                  type="text"
+                  placeholder="Отчество"
+                  value={middleName}
+                  className={style.inputAuth}
+                  onChange={event => setMiddleName(event.target.value)}
+                />
+              </>
+            )}
 
-          {(showDetails || mode === 'register') && (
             <div className={style.passwordField}>
               <AuthInput
                 type={isPasswordVisible ? 'text' : 'password'}
                 placeholder="Пароль"
                 value={password}
-                className={style.emailAuth}
+                className={style.inputAuth}
                 onChange={event => setPassword(event.target.value)}
                 required
                 minLength={8}
@@ -230,22 +228,12 @@ const AuthPage: React.FC = () => {
                 type="button"
                 className={style.passwordToggle}
                 onClick={() => setIsPasswordVisible(prev => !prev)}
-                aria-label={
-                  isPasswordVisible ? 'Скрыть пароль' : 'Показать пароль'
-                }
+                aria-label={isPasswordVisible ? 'Скрыть пароль' : 'Показать пароль'}
               >
                 {isPasswordVisible ? 'Скрыть' : 'Показать'}
               </button>
-              <button
-                type="button"
-                onClick={collapseToEmail}
-                className={style.backButton}
-                aria-label="Назад"
-              >
-                ←
-              </button>
             </div>
-          )}
+          </div>
 
           {mode === 'register' && (
             <p className={style.recaptchaHint}>
@@ -266,25 +254,8 @@ const AuthPage: React.FC = () => {
               className={style.buttonAuth}
               isLoading={isLoading}
             >
-              {mode === 'register'
-                ? 'Зарегистрироваться'
-                : showDetails
-                  ? 'Войти'
-                  : 'Продолжить'}
+              {mode === 'register' ? 'Зарегистрироваться' : 'Войти'}
             </AuthButton>
-
-            {!showDetails && mode === 'login' && (
-              <>
-                <p className={style.registerText}>У вас нет учетной записи?</p>
-                <button
-                  type="button"
-                  className={style.registerButton}
-                  onClick={openRegister}
-                >
-                  Зарегистрироваться
-                </button>
-              </>
-            )}
           </div>
         </form>
       </div>
