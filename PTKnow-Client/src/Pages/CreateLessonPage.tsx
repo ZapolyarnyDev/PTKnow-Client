@@ -83,7 +83,9 @@ const CreateLessonPage: React.FC = () => {
   const canManageLessons = useMemo(() => {
     if (!user || !course) return false;
     const normalizedRole = user.role?.toUpperCase() ?? '';
-    return normalizedRole === 'ADMIN' || user.id === course.owner?.id;
+    const isOwner = user.id === course.owner?.id;
+    const isEditor = (course.editors ?? []).some(editor => editor.id === user.id);
+    return normalizedRole === 'ADMIN' || normalizedRole === 'TEACHER' || isOwner || isEditor;
   }, [course, user]);
 
   const isFormDisabled =
@@ -212,55 +214,55 @@ const CreateLessonPage: React.FC = () => {
         }
       }
 
-      if (isEditMode) {
-        navigate(`/course/${courseId}`);
-        return;
-      }
-
-      setName('');
-      setDescription('');
-      setContentMd('');
-      setBeginAt('');
-      setEndsAt('');
-      setType('');
-      setMdFile(null);
+      navigate(`/courses/${courseId}/lessons/${savedLesson.id}`);
     } catch (submitError) {
       console.error('Error saving lesson:', submitError);
     }
   };
+
+  const activeMessage =
+    (localError || error || uploadError || uploadMessage) ?? null;
 
   return (
     <>
       <Header />
       <main className={styles.page}>
         <div className={styles.container}>
-          <div className={styles.header}>
-            <div>
-              <h1>{isEditMode ? 'Редактирование урока' : 'Создание урока'}</h1>
-              <p>
-                {isEditMode
-                  ? 'Обновите содержание, расписание и материалы урока.'
-                  : 'Добавьте структуру, расписание и материалы урока.'}
+          <section className={styles.hero}>
+            <div className={styles.heroMain}>
+              <div className={styles.heroBadges}>
+                <span className={styles.badge}>Урок</span>
+                <span className={styles.badgeSecondary}>
+                  {isEditMode ? 'Редактирование' : 'Создание'}
+                </span>
+                {course?.handle && (
+                  <span className={styles.badgeGhost}>@{course.handle}</span>
+                )}
+              </div>
+              <h1 className={styles.title}>
+                {isEditMode ? 'Настройте урок' : 'Создайте сильный урок'}
+              </h1>
+              <p className={styles.subtitle}>
+                Соберите тему, расписание и материалы в одной форме, чтобы урок
+                сразу выглядел цельным и готовым к публикации
               </p>
             </div>
-            <div className={styles.badges}>
-              <span className={styles.badge}>Урок</span>
-              {course?.handle && (
-                <span className={styles.badgeSecondary}>@{course.handle}</span>
-              )}
-            </div>
-          </div>
+
+            <aside className={styles.heroAside}>
+              <div className={styles.statCard}>
+                <span className={styles.statLabel}>Курс</span>
+                <strong>{course?.name ?? '—'}</strong>
+              </div>
+              <div className={styles.statCard}>
+                <span className={styles.statLabel}>Режим</span>
+                <strong>{isEditMode ? 'Обновление урока' : 'Новый урок'}</strong>
+              </div>
+            </aside>
+          </section>
 
           <div className={styles.noticeStack}>
-            {!courseId && (
-              <div className={styles.notice}>
-                Добавьте идентификатор курса в URL, чтобы продолжить.
-              </div>
-            )}
             {courseError && (
-              <div className={styles.notice}>
-                Ошибка загрузки курса: {courseError}
-              </div>
+              <div className={styles.notice}>Ошибка загрузки курса: {courseError}</div>
             )}
             {!authLoading && !user && (
               <div className={styles.notice}>
@@ -282,21 +284,45 @@ const CreateLessonPage: React.FC = () => {
           </div>
 
           <form className={styles.form} onSubmit={handleSubmit}>
-            <div className={styles.section}>
-              <label className={styles.field}>
-                <span>Название урока</span>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={event => {
-                    resetErrors();
-                    setName(event.target.value);
-                  }}
-                  placeholder="Введите название"
-                  disabled={isFormDisabled}
-                  required
-                />
-              </label>
+            <section className={styles.card}>
+              <div className={styles.cardHeader}>
+                <div>
+                  <h2>Основа урока</h2>
+                  <p>Название, формат и короткое описание того, что получит студент</p>
+                </div>
+              </div>
+
+              <div className={styles.gridTwo}>
+                <label className={styles.field}>
+                  <span>Название урока</span>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={event => {
+                      resetErrors();
+                      setName(event.target.value);
+                    }}
+                    placeholder="Например: Введение в типографику интерфейсов"
+                    disabled={isFormDisabled}
+                    required
+                  />
+                </label>
+
+                <label className={styles.field}>
+                  <span>Тип занятия</span>
+                  <input
+                    type="text"
+                    value={type}
+                    onChange={event => {
+                      resetErrors();
+                      setType(event.target.value);
+                    }}
+                    placeholder="Например: LECTURE"
+                    disabled={isFormDisabled}
+                    required
+                  />
+                </label>
+              </div>
 
               <label className={styles.field}>
                 <span>Описание</span>
@@ -306,52 +332,70 @@ const CreateLessonPage: React.FC = () => {
                     resetErrors();
                     setDescription(event.target.value);
                   }}
-                  placeholder="Коротко опишите урок"
+                  placeholder="Кратко опишите цель урока, фокус и ожидаемый результат"
                   disabled={isFormDisabled}
                   required
                 />
               </label>
-            </div>
+            </section>
 
-            <div className={styles.section}>
+            <section className={styles.card}>
+              <div className={styles.cardHeader}>
+                <div>
+                  <h2>Содержание</h2>
+                  <p>Текст урока в Markdown и дополнительные материалы для скачивания</p>
+                </div>
+              </div>
+
               <label className={styles.field}>
-                <span>Содержание (Markdown)</span>
+                <span>Содержание урока (Markdown)</span>
                 <textarea
                   value={contentMd}
                   onChange={event => {
                     resetErrors();
                     setContentMd(event.target.value);
                   }}
-                  placeholder="Добавьте материал урока"
+                  placeholder="# План урока&#10;&#10;Опишите ключевые тезисы, задания и ссылки"
                   disabled={isFormDisabled}
+                  className={styles.markdownField}
                 />
               </label>
 
-              <label className={styles.field}>
-                <span>Файл материала (.md)</span>
-                <input
-                  type="file"
-                  accept=".md,.markdown,text/markdown"
-                  onChange={event => {
-                    resetErrors();
-                    const file = event.target.files?.[0] ?? null;
-                    handleMdFileChange(file);
-                  }}
-                  disabled={isFormDisabled}
-                />
-                {mdFile && (
-                  <span className={styles.helper}>Выбран: {mdFile.name}</span>
-                )}
+              <div className={styles.uploadCard}>
+                <div>
+                  <h3>Материал урока</h3>
+                  <p>Загрузите Markdown-файл, если хотите приложить отдельный конспект</p>
+                </div>
+                <label className={styles.uploadField}>
+                  <input
+                    type="file"
+                    accept=".md,.markdown,text/markdown"
+                    onChange={event => {
+                      resetErrors();
+                      const file = event.target.files?.[0] ?? null;
+                      handleMdFileChange(file);
+                    }}
+                    disabled={isFormDisabled}
+                  />
+                  <span>{mdFile ? mdFile.name : 'Выбрать .md файл'}</span>
+                </label>
                 {uploadedMaterial && (
                   <span className={styles.helper}>
-                    Загружен: {uploadedMaterial.originalFilename}
+                    Уже загружено: {uploadedMaterial.originalFilename}
                   </span>
                 )}
-              </label>
-            </div>
+              </div>
+            </section>
 
-            <div className={styles.section}>
-              <div className={styles.row}>
+            <section className={styles.card}>
+              <div className={styles.cardHeader}>
+                <div>
+                  <h2>Расписание</h2>
+                  <p>Выберите время начала и окончания, чтобы урок попал в календарь</p>
+                </div>
+              </div>
+
+              <div className={styles.gridTwo}>
                 <label className={styles.field}>
                   <span>Начало</span>
                   <input
@@ -380,26 +424,11 @@ const CreateLessonPage: React.FC = () => {
                   />
                 </label>
               </div>
+            </section>
 
-              <label className={styles.field}>
-                <span>Тип занятия</span>
-                <input
-                  type="text"
-                  value={type}
-                  onChange={event => {
-                    resetErrors();
-                    setType(event.target.value);
-                  }}
-                  placeholder="Например: LECTURE"
-                  disabled={isFormDisabled}
-                  required
-                />
-              </label>
-            </div>
-
-            {(localError || error || uploadError || uploadMessage) && (
+            {activeMessage && (
               <FormAlert
-                message={(localError || error || uploadError || uploadMessage) ?? ''}
+                message={activeMessage}
                 variant={
                   uploadMessage && !(localError || error || uploadError)
                     ? 'success'
@@ -409,7 +438,14 @@ const CreateLessonPage: React.FC = () => {
             )}
 
             <div className={styles.actions}>
-              <button type="submit" disabled={isFormDisabled}>
+              <button
+                type="button"
+                className={styles.secondaryButton}
+                onClick={() => navigate(`/course/${courseId}`)}
+              >
+                Отмена
+              </button>
+              <button type="submit" className={styles.primaryButton} disabled={isFormDisabled}>
                 {loading
                   ? isEditMode
                     ? 'Сохранение...'
