@@ -152,13 +152,15 @@
   width: 3rem;
   height: 3rem;
   border-radius: 1rem;
-  background: rgba(9, 86, 194, 0.12);
+  background: #eef1f5;
   flex-shrink: 0;
 }
 
 .linkIcon {
   width: 1.4rem;
   height: 1.4rem;
+  filter: brightness(0) saturate(100%) invert(24%) sepia(93%) saturate(2393%)
+    hue-rotate(208deg) brightness(86%) contrast(97%);
 }
 
 .linkContent {

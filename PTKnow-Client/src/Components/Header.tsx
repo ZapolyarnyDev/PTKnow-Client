@@ -11,7 +11,7 @@ import { formatShortName } from '../utils/formatName';
 import { getFileUrl } from '../utils/fileUtils';
 
 const ROUTES = {
-  HOME: '/',
+  HOME: '/home',
   AUTH: '/auth',
   COURSES: '/courses',
   MY_COURSES: '/my-courses',
@@ -36,7 +36,10 @@ const NAV_ITEMS: NavItem[] = [
 
 const Header: React.FC = () => {
   const location = useLocation();
-  const isAuthPage = useMemo(() => location.pathname === '/auth', [location.pathname]);
+  const isAuthPage = useMemo(
+    () => location.pathname === '/auth' || location.pathname === '/register',
+    [location.pathname]
+  );
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const { user, logout } = useAuth();
@@ -53,7 +56,7 @@ const Header: React.FC = () => {
   const handleLogout = useCallback(async () => {
     await logout();
     setIsMobileMenuOpen(false);
-    window.location.href = '/home';
+    window.location.href = ROUTES.HOME;
   }, [logout]);
 
   const toggleMobileMenu = useCallback(() => {
@@ -123,9 +126,10 @@ const Header: React.FC = () => {
     <header className={styles.header}>
       <div className={styles.container}>
         <div className={styles.headerLogo}>
-          <NavLink to="/home" onClick={closeMobileMenu}>
-            <img src={Logotype} alt="Логотип" />
-          </NavLink>
+          <Link to={ROUTES.HOME} className={styles.brandLink} onClick={closeMobileMenu}>
+            <img src={Logotype} alt="Логотип ПТК знания" className={styles.brandLogo} />
+            <span className={styles.brandTitle}>ПТК знания</span>
+          </Link>
         </div>
 
         <nav className={styles.nav}>
@@ -154,7 +158,9 @@ const Header: React.FC = () => {
                   <img
                     src={avatarUrl || Logotype}
                     className={styles.userAvatar}
-                    alt={displayName ? `Аватар ${displayName}` : 'Аватар пользователя'}
+                    alt={
+                      displayName ? `Аватар ${displayName}` : 'Аватар пользователя'
+                    }
                   />
                 </div>
                 <div>
