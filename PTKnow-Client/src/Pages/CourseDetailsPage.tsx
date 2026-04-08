@@ -183,7 +183,9 @@ const CourseDetailsPage: React.FC = () => {
   const canManageLessons = useMemo(() => {
     if (!course || !user) return false;
     const normalizedRole = user.role?.toUpperCase() ?? '';
-    return normalizedRole === 'ADMIN' || user.id === course.owner?.id;
+    const isOwner = user.id === course.owner?.id;
+    const isEditor = (course.editors ?? []).some(editor => editor.id === user.id);
+    return normalizedRole === 'ADMIN' || normalizedRole === 'TEACHER' || isOwner || isEditor;
   }, [course, user]);
 
   const refreshPeople = useCallback(async () => {

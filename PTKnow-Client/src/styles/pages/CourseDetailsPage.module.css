@@ -26,7 +26,7 @@
   display: grid;
   grid-template-columns: 100px 1fr auto;
   gap: 20px;
-  align-items: center;
+  align-items: start;
   box-shadow: 0 16px 32px rgba(9, 86, 194, 0.08);
   min-height: 247px;
 }
@@ -126,6 +126,8 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  align-items: stretch;
+  min-width: 0;
 }
 
 .primaryButton {
@@ -136,6 +138,9 @@
   color: #ffffff;
   font-weight: 600;
   cursor: pointer;
+  width: 100%;
+  min-width: 11rem;
+  white-space: nowrap;
 }
 
 .summaryCard {
@@ -230,18 +235,21 @@
 .lessonRow {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 16px;
   padding: 12px 16px;
   border-radius: 12px;
   background: #f4f7fc;
   border: 1px solid #e2e8f4;
+  flex-wrap: wrap;
 }
 
 .lessonInfo {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-width: 0;
+  flex: 1 1 18rem;
 }
 
 .lessonName {
@@ -262,6 +270,7 @@
   font-weight: 600;
   color: #0956c2;
   white-space: nowrap;
+  flex: 0 0 auto;
 }
 
 .lessonControls {
@@ -296,6 +305,7 @@
   padding: 8px 14px;
   font-weight: 600;
   cursor: pointer;
+  max-width: 100%;
 }
 
 .inlineAction,
@@ -319,11 +329,12 @@
 .materialItem {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   padding: 10px 12px;
   background: #f8fafc;
   border-radius: 10px;
+  flex-wrap: wrap;
 }
 
 .materialLink {
@@ -374,14 +385,16 @@
 .managementInputRow {
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .managementInputRow input {
-  flex: 1;
+  flex: 1 1 14rem;
   border: 1px solid #cdd9ee;
   border-radius: 10px;
   padding: 10px 12px;
   background: #fff;
+  min-width: 0;
 }
 
 .managementList {
@@ -394,10 +407,11 @@
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  align-items: center;
+  align-items: flex-start;
   padding: 10px 12px;
   background: #fff;
   border-radius: 10px;
+  flex-wrap: wrap;
 }
 
 .managementItem div {
@@ -454,6 +468,7 @@
   display: flex;
   justify-content: flex-end;
   margin-top: 16px;
+  flex-wrap: wrap;
 }
 
 .settingsButton {
@@ -518,6 +533,8 @@
   cursor: pointer;
   font-weight: 600;
   transition: transform 0.2s ease, opacity 0.2s ease;
+  width: 100%;
+  max-width: 100%;
 }
 
 .actionButton:disabled {
@@ -601,6 +618,11 @@
   .heroActions {
     flex-direction: row;
     flex-wrap: wrap;
+    grid-column: 1 / -1;
+  }
+
+  .primaryButton {
+    width: auto;
   }
 }
 
@@ -617,5 +639,66 @@
   .heroMedia {
     width: 72px;
     height: 72px;
+  }
+
+  .heroActions {
+    width: 100%;
+  }
+
+  .primaryButton {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .summaryPanel {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .lessonControls {
+    align-items: stretch;
+  }
+
+  .lessonStateSelect,
+  .inlineAction,
+  .inlineDanger,
+  .materialDelete,
+  .managementInputRow button,
+  .settingsButton {
+    width: 100%;
+  }
+
+  .managementInputRow {
+    flex-direction: column;
+  }
+
+  .settingsActions {
+    justify-content: stretch;
+  }
+}
+
+@media (max-width: 560px) {
+  .page {
+    padding-inline: 12px;
+  }
+
+  .blockCard,
+  .sideCard,
+  .summaryCard,
+  .heroCard {
+    padding: 16px;
+  }
+
+  .summaryPanel {
+    grid-template-columns: 1fr;
+  }
+
+  .heroTitleRow h1 {
+    font-size: 20px;
+  }
+
+  .lessonRow,
+  .managementItem,
+  .materialItem {
+    padding: 10px;
   }
 }
