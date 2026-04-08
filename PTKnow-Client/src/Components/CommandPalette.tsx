@@ -232,6 +232,11 @@ const CommandPalette: React.FC = () => {
     }));
   }, [filteredActions]);
 
+  const orderedActions = useMemo(
+    () => groupedActions.flatMap(group => group.items),
+    [groupedActions]
+  );
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
@@ -290,25 +295,25 @@ const CommandPalette: React.FC = () => {
   };
 
   const handleInputKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
-    if (filteredActions.length === 0) {
+    if (orderedActions.length === 0) {
       return;
     }
 
     if (event.key === 'ArrowDown') {
       event.preventDefault();
-      setActiveIndex(prev => (prev + 1) % filteredActions.length);
+      setActiveIndex(prev => (prev + 1) % orderedActions.length);
     }
 
     if (event.key === 'ArrowUp') {
       event.preventDefault();
       setActiveIndex(prev =>
-        prev === 0 ? filteredActions.length - 1 : prev - 1
+        prev === 0 ? orderedActions.length - 1 : prev - 1
       );
     }
 
     if (event.key === 'Enter') {
       event.preventDefault();
-      handleNavigate(filteredActions[activeIndex]);
+      handleNavigate(orderedActions[activeIndex]);
     }
   };
 
@@ -348,7 +353,7 @@ const CommandPalette: React.FC = () => {
                   <p className={styles.sectionTitle}>{group.section}</p>
                   <div className={styles.sectionList}>
                     {group.items.map(action => {
-                      const itemIndex = filteredActions.findIndex(
+                      const itemIndex = orderedActions.findIndex(
                         item => item.id === action.id
                       );
                       const continueTime =

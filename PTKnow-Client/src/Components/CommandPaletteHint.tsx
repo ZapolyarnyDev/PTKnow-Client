@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import { useAuth } from '../hooks/useAuth';
 import styles from '../styles/components/CommandPaletteHint.module.css';
@@ -7,6 +8,7 @@ const HINT_STORAGE_KEY = 'commandPaletteHintPending';
 
 const CommandPaletteHint: React.FC = () => {
   const { user } = useAuth();
+  const location = useLocation();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -29,7 +31,7 @@ const CommandPaletteHint: React.FC = () => {
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [user]);
+  }, [location.pathname, user]);
 
   if (!isVisible) {
     return null;
