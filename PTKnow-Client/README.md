@@ -1,4 +1,4 @@
-# PTKnow-Client
+﻿# PTKnow-Client
 
 Frontend для PTKnow — информационного портала Политехнического колледжа НовГУ
 с мероприятиями и курсами дополнительного образования.
@@ -209,4 +209,4 @@ docker run --rm -p 8081:80 ptknow-client:local
 - `VITE_API_BASE_URL`
 - `VITE_RECAPTCHA_SITE_KEY`
 
-Workflow публикует образ `${DOCKERHUB_USERNAME}/ptknow-client` при пуше в `main`, по тегам `v*` и при ручном запуске
+Workflow публикует образ `${DOCKERHUB_USERNAME}/site-frontend` при пуше в `main`, по тегам `v*` и при ручном запуске

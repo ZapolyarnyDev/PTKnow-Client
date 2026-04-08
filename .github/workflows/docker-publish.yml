@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/ptknow-client
+  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/site-frontend
 
 jobs:
   docker:
