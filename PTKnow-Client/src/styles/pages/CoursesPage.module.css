@@ -70,8 +70,7 @@
   font-size: 1.1rem;
 }
 
-.searchInput,
-.select {
+.searchInput {
   height: 3.25rem;
   border: 1px solid #d7e1f1;
   border-radius: 1.1rem;
@@ -143,8 +142,7 @@
   text-align: center;
 }
 
-.searchInput:focus,
-.select:focus {
+.searchInput:focus {
   outline: none;
   border-color: #0956c2;
   box-shadow: 0 0 0 4px rgba(9, 86, 194, 0.12);
@@ -184,7 +182,6 @@
 
 .select {
   min-width: 13rem;
-  padding: 0 1rem;
 }
 
 .catalogSection {

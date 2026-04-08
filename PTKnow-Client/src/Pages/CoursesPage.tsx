@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import Footer from '../Components/Footer';
 import Header from '../Components/Header';
 import { CourseList } from '../Components/CourseList';
+import { Dropdown } from '../Components/ui/forms/Dropdown';
 import { courseCardApi } from '../api';
 import { useAuth } from '../hooks/useAuth';
 import { useMyEnrollments } from '../hooks/useMyEnrollments';
@@ -212,36 +213,26 @@ const CoursesPage: React.FC = () => {
 
           <div className={styles.controlsRow}>
             {canFilterByState && (
-              <select
+              <Dropdown
                 className={styles.select}
                 value={selectedState}
-                onChange={event => {
-                  setSelectedState(event.target.value);
+                options={STATE_OPTIONS.map(option => ({ ...option }))}
+                onChange={value => {
+                  setSelectedState(value);
                   setPage(0);
                 }}
-              >
-                {STATE_OPTIONS.map(option => (
-                  <option key={option.label} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+              />
             )}
 
-            <select
+            <Dropdown
               className={styles.select}
               value={sort}
-              onChange={event => {
-                setSort(event.target.value);
+              options={SORT_OPTIONS.map(option => ({ ...option }))}
+              onChange={value => {
+                setSort(value);
                 setPage(0);
               }}
-            >
-              {SORT_OPTIONS.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            />
           </div>
         </section>
 
