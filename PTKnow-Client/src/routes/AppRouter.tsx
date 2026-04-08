@@ -21,6 +21,7 @@ import AdminPanelPage from '../Pages/AdminPanelPage';
 import UnderConstructionPage from '../Pages/UnderConstructionPage';
 import CourseRegisterPage from '../Pages/CourseRegisterPage';
 import MyCoursesPage from '../Pages/MyCoursesPage';
+import ProfileSearchPage from '../Pages/ProfileSearchPage';
 
 const AppRouter: React.FC = () => {
   return (
@@ -57,6 +58,7 @@ const AppRouter: React.FC = () => {
         />
 
         <Route path="/profile/:handle" element={<ProfilePage />} />
+        <Route path="/profiles" element={<ProfileSearchPage />} />
 
         <Route path="/profile/edit" element={<ProfileEditPage />} />
 
