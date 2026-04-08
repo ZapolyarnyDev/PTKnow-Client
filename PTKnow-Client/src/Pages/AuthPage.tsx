@@ -40,6 +40,7 @@ const AuthPage: React.FC = () => {
       setRecaptchaError(null);
       setIsPasswordVisible(false);
       setMode(nextMode);
+
       if (nextMode === 'register') {
         setSearchParams({ mode: 'register' }, { replace: true });
       } else {
@@ -77,7 +78,12 @@ const AuthPage: React.FC = () => {
         return;
       }
 
-      const success = await login({ email: email.trim(), password, recaptchaToken });
+      const success = await login({
+        email: email.trim(),
+        password,
+        recaptchaToken,
+      });
+
       if (success) {
         navigate('/profile');
       }
@@ -144,21 +150,28 @@ const AuthPage: React.FC = () => {
   );
 
   const visibleError = formError || recaptchaError || error;
+  const isRegister = mode === 'register';
 
   return (
     <>
       <Header />
       <div className={style.container}>
         <form
-          onSubmit={mode === 'register' ? handleRegister : handleLogin}
+          onSubmit={isRegister ? handleRegister : handleLogin}
           className={style.formAuth}
         >
           <div className={style.tabs} role="tablist" aria-label="Авторизация">
+            <span
+              className={`${style.tabIndicator} ${
+                isRegister ? style.tabIndicatorRegister : ''
+              }`}
+              aria-hidden="true"
+            />
             <button
               type="button"
               role="tab"
-              aria-selected={mode === 'login'}
-              className={`${style.tab} ${mode === 'login' ? style.tabActive : ''}`}
+              aria-selected={!isRegister}
+              className={`${style.tab} ${!isRegister ? style.tabActive : ''}`}
               onClick={() => switchMode('login')}
             >
               Вход
@@ -166,8 +179,8 @@ const AuthPage: React.FC = () => {
             <button
               type="button"
               role="tab"
-              aria-selected={mode === 'register'}
-              className={`${style.tab} ${mode === 'register' ? style.tabActive : ''}`}
+              aria-selected={isRegister}
+              className={`${style.tab} ${isRegister ? style.tabActive : ''}`}
               onClick={() => switchMode('register')}
             >
               Регистрация
@@ -176,25 +189,34 @@ const AuthPage: React.FC = () => {
 
           <legend className={style.legendAuth}>{pageTitle}</legend>
 
-          <div className={style.fieldGroup}>
-            <AuthInput
-              type="email"
-              placeholder="Адрес электронной почты"
-              value={email}
-              className={style.inputAuth}
-              onChange={event => setEmail(event.target.value)}
-              required
-            />
+          <div
+            className={`${style.formViewport} ${
+              isRegister ? style.formViewportRegister : style.formViewportLogin
+            }`}
+          >
+            <div className={style.fieldGroup}>
+              <AuthInput
+                type="email"
+                placeholder="Адрес электронной почты"
+                value={email}
+                className={style.inputAuth}
+                onChange={event => setEmail(event.target.value)}
+                required
+              />
 
-            {mode === 'register' && (
-              <>
+              <div
+                className={`${style.registerFields} ${
+                  isRegister ? style.registerFieldsVisible : ''
+                }`}
+                aria-hidden={!isRegister}
+              >
                 <AuthInput
                   type="text"
                   placeholder="Имя"
                   value={firstName}
                   className={style.inputAuth}
                   onChange={event => setFirstName(event.target.value)}
-                  required
+                  required={isRegister}
                 />
                 <AuthInput
                   type="text"
@@ -202,7 +224,7 @@ const AuthPage: React.FC = () => {
                   value={lastName}
                   className={style.inputAuth}
                   onChange={event => setLastName(event.target.value)}
-                  required
+                  required={isRegister}
                 />
                 <AuthInput
                   type="text"
@@ -211,35 +233,31 @@ const AuthPage: React.FC = () => {
                   className={style.inputAuth}
                   onChange={event => setMiddleName(event.target.value)}
                 />
-              </>
-            )}
+              </div>
 
-            <div className={style.passwordField}>
-              <AuthInput
-                type={isPasswordVisible ? 'text' : 'password'}
-                placeholder="Пароль"
-                value={password}
-                className={style.inputAuth}
-                onChange={event => setPassword(event.target.value)}
-                required
-                minLength={8}
-              />
-              <button
-                type="button"
-                className={style.passwordToggle}
-                onClick={() => setIsPasswordVisible(prev => !prev)}
-                aria-label={isPasswordVisible ? 'Скрыть пароль' : 'Показать пароль'}
-              >
-                {isPasswordVisible ? 'Скрыть' : 'Показать'}
-              </button>
+              <div className={style.passwordField}>
+                <AuthInput
+                  type={isPasswordVisible ? 'text' : 'password'}
+                  placeholder="Пароль"
+                  value={password}
+                  className={style.inputAuth}
+                  onChange={event => setPassword(event.target.value)}
+                  required
+                  minLength={8}
+                />
+                <button
+                  type="button"
+                  className={style.passwordToggle}
+                  onClick={() => setIsPasswordVisible(prev => !prev)}
+                  aria-label={
+                    isPasswordVisible ? 'Скрыть пароль' : 'Показать пароль'
+                  }
+                >
+                  {isPasswordVisible ? 'Скрыть' : 'Показать'}
+                </button>
+              </div>
             </div>
           </div>
-
-          {mode === 'register' && (
-            <p className={style.recaptchaHint}>
-              Форма защищена reCAPTCHA v3. Проверка выполняется автоматически.
-            </p>
-          )}
 
           {visibleError && (
             <div className={style.errorMessage} role="alert" aria-live="polite">
@@ -254,7 +272,7 @@ const AuthPage: React.FC = () => {
               className={style.buttonAuth}
               isLoading={isLoading}
             >
-              {mode === 'register' ? 'Зарегистрироваться' : 'Войти'}
+              {isRegister ? 'Зарегистрироваться' : 'Войти'}
             </AuthButton>
           </div>
         </form>
