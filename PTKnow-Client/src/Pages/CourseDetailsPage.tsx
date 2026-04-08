@@ -71,6 +71,7 @@ const CourseDetailsPage: React.FC = () => {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [settingsName, setSettingsName] = useState('');
   const [settingsDescription, setSettingsDescription] = useState('');
+  const [settingsHandle, setSettingsHandle] = useState('');
   const [settingsTags, setSettingsTags] = useState('');
   const [settingsStatus, setSettingsStatus] = useState('');
   const [settingsError, setSettingsError] = useState<string | null>(null);
@@ -136,6 +137,7 @@ const CourseDetailsPage: React.FC = () => {
     }
     setSettingsName(course.name ?? '');
     setSettingsDescription(course.description ?? '');
+    setSettingsHandle(course.handle ?? '');
     setSettingsTags(course.tags?.join(', ') ?? '');
     setSettingsStatus(course.state ?? '');
   }, [course]);
@@ -310,6 +312,11 @@ const CourseDetailsPage: React.FC = () => {
       return;
     }
 
+    if (!settingsHandle.trim()) {
+      setSettingsError('Короткое имя курса не может быть пустым.');
+      return;
+    }
+
     const nextTags = settingsTags
       .split(',')
       .map(tag => tag.trim())
@@ -320,6 +327,7 @@ const CourseDetailsPage: React.FC = () => {
       await courseCardApi.replaceCourse(resolvedCourseId, {
         name: settingsName.trim(),
         description: settingsDescription.trim(),
+        handle: settingsHandle.trim(),
         tags: nextTags.length > 0 ? nextTags : course.tags ?? [],
         maxUsersAmount: course.maxUsersAmount,
       });
@@ -348,6 +356,7 @@ const CourseDetailsPage: React.FC = () => {
     fetchCourse,
     resolvedCourseId,
     settingsDescription,
+    settingsHandle,
     settingsLoading,
     settingsName,
     settingsStatus,
@@ -899,6 +908,15 @@ const CourseDetailsPage: React.FC = () => {
                   <textarea
                     value={settingsDescription}
                     onChange={event => setSettingsDescription(event.target.value)}
+                  />
+                </label>
+                <label className={styles.settingsField}>
+                  <span>Короткое имя</span>
+                  <input
+                    type="text"
+                    value={settingsHandle}
+                    onChange={event => setSettingsHandle(event.target.value)}
+                    placeholder="Например: web-design-101"
                   />
                 </label>
                 <label className={styles.settingsField}>
