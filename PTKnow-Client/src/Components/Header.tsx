@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 
 import BookIcon from '../assets/icons/book.svg';
 import CalendarIcon from '../assets/icons/calendar.svg';
+import LoginIcon from '../assets/icons/login.svg';
 import ProfileIcon from '../assets/icons/profile.svg';
 import ProjectsIcon from '../assets/icons/projects.svg';
 import Logotype from '../assets/logo/Logotype.svg';
@@ -171,9 +172,7 @@ const Header: React.FC = () => {
                   <img
                     src={avatarUrl || Logotype}
                     className={styles.userAvatar}
-                    alt={
-                      displayName ? `Аватар ${displayName}` : 'Аватар пользователя'
-                    }
+                    alt={displayName ? `Аватар ${displayName}` : 'Аватар пользователя'}
                   />
                 </div>
                 <div>
@@ -187,6 +186,34 @@ const Header: React.FC = () => {
             !isAuthPage && (
               <Link to={ROUTES.AUTH} className={styles.loginButton}>
                 Войти
+              </Link>
+            )
+          )}
+        </div>
+
+        <div className={styles.mobileQuickAction}>
+          {isAuthenticated ? (
+            <Link
+              to={ROUTES.PROFILE}
+              className={styles.mobileProfileButton}
+              onClick={closeMobileMenu}
+              aria-label="Открыть профиль"
+            >
+              <img
+                src={avatarUrl || Logotype}
+                className={styles.mobileProfileAvatar}
+                alt=""
+              />
+            </Link>
+          ) : (
+            !isAuthPage && (
+              <Link
+                to={ROUTES.AUTH}
+                className={styles.mobileProfileButton}
+                onClick={closeMobileMenu}
+                aria-label="Войти"
+              >
+                <img src={LoginIcon} className={styles.mobileProfileIcon} alt="" />
               </Link>
             )
           )}
@@ -232,6 +259,9 @@ const Header: React.FC = () => {
                 className={styles.mobileNavLink}
                 onClick={handleNavLinkClick}
               >
+                <span className={styles.navIconWrap}>
+                  <img src={ProfileIcon} alt="" className={styles.navIcon} />
+                </span>
                 Профиль
               </Link>
               <button
@@ -239,6 +269,9 @@ const Header: React.FC = () => {
                 className={styles.mobileNavLink}
                 style={{ background: 'none', border: 'none', textAlign: 'left' }}
               >
+                <span className={styles.navIconWrap}>
+                  <img src={ProfileIcon} alt="" className={styles.navIcon} />
+                </span>
                 Выйти
               </button>
             </div>
