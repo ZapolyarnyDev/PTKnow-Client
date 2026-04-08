@@ -5,6 +5,7 @@ import Header from '../Components/Header';
 import Footer from '../Components/Footer';
 import { courseCardApi } from '../api';
 import { CourseList } from '../Components/CourseList';
+import { useAuth } from '../hooks/useAuth';
 import { useMyEnrollments } from '../hooks/useMyEnrollments';
 import type { CourseDTO } from '../types/CourseCard';
 import styles from '../styles/pages/CoursesPage.module.css';
@@ -48,11 +49,20 @@ const CoursesPage: React.FC = () => {
   const [hasNext, setHasNext] = useState(false);
   const [totalPages, setTotalPages] = useState(0);
   const { enrolledCourses } = useMyEnrollments();
+  const { user } = useAuth();
 
   const enrolledIds = useMemo(
     () => enrolledCourses.map(course => course.id),
     [enrolledCourses]
   );
+  const canFilterByState =
+    user?.role === 'ADMIN' || user?.role === 'TEACHER';
+
+  useEffect(() => {
+    if (!canFilterByState && selectedState) {
+      setSelectedState('');
+    }
+  }, [canFilterByState, selectedState]);
 
   const handleFilterClick = useCallback((filterId: string) => {
     setActiveFilter(filterId);
@@ -81,7 +91,7 @@ const CoursesPage: React.FC = () => {
           size: PAGE_SIZE,
           sort,
           q: submittedQuery || undefined,
-          state: selectedState || undefined,
+          state: canFilterByState ? selectedState || undefined : undefined,
           tag: activeFilter === 'all' ? undefined : activeFilter,
         });
 
@@ -111,7 +121,7 @@ const CoursesPage: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [activeFilter, page, selectedState, sort, submittedQuery]);
+  }, [activeFilter, canFilterByState, page, selectedState, sort, submittedQuery]);
 
   return (
     <>
@@ -131,20 +141,22 @@ const CoursesPage: React.FC = () => {
         </form>
 
         <div className={styles.selects}>
-          <select
-            className={styles.select}
-            value={selectedState}
-            onChange={event => {
-              setSelectedState(event.target.value);
-              setPage(0);
-            }}
-          >
-            {STATE_OPTIONS.map(option => (
-              <option key={option.label} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          {canFilterByState && (
+            <select
+              className={styles.select}
+              value={selectedState}
+              onChange={event => {
+                setSelectedState(event.target.value);
+                setPage(0);
+              }}
+            >
+              {STATE_OPTIONS.map(option => (
+                <option key={option.label} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          )}
 
           <select
             className={styles.select}

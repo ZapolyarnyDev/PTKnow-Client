@@ -25,12 +25,10 @@
   height: 3.125rem;
   border: 1px solid #0956c2;
   border-radius: 32px;
-
   color: black;
   font-family: 'Roboto', sans-serif;
   font-size: 1rem;
   font-weight: 500;
-
   padding-left: 1.75rem;
 }
 
@@ -114,30 +112,11 @@
   background-color: #0956c2;
   border-radius: 32px;
   cursor: pointer;
-
   color: white;
   font-family: 'Inter', sans-serif;
   font-weight: 600;
   font-size: 1rem;
-
   transition: background-color 0.3s, transform 0.2s;
-}
-
-.registerText {
-  padding-top: 1.0625rem;
-
-  font-family: 'Inter', sans-serif;
-  font-weight: 400;
-  font-size: 1rem;
-  line-height: 44px;
-}
-
-.registerLink {
-  font-family: 'Inter', sans-serif;
-  font-weight: 400;
-  font-size: 1rem;
-  line-height: 15px;
-  color: #0956c2;
 }
 
 .buttonAuth:hover {
@@ -147,4 +126,42 @@
 
 .buttonAuth:active {
   transform: translateY(1px);
+}
+
+.buttonAuth:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.registerText {
+  padding-top: 1.0625rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 44px;
+}
+
+.registerButton {
+  border: none;
+  background: none;
+  padding: 0;
+  color: #0956c2;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 15px;
+  cursor: pointer;
+}
+
+.registerButton:hover {
+  color: #0956c2;
+}
+
+.recaptchaHint {
+  width: 21.8125rem;
+  margin: 0;
+  color: #5e6573;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
