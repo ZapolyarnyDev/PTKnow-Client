@@ -118,7 +118,7 @@ const CoursesPage: React.FC = () => {
             <p className={styles.heroLabel}>Каталог курсов</p>
             <h1 className={styles.heroTitle}>Подберите направление для обучения</h1>
             <p className={styles.heroDescription}>
-              Ищите по названию курса и сортируйте каталог так, как удобно именно вам.
+              Ищите по названию курса и сортируйте каталог так по направлениям
             </p>
           </div>
 
