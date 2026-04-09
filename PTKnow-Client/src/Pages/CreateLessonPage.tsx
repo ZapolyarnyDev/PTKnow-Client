@@ -4,11 +4,27 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import Footer from '../Components/Footer';
 import Header from '../Components/Header';
 import { FormAlert } from '../Components/ui/forms/FormAlert';
+import { ErrorModal } from '../Components/ui/forms/ErrorModal';
 import { useAuth } from '../hooks/useAuth';
 import { useLesson } from '../hooks/useLessons';
 import { useCourseStore } from '../stores/courseStore';
 import type { FileMetaDTO } from '../types/CourseCard';
 import styles from '../styles/pages/CreateLessonPage.module.css';
+
+const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
+
+const LESSON_TYPE_OPTIONS = [
+  { value: 'LECTURE', label: 'Лекция' },
+  { value: 'PRACTICE', label: 'Практика' },
+];
+
+const formatFileSize = (size: number) => {
+  if (size >= 1024 * 1024) {
+    return `${(size / (1024 * 1024)).toFixed(1)} МБ`;
+  }
+
+  return `${Math.max(1, Math.round(size / 1024))} КБ`;
+};
 
 const CreateLessonPage: React.FC = () => {
   const { courseId: courseIdParam, lessonId: lessonIdParam } = useParams<{
@@ -37,17 +53,19 @@ const CreateLessonPage: React.FC = () => {
     error: courseError,
   } = useCourseStore();
   const navigate = useNavigate();
+
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [contentMd, setContentMd] = useState('');
   const [beginAt, setBeginAt] = useState('');
   const [endsAt, setEndsAt] = useState('');
-  const [type, setType] = useState('');
+  const [type, setType] = useState('LECTURE');
   const [materialFiles, setMaterialFiles] = useState<File[]>([]);
   const [uploadedMaterials, setUploadedMaterials] = useState<FileMetaDTO[]>([]);
   const [localError, setLocalError] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
+  const [sizeModalMessage, setSizeModalMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (courseId) {
@@ -73,7 +91,8 @@ const CreateLessonPage: React.FC = () => {
     setContentMd(lesson.contentMd ?? '');
     setBeginAt(lesson.beginAt ? lesson.beginAt.slice(0, 16) : '');
     setEndsAt(lesson.endsAt ? lesson.endsAt.slice(0, 16) : '');
-    setType(lesson.type ?? '');
+    setType(lesson.type ?? 'LECTURE');
+    setUploadedMaterials(lesson.materials ?? []);
   }, [lesson, lessonId]);
 
   const isEditMode = Boolean(lessonId);
@@ -125,17 +144,59 @@ const CreateLessonPage: React.FC = () => {
     }
   };
 
+  const closeSizeModal = () => {
+    setSizeModalMessage(null);
+  };
+
   const handleMaterialFilesChange = (files: FileList | null) => {
-    setUploadedMaterials([]);
-    setUploadMessage(null);
-    setUploadError(null);
-    setMaterialFiles([]);
+    resetErrors();
 
     if (!files || files.length === 0) {
       return;
     }
 
-    setMaterialFiles(Array.from(files));
+    const nextFiles = Array.from(files);
+    const oversizedFiles = nextFiles.filter(file => file.size > MAX_FILE_SIZE_BYTES);
+
+    if (oversizedFiles.length > 0) {
+      const names = oversizedFiles.map(file => `«${file.name}»`).join(', ');
+      setSizeModalMessage(
+        `Файлы ${names} превышают лимит 10 МБ. Уменьшите размер или выберите другие материалы.`
+      );
+      return;
+    }
+
+    setMaterialFiles(prev => {
+      const merged = [...prev];
+
+      nextFiles.forEach(file => {
+        const alreadyExists = merged.some(
+          existing =>
+            existing.name === file.name &&
+            existing.size === file.size &&
+            existing.lastModified === file.lastModified
+        );
+
+        if (!alreadyExists) {
+          merged.push(file);
+        }
+      });
+
+      return merged;
+    });
+  };
+
+  const removePendingFile = (targetFile: File) => {
+    setMaterialFiles(prev =>
+      prev.filter(
+        file =>
+          !(
+            file.name === targetFile.name &&
+            file.size === targetFile.size &&
+            file.lastModified === targetFile.lastModified
+          )
+      )
+    );
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -157,13 +218,7 @@ const CreateLessonPage: React.FC = () => {
       return;
     }
 
-    if (
-      !name.trim() ||
-      !description.trim() ||
-      !beginAt ||
-      !endsAt ||
-      !type.trim()
-    ) {
+    if (!name.trim() || !description.trim() || !beginAt || !endsAt || !type.trim()) {
       setLocalError('Заполните все обязательные поля.');
       return;
     }
@@ -197,7 +252,8 @@ const CreateLessonPage: React.FC = () => {
           const uploaded = await Promise.all(
             materialFiles.map(file => addLessonMaterial(savedLesson.id, file))
           );
-          setUploadedMaterials(uploaded);
+          setUploadedMaterials(prev => [...prev, ...uploaded]);
+          setMaterialFiles([]);
           setUploadMessage(
             uploaded.length === 1
               ? 'Материал успешно добавлен к уроку.'
@@ -207,8 +263,9 @@ const CreateLessonPage: React.FC = () => {
           const message =
             materialError instanceof Error
               ? materialError.message
-              : 'Не удалось загрузить материал.';
+              : 'Не удалось загрузить материалы урока.';
           setUploadError(message);
+          return;
         }
       }
 
@@ -241,8 +298,8 @@ const CreateLessonPage: React.FC = () => {
                 {isEditMode ? 'Настройте урок' : 'Создайте сильный урок'}
               </h1>
               <p className={styles.subtitle}>
-                Соберите тему, расписание и материалы в одной форме, чтобы урок
-                сразу выглядел цельным и готовым к публикации
+                Соберите тему, формат, расписание и материалы в одной форме, чтобы
+                урок сразу выглядел цельным и готовым к публикации
               </p>
             </div>
 
@@ -308,17 +365,21 @@ const CreateLessonPage: React.FC = () => {
 
                 <label className={styles.field}>
                   <span>Тип занятия</span>
-                  <input
-                    type="text"
+                  <select
                     value={type}
                     onChange={event => {
                       resetErrors();
                       setType(event.target.value);
                     }}
-                    placeholder="Например: LECTURE"
                     disabled={isFormDisabled}
                     required
-                  />
+                  >
+                    {LESSON_TYPE_OPTIONS.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
                 </label>
               </div>
 
@@ -353,49 +414,83 @@ const CreateLessonPage: React.FC = () => {
                     resetErrors();
                     setContentMd(event.target.value);
                   }}
-                  placeholder="# План урока&#10;&#10;Опишите ключевые тезисы, задания и ссылки"
+                  placeholder={'# План урока\n\nОпишите ключевые тезисы, задания и ссылки'}
                   disabled={isFormDisabled}
                   className={styles.markdownField}
                 />
               </label>
 
               <div className={styles.uploadCard}>
-                <div>
-                  <h3>Материал урока</h3>
-                  <p>Загрузите один или несколько файлов любого типа, которые должны сопровождать урок</p>
+                <div className={styles.uploadIntro}>
+                  <div>
+                    <h3>Материалы урока</h3>
+                    <p>
+                      Загружайте несколько файлов любого типа. Каждый файл не должен
+                      превышать 10 МБ
+                    </p>
+                  </div>
+                  <span className={styles.uploadLimit}>Лимит: 10 МБ на файл</span>
                 </div>
-                <label className={styles.uploadField}>
-                  <input
-                    type="file"
-                    multiple
-                    onChange={event => {
-                      resetErrors();
-                      handleMaterialFilesChange(event.target.files);
-                    }}
-                    disabled={isFormDisabled}
-                  />
-                  <span>
-                    {materialFiles.length > 0
-                      ? `Выбрано файлов: ${materialFiles.length}`
-                      : 'Выбрать файлы'}
-                  </span>
-                </label>
+
+                <div className={styles.uploadActions}>
+                  <label className={styles.uploadField}>
+                    <input
+                      type="file"
+                      multiple
+                      onChange={event => {
+                        handleMaterialFilesChange(event.target.files);
+                        event.target.value = '';
+                      }}
+                      disabled={isFormDisabled}
+                    />
+                    <span>Добавить файлы</span>
+                  </label>
+                  <p className={styles.helper}>
+                    Можно выбрать файлы повторно: новые материалы будут аккуратно
+                    добавлены к уже выбранным
+                  </p>
+                </div>
+
                 {materialFiles.length > 0 && (
-                  <div className={styles.fileList}>
-                    {materialFiles.map(file => (
-                      <span key={`${file.name}-${file.size}`} className={styles.fileChip}>
-                        {file.name}
-                      </span>
-                    ))}
+                  <div className={styles.filesSection}>
+                    <span className={styles.sectionLabel}>Будут загружены</span>
+                    <div className={styles.fileList}>
+                      {materialFiles.map(file => (
+                        <div
+                          key={`${file.name}-${file.size}-${file.lastModified}`}
+                          className={styles.fileChip}
+                        >
+                          <div className={styles.fileChipBody}>
+                            <strong>{file.name}</strong>
+                            <span>{formatFileSize(file.size)}</span>
+                          </div>
+                          <button
+                            type="button"
+                            className={styles.fileChipRemove}
+                            onClick={() => removePendingFile(file)}
+                            aria-label={`Убрать файл ${file.name}`}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
+
                 {uploadedMaterials.length > 0 && (
-                  <div className={styles.fileList}>
-                    {uploadedMaterials.map(file => (
-                      <span key={file.id} className={styles.fileChip}>
-                        {file.originalFilename}
-                      </span>
-                    ))}
+                  <div className={styles.filesSection}>
+                    <span className={styles.sectionLabel}>Уже прикреплено</span>
+                    <div className={styles.fileList}>
+                      {uploadedMaterials.map(file => (
+                        <div key={file.id} className={styles.fileChip}>
+                          <div className={styles.fileChipBody}>
+                            <strong>{file.originalFilename}</strong>
+                            <span>{formatFileSize(file.size)}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -473,6 +568,13 @@ const CreateLessonPage: React.FC = () => {
         </div>
       </main>
       <Footer />
+
+      <ErrorModal
+        title="Файл слишком большой"
+        message={sizeModalMessage}
+        isOpen={Boolean(sizeModalMessage)}
+        onClose={closeSizeModal}
+      />
     </>
   );
 };

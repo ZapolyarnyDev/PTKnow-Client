@@ -188,7 +188,8 @@
 }
 
 .field input,
-.field textarea {
+.field textarea,
+.field select {
   border: 1px solid #d8e2f1;
   border-radius: 1rem;
   padding: 0.92rem 1rem;
@@ -199,11 +200,26 @@
 }
 
 .field input:focus,
-.field textarea:focus {
+.field textarea:focus,
+.field select:focus {
   outline: none;
   border-color: #0956c2;
   box-shadow: 0 0 0 4px rgba(9, 86, 194, 0.1);
   background: #fff;
+}
+
+.field select {
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #5f6f8c 50%),
+    linear-gradient(135deg, #5f6f8c 50%, transparent 50%);
+  background-position:
+    calc(100% - 1.1rem) calc(50% - 0.12rem),
+    calc(100% - 0.8rem) calc(50% - 0.12rem);
+  background-size: 0.38rem 0.38rem, 0.38rem 0.38rem;
+  background-repeat: no-repeat;
+  padding-right: 2.8rem;
+  cursor: pointer;
 }
 
 .field textarea {
@@ -225,6 +241,14 @@
   gap: 0.75rem;
 }
 
+.uploadIntro {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
 .uploadCard h3 {
   margin: 0 0 0.2rem;
   color: #102a56;
@@ -235,6 +259,25 @@
   margin: 0;
   color: #5f6f8c;
   line-height: 1.6;
+}
+
+.uploadLimit {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0 0.75rem;
+  border-radius: 999px;
+  background: #edf3ff;
+  color: #0956c2;
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.uploadActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
 }
 
 .uploadField {
@@ -265,6 +308,20 @@
   font-size: 0.85rem;
 }
 
+.filesSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.sectionLabel {
+  color: #6b7a95;
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
 .fileList {
   display: flex;
   flex-wrap: wrap;
@@ -274,15 +331,47 @@
 .fileChip {
   display: inline-flex;
   align-items: center;
-  min-height: 2rem;
-  padding: 0 0.8rem;
-  border-radius: 999px;
+  gap: 0.65rem;
+  max-width: 100%;
+  min-height: 2.7rem;
+  padding: 0.55rem 0.6rem 0.55rem 0.9rem;
+  border-radius: 1rem;
   background: #edf3ff;
   color: #102a56;
-  font-size: 0.82rem;
-  font-weight: 700;
-  max-width: 100%;
+  border: 1px solid #dbe7fb;
+}
+
+.fileChipBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.fileChipBody strong,
+.fileChipBody span {
   overflow-wrap: anywhere;
+}
+
+.fileChipBody strong {
+  font-size: 0.84rem;
+}
+
+.fileChipBody span {
+  color: #60708b;
+  font-size: 0.76rem;
+}
+
+.fileChipRemove {
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 999px;
+  background: #fff;
+  color: #60708b;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  flex: 0 0 auto;
 }
 
 .actions {
@@ -339,5 +428,14 @@
   .uploadField {
     width: 100%;
     justify-content: center;
+  }
+
+  .uploadIntro {
+    flex-direction: column;
+  }
+
+  .fileChip {
+    width: 100%;
+    justify-content: space-between;
   }
 }
