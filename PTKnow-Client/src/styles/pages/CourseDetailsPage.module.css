@@ -349,16 +349,28 @@
   gap: 16px 20px;
 }
 
+.detailsGrid > div {
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
+  border: 1px solid rgba(9, 86, 194, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
 .detailsGrid p {
-  margin: 0 0 6px;
-  font-size: 12px;
-  color: #6b7280;
+  margin: 0 0 8px;
+  font-size: 11px;
+  color: #60708b;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .detailsGrid span {
-  font-size: 14px;
-  font-weight: 600;
-  color: #111827;
+  font-size: 15px;
+  font-weight: 700;
+  color: #102a56;
+  line-height: 1.45;
 }
 
 .managementGrid {
