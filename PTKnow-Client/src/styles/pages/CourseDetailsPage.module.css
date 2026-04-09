@@ -373,6 +373,93 @@
   line-height: 1.45;
 }
 
+.editCard {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 16px 32px rgba(9, 86, 194, 0.08);
+  border: 1px solid rgba(9, 86, 194, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.editCardHeader {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 20px;
+  align-items: start;
+}
+
+.editCardText {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.editEyebrow {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #0956c2;
+}
+
+.editCardText h2 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.15;
+  color: #102a56;
+}
+
+.editSubtext {
+  margin: 0;
+  color: #60708b;
+  line-height: 1.65;
+}
+
+.editPreviewCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 16px;
+  background: #f7faff;
+  border: 1px solid #dce7f8;
+}
+
+.editPreviewImage {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 16px;
+}
+
+.previewUploadButton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.8rem;
+  padding: 0 1rem;
+  border-radius: 999px;
+  background: #0956c2;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  overflow: hidden;
+  text-align: center;
+}
+
+.previewUploadButton input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
 .managementGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -451,6 +538,10 @@
   color: #111827;
 }
 
+.settingsFieldWide {
+  grid-column: 1 / -1;
+}
+
 .settingsField input,
 .settingsField textarea,
 .settingsField select {
@@ -476,10 +567,10 @@
   background: #ffffff;
 }
 
-.settingsActions {
+.editActions {
   display: flex;
   justify-content: flex-end;
-  margin-top: 16px;
+  margin-top: 4px;
   flex-wrap: wrap;
 }
 
@@ -670,6 +761,10 @@
     align-items: stretch;
   }
 
+  .editCardHeader {
+    grid-template-columns: 1fr;
+  }
+
   .lessonStateSelect,
   .inlineAction,
   .inlineDanger,
@@ -683,7 +778,7 @@
     flex-direction: column;
   }
 
-  .settingsActions {
+  .editActions {
     justify-content: stretch;
   }
 }

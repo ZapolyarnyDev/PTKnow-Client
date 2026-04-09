@@ -77,6 +77,7 @@ const CourseDetailsPage: React.FC = () => {
   const [settingsError, setSettingsError] = useState<string | null>(null);
   const [settingsSuccess, setSettingsSuccess] = useState<string | null>(null);
   const [settingsLoading, setSettingsLoading] = useState(false);
+  const [previewFile, setPreviewFile] = useState<File | null>(null);
   const [courseTeachers, setCourseTeachers] = useState<CourseTeacherDTO[]>([]);
   const [courseStudents, setCourseStudents] = useState<EnrollmentDTO[]>([]);
   const [courseMembers, setCourseMembers] = useState<EnrollmentDTO[]>([]);
@@ -140,6 +141,7 @@ const CourseDetailsPage: React.FC = () => {
     setSettingsHandle(course.handle ?? '');
     setSettingsTags(course.tags?.join(', ') ?? '');
     setSettingsStatus(course.state ?? '');
+    setPreviewFile(null);
   }, [course]);
 
   useEffect(() => {
@@ -332,6 +334,10 @@ const CourseDetailsPage: React.FC = () => {
         maxUsersAmount: course.maxUsersAmount,
       });
 
+      if (previewFile) {
+        await courseCardApi.updateCoursePreview(resolvedCourseId, previewFile);
+      }
+
       if (settingsStatus && settingsStatus !== course.state) {
         if (settingsStatus === 'PUBLISHED') {
           await courseCardApi.publishCourse(resolvedCourseId);
@@ -359,6 +365,7 @@ const CourseDetailsPage: React.FC = () => {
     settingsHandle,
     settingsLoading,
     settingsName,
+    previewFile,
     settingsStatus,
     settingsTags,
   ]);
@@ -384,6 +391,13 @@ const CourseDetailsPage: React.FC = () => {
       );
     }
   }, [fetchCourse, refreshPeople, resolvedCourseId, teacherIdInput]);
+
+  const handlePreviewFileSelect = useCallback((files: FileList | null) => {
+    const file = files?.[0] ?? null;
+    setPreviewFile(file);
+    setSettingsError(null);
+    setSettingsSuccess(null);
+  }, []);
 
   const handleRemoveTeacher = useCallback(
     async (teacherId: string) => {
@@ -779,6 +793,104 @@ const CourseDetailsPage: React.FC = () => {
           </div>
 
           {canManageLessons && (
+            <div className={styles.editCard}>
+              <div className={styles.editCardHeader}>
+                <div className={styles.editCardText}>
+                  <p className={styles.editEyebrow}>Редактирование курса</p>
+                  <h2>Обновите ключевые параметры курса в одном блоке</h2>
+                  <p className={styles.editSubtext}>
+                    Здесь можно сразу поменять описание, короткое имя, статус и
+                    загрузить новое превью без нижней сервисной панели
+                  </p>
+                </div>
+
+                <div className={styles.editPreviewCard}>
+                  <AuthImage
+                    src={course?.previewUrl}
+                    fallbackSrc={courseDetails}
+                    alt={course?.name || 'Превью курса'}
+                    className={styles.editPreviewImage}
+                  />
+                  <label className={styles.previewUploadButton}>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={event => {
+                        handlePreviewFileSelect(event.target.files);
+                        event.target.value = '';
+                      }}
+                    />
+                    <span>{previewFile ? previewFile.name : 'Выбрать новое превью'}</span>
+                  </label>
+                </div>
+              </div>
+
+              <div className={styles.settingsGrid}>
+                <label className={styles.settingsField}>
+                  <span>Название курса</span>
+                  <input
+                    type="text"
+                    value={settingsName}
+                    onChange={event => setSettingsName(event.target.value)}
+                  />
+                </label>
+                <label className={styles.settingsField}>
+                  <span>Короткое имя</span>
+                  <input
+                    type="text"
+                    value={settingsHandle}
+                    onChange={event => setSettingsHandle(event.target.value)}
+                    placeholder="Например: web-design-101"
+                  />
+                </label>
+                <label className={styles.settingsField}>
+                  <span>Статус</span>
+                  <select
+                    value={settingsStatus}
+                    onChange={event => setSettingsStatus(event.target.value)}
+                  >
+                    <option value="DRAFT">DRAFT</option>
+                    <option value="PUBLISHED">PUBLISHED</option>
+                    <option value="ARCHIVED">ARCHIVED</option>
+                  </select>
+                </label>
+                <label className={`${styles.settingsField} ${styles.settingsFieldWide}`}>
+                  <span>Описание курса</span>
+                  <textarea
+                    value={settingsDescription}
+                    onChange={event => setSettingsDescription(event.target.value)}
+                  />
+                </label>
+                <label className={`${styles.settingsField} ${styles.settingsFieldWide}`}>
+                  <span>Теги курса</span>
+                  <input
+                    type="text"
+                    value={settingsTags}
+                    onChange={event => setSettingsTags(event.target.value)}
+                    placeholder="Например: IT, дизайн, frontend"
+                  />
+                </label>
+              </div>
+
+              {settingsError && <FormAlert message={settingsError} variant="error" />}
+              {settingsSuccess && (
+                <FormAlert message={settingsSuccess} variant="success" />
+              )}
+
+              <div className={styles.editActions}>
+                <button
+                  type="button"
+                  className={styles.settingsButton}
+                  onClick={handleSaveSettings}
+                  disabled={settingsLoading}
+                >
+                  {settingsLoading ? 'Сохранение...' : 'Сохранить изменения'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {canManageLessons && (
             <div className={styles.blockCard}>
               <div className={styles.blockHeader}>Команда и участники</div>
               {peopleError && <FormAlert message={peopleError} variant="error" />}
@@ -891,73 +1003,6 @@ const CourseDetailsPage: React.FC = () => {
             </div>
           )}
 
-          {canManageLessons && (
-            <div className={styles.blockCard}>
-              <div className={styles.blockHeader}>Настройки курса</div>
-              <div className={styles.settingsGrid}>
-                <label className={styles.settingsField}>
-                  <span>Название курса</span>
-                  <input
-                    type="text"
-                    value={settingsName}
-                    onChange={event => setSettingsName(event.target.value)}
-                  />
-                </label>
-                <label className={styles.settingsField}>
-                  <span>Описание курса</span>
-                  <textarea
-                    value={settingsDescription}
-                    onChange={event => setSettingsDescription(event.target.value)}
-                  />
-                </label>
-                <label className={styles.settingsField}>
-                  <span>Короткое имя</span>
-                  <input
-                    type="text"
-                    value={settingsHandle}
-                    onChange={event => setSettingsHandle(event.target.value)}
-                    placeholder="Например: web-design-101"
-                  />
-                </label>
-                <label className={styles.settingsField}>
-                  <span>Теги курса</span>
-                  <input
-                    type="text"
-                    value={settingsTags}
-                    onChange={event => setSettingsTags(event.target.value)}
-                    placeholder="Например: IT, дизайн, frontend"
-                  />
-                </label>
-                <label className={styles.settingsField}>
-                  <span>Статус</span>
-                  <select
-                    value={settingsStatus}
-                    onChange={event => setSettingsStatus(event.target.value)}
-                  >
-                    <option value="DRAFT">DRAFT</option>
-                    <option value="PUBLISHED">PUBLISHED</option>
-                    <option value="ARCHIVED">ARCHIVED</option>
-                  </select>
-                </label>
-              </div>
-              {settingsError && (
-                <FormAlert message={settingsError} variant="error" />
-              )}
-              {settingsSuccess && (
-                <FormAlert message={settingsSuccess} variant="success" />
-              )}
-              <div className={styles.settingsActions}>
-                <button
-                  type="button"
-                  className={styles.settingsButton}
-                  onClick={handleSaveSettings}
-                  disabled={settingsLoading}
-                >
-                  {settingsLoading ? 'Сохранение...' : 'Сохранить'}
-                </button>
-              </div>
-            </div>
-          )}
         </div>
 
         <aside className={styles.sideColumn}>
